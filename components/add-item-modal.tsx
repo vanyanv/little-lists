@@ -1,0 +1,451 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useStore } from "@/lib/store";
+import { useUi } from "@/lib/ui";
+import {
+  ITEM_TYPE_META,
+  TEMPLATE_META,
+  statusesForList,
+  type ItemType,
+  type ListTemplate,
+  type StatusId,
+} from "@/lib/types";
+import { BOOK_CATALOG, MOVIE_CATALOG, type SearchResult } from "@/lib/mock-data";
+import { themeClass } from "@/lib/visual";
+import { staggerContainer, riseItem, softSpring, tap } from "@/lib/motion";
+import { BottomSheet } from "./bottom-sheet";
+import { SoftDotLoader } from "./soft-dot-loader";
+import { PlaceholderPoster } from "./placeholder-poster";
+import { StatusPill } from "./status-pill";
+
+const TYPES: ItemType[] = ["movie", "book", "food", "place", "custom"];
+const EMOJI_CHOICES = ["✨", "🍜", "🍵", "📍", "🎁", "🌷", "🍔", "☕", "🍄", "🌿", "🍷", "🎧", "💡", "🔖", "🧁", "🍿", "🎟️", "🌸"];
+
+type Step = "compose" | "details";
+
+export function AddItemModal() {
+  const { sheet, closeSheet } = useUi();
+  const open = sheet?.kind === "item";
+  const presetListId = open ? sheet.listId : undefined;
+
+  return (
+    <BottomSheet open={open} onClose={closeSheet} ariaLabel="Add a little thing">
+      {open && (
+        <AddItemFlow
+          key={presetListId ?? "home"}
+          presetListId={presetListId}
+          onClose={closeSheet}
+        />
+      )}
+    </BottomSheet>
+  );
+}
+
+function AddItemFlow({
+  presetListId,
+  onClose,
+}: {
+  presetListId?: string;
+  onClose: () => void;
+}) {
+  const { lists, addItem, fireCelebration } = useStore();
+  const { showToast } = useUi();
+  const presetList = lists.find((l) => l.id === presetListId);
+
+  const [step, setStep] = useState<Step>("compose");
+  const [type, setType] = useState<ItemType>(presetList?.kind ?? "movie");
+  const [query, setQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [picked, setPicked] = useState<string | null>(null);
+
+  // chosen thing
+  const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
+  const [seed, setSeed] = useState("");
+  const [emoji, setEmoji] = useState("✨");
+
+  // details
+  const [targetListId, setTargetListId] = useState<string | undefined>(presetListId);
+  const [status, setStatus] = useState<StatusId | undefined>(undefined);
+  const [note, setNote] = useState("");
+  const [tag, setTag] = useState("");
+
+  const meta = ITEM_TYPE_META[type];
+  const template: ListTemplate = presetList?.template ?? (type as ListTemplate);
+  const tmeta = TEMPLATE_META[template];
+  const statuses = presetList ? statusesForList(presetList) : tmeta.statuses;
+  const searchable = meta.searchable;
+  const catalog = type === "movie" ? MOVIE_CATALOG : BOOK_CATALOG;
+
+  // simulate a soft search whenever the query changes for searchable types
+  useEffect(() => {
+    if (!searchable) return;
+    setSearching(true);
+    const t = setTimeout(() => setSearching(false), 520);
+    return () => clearTimeout(t);
+  }, [query, searchable, type]);
+
+  const results = useMemo<SearchResult[]>(() => {
+    const q = query.trim().toLowerCase();
+    const base = q ? catalog.filter((r) => r.title.toLowerCase().includes(q)) : catalog;
+    return base.slice(0, 6);
+  }, [query, catalog]);
+
+  // auto-pick a sensible destination list when type changes (home entry)
+  useEffect(() => {
+    if (presetListId) return;
+    const match = lists.find((l) => l.kind === type);
+    setTargetListId(match?.id ?? lists[0]?.id);
+  }, [type, presetListId, lists]);
+
+  const pickResult = (r: SearchResult) => {
+    setPicked(r.seed);
+    setTitle(r.title);
+    setSubtitle(r.subtitle);
+    setSeed(r.seed);
+    setStatus(statuses[0]);
+    // let the chosen row glow for a beat before sliding forward
+    setTimeout(() => setStep("details"), 260);
+  };
+
+  const continueManual = () => {
+    if (!title.trim()) return;
+    setSeed(title);
+    setStatus(statuses[0]);
+    setStep("details");
+  };
+
+  const save = () => {
+    const listId = targetListId ?? lists[0]?.id;
+    if (!listId) return;
+    const wasEmpty = (lists.find((l) => l.id === listId)?.items.length ?? 0) === 0;
+
+    addItem(listId, {
+      type,
+      title: title.trim(),
+      subtitle: subtitle.trim() || undefined,
+      note: note.trim() || undefined,
+      status,
+      tags: tag.trim() ? [tag.trim()] : undefined,
+      emoji: meta.aspect === "note" ? emoji : undefined,
+      seed: seed || title,
+    });
+
+    // rare milestone: this list just came alive
+    if (wasEmpty) fireCelebration("confetti");
+
+    onClose();
+    showToast("Saved to your little world ✨");
+  };
+
+  return (
+    <div className="pt-1">
+      <AnimatePresence mode="wait" initial={false}>
+        {step === "compose" && (
+          <motion.div
+            key="compose"
+            initial={{ opacity: 0, x: 12 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -12 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <h2 className="font-display text-[1.5rem] font-semibold leading-tight text-ink">
+              {presetList ? tmeta.addHeading(presetList.title) : "What little thing are we saving?"}
+            </h2>
+            <p className="mt-1 text-[0.92rem] text-brown">
+              {presetList
+                ? searchable
+                  ? "Search a title, or tuck in your own."
+                  : "Give it a name and a little icon."
+                : "A film, a book, a place, a tiny obsession."}
+            </p>
+
+            <input
+              autoFocus
+              value={query || title}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                if (!searchable) setTitle(e.target.value);
+              }}
+              placeholder={searchable ? "Search a title…" : "Give it a name…"}
+              className="mt-4 w-full rounded-xl border border-line bg-cream-deep/50 px-4 py-3.5 text-[1.05rem] font-medium text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none"
+            />
+
+            {/* type picker only when there's no list context yet */}
+            {!presetListId && (
+              <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1">
+                {TYPES.map((t) => {
+                  const m = ITEM_TYPE_META[t];
+                  const active = t === type;
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setType(t)}
+                      className={`flex shrink-0 items-center gap-1.5 rounded-pill px-3.5 py-2 text-[0.85rem] font-bold transition ${
+                        active ? "bg-ink text-cream shadow-soft" : "bg-cream-deep text-brown ring-1 ring-line/60"
+                      }`}
+                    >
+                      <span>{m.emoji}</span>
+                      {m.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {searchable ? (
+              <div className="mt-4 min-h-[8rem]">
+                {searching ? (
+                  <SoftDotLoader />
+                ) : (
+                  <motion.div variants={staggerContainer} initial="hidden" animate="show" className="flex flex-col gap-2">
+                    {results.map((r) => {
+                      const chosen = picked === r.seed;
+                      return (
+                        <motion.button
+                          key={r.seed}
+                          variants={riseItem}
+                          type="button"
+                          onClick={() => pickResult(r)}
+                          whileTap={tap}
+                          animate={{ scale: chosen ? 1.015 : 1 }}
+                          transition={{ ...softSpring }}
+                          className={`flex items-center gap-3 rounded-xl p-2 text-left transition ${
+                            chosen
+                              ? "bg-cream-deep ring-2 ring-ink/15"
+                              : "bg-cream-deep/40 hover:bg-cream-deep/70"
+                          }`}
+                        >
+                          <div className="w-11 shrink-0">
+                            <PlaceholderPoster seed={r.seed} title={r.title} rounded="rounded-md" className="ring-1 ring-black/5" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-display text-[0.98rem] font-semibold text-ink">{r.title}</p>
+                            <p className="text-[0.82rem] font-medium text-brown">{r.subtitle}</p>
+                          </div>
+                          {chosen && (
+                            <motion.span
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={softSpring}
+                              className="mr-1 text-[1.1rem]"
+                              aria-hidden
+                            >
+                              ✓
+                            </motion.span>
+                          )}
+                        </motion.button>
+                      );
+                    })}
+                    {results.length === 0 && (
+                      <p className="px-1 py-6 text-center text-[0.9rem] text-brown">
+                        No match, but you can still tuck it in. Try Custom ✨
+                      </p>
+                    )}
+                  </motion.div>
+                )}
+              </div>
+            ) : (
+              <div className="mt-4">
+                <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">pick a little icon</p>
+                <div className="grid grid-cols-9 gap-1.5">
+                  {EMOJI_CHOICES.map((e) => (
+                    <button
+                      key={e}
+                      type="button"
+                      onClick={() => setEmoji(e)}
+                      className={`grid aspect-square place-items-center rounded-lg text-xl transition ${
+                        emoji === e ? "bg-cream-deep ring-2 ring-ink/20" : "bg-cream-deep/40"
+                      }`}
+                    >
+                      {e}
+                    </button>
+                  ))}
+                </div>
+                <motion.button
+                  type="button"
+                  whileTap={tap}
+                  onClick={continueManual}
+                  disabled={!title.trim()}
+                  className="mt-4 w-full rounded-pill bg-ink py-3.5 text-[0.95rem] font-bold text-cream shadow-soft disabled:opacity-40"
+                >
+                  Continue
+                </motion.button>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {step === "details" && (
+          <DetailsStep
+            type={type}
+            title={title}
+            subtitle={subtitle}
+            setSubtitle={setSubtitle}
+            seed={seed}
+            emoji={emoji}
+            lists={lists}
+            targetListId={targetListId}
+            setTargetListId={presetListId ? undefined : setTargetListId}
+            statuses={statuses}
+            statusHeading={tmeta.statusHeading}
+            extraField={tmeta.extraField}
+            status={status}
+            setStatus={setStatus}
+            note={note}
+            setNote={setNote}
+            tag={tag}
+            setTag={setTag}
+            onBack={() => setStep("compose")}
+            onSave={save}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function DetailsStep(props: {
+  type: ItemType;
+  title: string;
+  subtitle: string;
+  setSubtitle: (s: string) => void;
+  seed: string;
+  emoji: string;
+  lists: ReturnType<typeof useStore>["lists"];
+  targetListId?: string;
+  setTargetListId?: (id: string) => void;
+  statuses: StatusId[];
+  statusHeading: string;
+  extraField?: { label: string; placeholder: string };
+  status?: StatusId;
+  setStatus: (s: StatusId) => void;
+  note: string;
+  setNote: (s: string) => void;
+  tag: string;
+  setTag: (s: string) => void;
+  onBack: () => void;
+  onSave: () => void;
+}) {
+  const {
+    type, title, subtitle, setSubtitle, seed, emoji, lists, targetListId, setTargetListId,
+    statuses, statusHeading, extraField, status, setStatus, note, setNote, tag, setTag, onBack, onSave,
+  } = props;
+  const isPoster = ITEM_TYPE_META[type].aspect !== "note";
+  const targetList = lists.find((l) => l.id === targetListId);
+  const themed = targetList ? themeClass(targetList.theme) : "";
+
+  return (
+    <motion.div
+      key="details"
+      initial={{ opacity: 0, x: 12 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -12 }}
+      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+      className={themed}
+    >
+      <button type="button" onClick={onBack} className="mb-3 flex items-center gap-1 text-[0.86rem] font-bold text-brown">
+        <span aria-hidden>‹</span> back
+      </button>
+
+      <div className="flex items-center gap-4">
+        {isPoster ? (
+          <div className="w-20 shrink-0">
+            <PlaceholderPoster seed={seed} title={title} className="shadow-soft ring-1 ring-black/5" />
+          </div>
+        ) : (
+          <span className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl text-4xl" style={{ background: "var(--t-bg)" }}>
+            {emoji}
+          </span>
+        )}
+        <div className="min-w-0">
+          <h2 className="font-display text-[1.35rem] font-semibold leading-tight text-ink">{title}</h2>
+          {subtitle && <p className="mt-0.5 text-[0.9rem] font-semibold text-brown">{subtitle}</p>}
+        </div>
+      </div>
+
+      {setTargetListId && (
+        <div className="mt-5">
+          <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">save into</p>
+          <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
+            {lists.map((l) => (
+              <button
+                key={l.id}
+                type="button"
+                onClick={() => setTargetListId(l.id)}
+                className={`flex shrink-0 items-center gap-1.5 rounded-pill px-3 py-2 text-[0.82rem] font-bold transition ${
+                  l.id === targetListId ? "bg-ink text-cream" : "bg-cream-deep text-brown ring-1 ring-line/60"
+                }`}
+              >
+                <span>{l.emoji}</span>
+                {l.title}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-5">
+        <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">{statusHeading}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {statuses.map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setStatus(s)}
+              className={`rounded-pill transition ${status === s ? "ring-2 ring-ink/20" : "opacity-55 hover:opacity-90"}`}
+            >
+              <StatusPill status={s} />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {extraField && (
+        <div className="mt-5">
+          <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">{extraField.label}</p>
+          <input
+            value={subtitle}
+            onChange={(e) => setSubtitle(e.target.value)}
+            placeholder={extraField.placeholder}
+            className="w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none"
+          />
+        </div>
+      )}
+
+      <div className="mt-5">
+        <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">a little note</p>
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          rows={2}
+          placeholder="Add a note so future you remembers why ✨"
+          className="w-full resize-none rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none"
+        />
+      </div>
+
+      <div className="mt-4">
+        <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">a tag (optional)</p>
+        <input
+          value={tag}
+          onChange={(e) => setTag(e.target.value)}
+          placeholder="like a person, a mood, a someday…"
+          className="w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none"
+        />
+      </div>
+
+      <motion.button
+        type="button"
+        whileTap={tap}
+        onClick={onSave}
+        disabled={!title.trim()}
+        className="mt-6 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40"
+      >
+        Save it to your little world
+      </motion.button>
+    </motion.div>
+  );
+}

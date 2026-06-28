@@ -1,0 +1,51 @@
+"use client";
+
+import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { motion } from "motion/react";
+import { UiProvider } from "@/lib/ui";
+import { useStore } from "@/lib/store";
+import { BottomNav } from "./bottom-nav";
+import { FloatingAddButton } from "./floating-add-button";
+import { AddItemModal } from "./add-item-modal";
+import { AddDetailSheet } from "./add-detail-sheet";
+import { CreateListSheet } from "./create-list-sheet";
+import { Celebration } from "./celebration";
+import { Toast } from "./toast";
+
+function PageTransition({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  return (
+    <motion.div
+      key={pathname}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+export function AppShell({ children }: { children: ReactNode }) {
+  const { celebration } = useStore();
+
+  return (
+    <UiProvider>
+      <div className="flex min-h-dvh w-full justify-center bg-cream-deep">
+        <div className="paper-grain relative min-h-dvh w-full max-w-[440px] overflow-x-hidden bg-cream shadow-[0_0_70px_oklch(0.5_0.05_60_/_0.14)]">
+          <main className="relative z-[1] min-h-dvh pb-32">
+            <PageTransition>{children}</PageTransition>
+          </main>
+          <FloatingAddButton />
+          <Toast />
+          <BottomNav />
+          <AddItemModal />
+          <AddDetailSheet />
+          <CreateListSheet />
+          <Celebration signal={celebration} />
+        </div>
+      </div>
+    </UiProvider>
+  );
+}
