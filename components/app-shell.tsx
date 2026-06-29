@@ -11,6 +11,7 @@ import { AddItemModal } from "./add-item-modal";
 import { AddDetailSheet } from "./add-detail-sheet";
 import { CreateListSheet } from "./create-list-sheet";
 import { CreatePersonSheet } from "./create-person-sheet";
+import { ConfirmSheet } from "./confirm-sheet";
 import { Celebration } from "./celebration";
 import { Toast } from "./toast";
 
@@ -45,6 +46,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <AddDetailSheet />
           <CreateListSheet />
           <CreatePersonSheet />
+          <ConfirmSheet />
           <Celebration signal={celebration} />
         </div>
       </div>

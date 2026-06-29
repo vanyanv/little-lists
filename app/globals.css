@@ -23,6 +23,8 @@
   --color-sky: oklch(0.86 0.045 248);
   --color-lavender: oklch(0.84 0.058 300);
   --color-clay: oklch(0.85 0.045 55);
+  /* destructive actions — a muted dusty rose, warm not alarming */
+  --color-rosewood: oklch(0.55 0.13 18);
 
   /* type — native emoji fonts first (zero cost), Noto as last-resort fallback */
   --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
