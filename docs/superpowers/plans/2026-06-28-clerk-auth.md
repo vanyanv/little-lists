@@ -95,18 +95,27 @@ git commit -m "Add @clerk/nextjs dependency"
 - [ ] **Step 1: Write `lib/clerkAppearance.ts`**
 
 ```ts
-import type { Appearance } from "@clerk/types";
+import type { ComponentProps } from "react";
+import type { ClerkProvider } from "@clerk/nextjs";
+
+// Clerk v7 has no stable top-level `Appearance` export (the old `@clerk/types`
+// path isn't installed), so derive the type from ClerkProvider's own
+// `appearance` prop. `import type` is erased at build, so no runtime coupling.
+type Appearance = NonNullable<ComponentProps<typeof ClerkProvider>["appearance"]>;
 
 /* One Little Lists skin for every Clerk surface. Warm cream card, ink text,
-   soft-brown accents, pill buttons, soft rounded inputs — no harsh blue/black. */
+   soft-brown accents, pill buttons, soft rounded inputs — no harsh blue/black.
+   NOTE: these are Clerk v7 variable names (colorForeground / colorMutedForeground
+   / colorInput / colorInputForeground), NOT the older colorText/colorInputBackground. */
 export const clerkAppearance: Appearance = {
   variables: {
     colorPrimary: "#8A6F61", // soft brown — accents, links, focus
-    colorText: "#2B2523", // ink
-    colorTextSecondary: "#8A6F61",
+    colorPrimaryForeground: "#FFF8EF", // cream — text on a primary-colored surface
+    colorForeground: "#2B2523", // ink — default text
+    colorMutedForeground: "#8A6F61", // soft brown — secondary/muted text
     colorBackground: "#FFF8EF", // cream
-    colorInputBackground: "#FFFDF9",
-    colorInputText: "#2B2523",
+    colorInput: "#FFFDF9", // soft input background
+    colorInputForeground: "#2B2523", // ink — input text
     colorDanger: "#C56A6A",
     borderRadius: "0.9rem",
     fontFamily: "var(--font-nunito), ui-rounded, system-ui, sans-serif",
