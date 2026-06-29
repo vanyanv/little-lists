@@ -84,9 +84,9 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
                 <CardStack items={list.items} kind={list.kind} size="sm" />
               </div>
             </div>
-            <h3 className="mt-3 font-display text-[1.12rem] font-semibold leading-tight text-[var(--t-ink)]">
+            <h2 className="mt-3 font-display text-[1.12rem] font-semibold leading-tight text-[var(--t-ink)]">
               {list.title}
-            </h3>
+            </h2>
             <p className="mt-0.5 text-[0.82rem] font-semibold text-brown">{listCountLabel(list)}</p>
             <ListMeta list={list} />
           </div>

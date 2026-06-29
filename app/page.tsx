@@ -59,7 +59,7 @@ export default function HomeScreen() {
       </div>
 
       {/* category chips */}
-      <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
+      <div className="no-scrollbar fade-x -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
         {CATEGORIES.map((c) => (
           <Chip key={c.id} variant="filter" active={cat === c.id} onClick={() => setCat(c.id)}>
             {c.label}

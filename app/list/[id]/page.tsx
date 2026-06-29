@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
-import { useList } from "@/lib/store";
+import { useList, useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { listCountLabel, themeClass } from "@/lib/visual";
 import { softSpring } from "@/lib/motion";
@@ -24,6 +24,7 @@ function defaultViewFor(list?: Pick<List, "template" | "defaultView">): ViewMode
 export default function ListDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const list = useList(id);
+  const { hydrated } = useStore();
   const { openItemSheet } = useUi();
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState<ViewMode>(() => defaultViewFor(list));
@@ -53,6 +54,12 @@ export default function ListDetailScreen() {
     if (filter === "all") return list.items;
     return list.items.filter((i) => i.status === filter);
   }, [list, filter]);
+
+  // saved lists load from localStorage after mount — wait for that before
+  // deciding a list is truly missing, so a direct URL visit doesn't flash 404
+  if (!list && !hydrated) {
+    return <div className="min-h-dvh" aria-hidden />;
+  }
 
   if (!list) {
     return (

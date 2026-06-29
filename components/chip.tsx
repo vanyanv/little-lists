@@ -23,7 +23,11 @@ export function Chip({
 }: ChipProps) {
   const base =
     "inline-flex items-center gap-1.5 rounded-pill whitespace-nowrap font-semibold leading-none select-none";
-  const size = "px-3.5 py-2 text-[0.82rem]";
+  // filter chips are tap targets, so give them a thumb-friendly ~44px height
+  const size =
+    variant === "filter"
+      ? "min-h-11 px-4 text-[0.84rem]"
+      : "px-3.5 py-2 text-[0.82rem]";
 
   let look = "";
   if (variant === "filter") {

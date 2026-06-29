@@ -51,6 +51,7 @@ function CreateListFlow({ onClose }: { onClose: () => void }) {
   const [emoji, setEmoji] = useState(TEMPLATE_META.custom.emoji);
   const [emojiTouched, setEmojiTouched] = useState(false);
   const [theme, setTheme] = useState<ThemeColor>(TEMPLATE_META.custom.theme);
+  const [themeTouched, setThemeTouched] = useState(false);
   const [view, setView] = useState<ViewMode>(TEMPLATE_META.custom.defaultView);
 
   // track both edges of the template rail so the fades + "swipe for more" hint
@@ -71,8 +72,9 @@ function CreateListFlow({ onClose }: { onClose: () => void }) {
   const chooseTemplate = (t: ListTemplate) => {
     const meta = TEMPLATE_META[t];
     setTemplate(t);
-    setTheme(meta.theme);
     setView(meta.defaultView);
+    // don't stomp a color the user picked on purpose; templates only seed it
+    if (!themeTouched) setTheme(meta.theme);
     if (!emojiTouched) setEmoji(meta.emoji);
   };
 
@@ -165,7 +167,7 @@ function CreateListFlow({ onClose }: { onClose: () => void }) {
           <div
             ref={railRef}
             onScroll={measureRail}
-            className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-2.5 overflow-x-auto scroll-px-1 px-1 pb-1"
+            className="no-scrollbar -mx-2 flex snap-x snap-mandatory gap-2.5 overflow-x-auto scroll-px-2 px-2 pb-2 pt-2"
           >
             {TEMPLATE_ORDER.map((t) => {
               const meta = TEMPLATE_META[t];
@@ -177,11 +179,12 @@ function CreateListFlow({ onClose }: { onClose: () => void }) {
                   whileTap={tap}
                   onClick={() => chooseTemplate(t)}
                   aria-pressed={active}
-                  className={`relative flex w-[6.5rem] shrink-0 snap-start flex-col items-center gap-2 rounded-2xl px-2 py-3 text-center transition ${
+                  className={`${themeClass(meta.theme)} relative flex w-[6.25rem] shrink-0 snap-start flex-col items-center gap-1.5 rounded-xl px-2 py-2.5 text-center transition ${
                     active
-                      ? "bg-[var(--t-wash)] shadow-soft ring-2 ring-[var(--t-edge)]"
-                      : "bg-cream-deep/50 ring-1 ring-line/60"
+                      ? "shadow-soft ring-2 ring-[var(--t-edge)]"
+                      : "ring-1 ring-[var(--t-edge)]"
                   }`}
+                  style={{ background: active ? "var(--t-wash)" : "var(--t-bg)" }}
                 >
                   {active && (
                     <motion.span
@@ -195,17 +198,13 @@ function CreateListFlow({ onClose }: { onClose: () => void }) {
                     </motion.span>
                   )}
                   <span
-                    className={`grid h-11 w-11 place-items-center rounded-xl text-2xl transition ${
+                    className={`grid h-8 w-8 place-items-center rounded-lg text-lg transition ${
                       active ? "bg-paper shadow-soft" : "bg-paper/70"
                     }`}
                   >
                     {meta.emoji}
                   </span>
-                  <span
-                    className={`text-[0.74rem] font-bold leading-tight ${
-                      active ? "text-[var(--t-ink)]" : "text-brown"
-                    }`}
-                  >
+                  <span className="text-[0.74rem] font-bold leading-tight text-[var(--t-ink)]">
                     {meta.label}
                   </span>
                 </motion.button>
@@ -237,24 +236,53 @@ function CreateListFlow({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      {/* theme */}
+      {/* theme — dimensional beads so even the palest hues read clearly */}
       <div className="mt-5">
-        <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">choose a color</p>
-        <div className="flex gap-2.5">
-          {THEME_COLORS.map((c) => (
-            <motion.button
-              key={c}
-              type="button"
-              whileTap={tap}
-              onClick={() => setTheme(c)}
-              aria-label={`${c} theme`}
-              aria-pressed={theme === c}
-              className={`h-9 w-9 rounded-full ring-2 transition ${
-                theme === c ? "ring-ink/40" : "ring-black/5"
-              }`}
-              style={{ background: `var(--color-${c})` }}
-            />
-          ))}
+        <div className="mb-2 flex items-baseline justify-between gap-2">
+          <p className="text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">
+            choose a color
+          </p>
+          <span className="text-[0.72rem] font-bold lowercase tracking-tight text-[var(--t-ink)]">
+            {theme}
+          </span>
+        </div>
+        <div className="flex justify-between gap-2">
+          {THEME_COLORS.map((c) => {
+            const active = theme === c;
+            return (
+              <motion.button
+                key={c}
+                type="button"
+                whileTap={tap}
+                onClick={() => {
+                  setTheme(c);
+                  setThemeTouched(true);
+                }}
+                aria-label={`${c} theme`}
+                aria-pressed={active}
+                className={`${themeClass(c)} relative grid h-11 w-11 place-items-center rounded-full transition`}
+                style={{
+                  background:
+                    "radial-gradient(125% 125% at 32% 24%, var(--t-wash), var(--t) 72%)",
+                  boxShadow: active
+                    ? "inset 0 0 0 1px var(--t-edge), 0 0 0 2px var(--color-paper), 0 0 0 4.5px var(--color-ink)"
+                    : "inset 0 0 0 1px var(--t-edge), var(--shadow-soft)",
+                }}
+              >
+                {active && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={softSpring}
+                    className="grid h-5 w-5 place-items-center rounded-full bg-ink/85 text-[0.58rem] font-bold text-cream"
+                    aria-hidden
+                  >
+                    ✓
+                  </motion.span>
+                )}
+              </motion.button>
+            );
+          })}
         </div>
       </div>
 
@@ -266,15 +294,22 @@ function CreateListFlow({ onClose }: { onClose: () => void }) {
 
       <p className="mt-5 text-center text-[0.82rem] text-brown-soft">You can always change this later.</p>
 
-      <motion.button
-        type="button"
-        whileTap={tap}
-        onClick={save}
-        disabled={!canSave}
-        className="mt-3 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40"
-      >
-        Save your little list
-      </motion.button>
+      {/* sticky footer so the primary action is always reachable without scrolling */}
+      <div className="sticky bottom-0 z-10 -mx-5 mt-3 bg-paper px-5 pb-1 pt-3">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 -top-5 h-5 bg-gradient-to-t from-paper to-transparent"
+        />
+        <motion.button
+          type="button"
+          whileTap={tap}
+          onClick={save}
+          disabled={!canSave}
+          className="w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40"
+        >
+          Save your little list
+        </motion.button>
+      </div>
     </div>
   );
 }

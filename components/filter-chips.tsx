@@ -18,7 +18,7 @@ interface FilterChipsProps {
 /** A swipeable rail of status filters with live counts and a sliding highlight. */
 export function FilterChips({ options, active, onChange }: FilterChipsProps) {
   return (
-    <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+    <div className="no-scrollbar fade-x -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
       {options.map((opt) => {
         const isActive = opt.id === active;
         const dim = opt.count === 0 && !isActive;
@@ -29,7 +29,7 @@ export function FilterChips({ options, active, onChange }: FilterChipsProps) {
             onClick={() => onChange(opt.id)}
             whileTap={tap}
             aria-pressed={isActive}
-            className="relative flex shrink-0 items-center gap-1.5 rounded-pill px-3.5 py-2 text-[0.82rem] font-bold leading-none"
+            className="relative flex min-h-11 shrink-0 items-center gap-1.5 rounded-pill px-4 text-[0.82rem] font-bold leading-none"
             style={{
               color: isActive ? "var(--color-cream)" : "var(--color-brown)",
             }}

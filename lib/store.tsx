@@ -4,11 +4,32 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
 import type { Item, List, Person, Profile, ThemeColor } from "./types";
 import { MOCK_LISTS, MOCK_PEOPLE, MOCK_PROFILE } from "./mock-data";
+
+/* Prototype persistence: localStorage stands in for a backend so the little
+   worlds you create survive reloads and revisiting a list's URL. */
+const STORAGE_KEY = "little-lists:v1";
+
+interface PersistShape {
+  lists?: List[];
+  people?: Person[];
+  profile?: Profile;
+}
+
+function readPersisted(): PersistShape | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as PersistShape) : null;
+  } catch {
+    return null;
+  }
+}
 
 let _seq = 0;
 function makeId(prefix = "x"): string {
@@ -29,6 +50,8 @@ interface StoreValue {
   lists: List[];
   people: Person[];
   profile: Profile;
+  /** false until saved state has been read from localStorage on the client */
+  hydrated: boolean;
   celebration: CelebrationSignal | null;
   addList: (input: Omit<List, "id" | "items">) => List;
   addItem: (listId: string, item: Omit<Item, "id" | "fresh">) => Item | null;
@@ -50,6 +73,32 @@ export function ListsProvider({ children }: { children: React.ReactNode }) {
   );
   const [profile, setProfile] = useState<Profile>(MOCK_PROFILE);
   const [celebration, setCelebration] = useState<CelebrationSignal | null>(null);
+
+  // We seed from mock data so server + first client render match, then swap in
+  // any saved state on mount. `hydrated` gates the writer effect so we never
+  // clobber persisted lists with the mock seed before we've read them.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    const saved = readPersisted();
+    if (saved) {
+      if (saved.lists) setLists(saved.lists);
+      if (saved.people) setPeople(saved.people);
+      if (saved.profile) setProfile(saved.profile);
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ lists, people, profile })
+      );
+    } catch {
+      /* storage unavailable or full — the app keeps working in-memory */
+    }
+  }, [hydrated, lists, people, profile]);
 
   const fireCelebration = useCallback((variant: CelebrationVariant = "confetti") => {
     setCelebration({ id: makeId("celebrate"), variant });
@@ -125,6 +174,7 @@ export function ListsProvider({ children }: { children: React.ReactNode }) {
       lists,
       people,
       profile,
+      hydrated,
       celebration,
       addList,
       addItem,
@@ -138,6 +188,7 @@ export function ListsProvider({ children }: { children: React.ReactNode }) {
       lists,
       people,
       profile,
+      hydrated,
       celebration,
       addList,
       addItem,
