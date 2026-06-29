@@ -9,6 +9,9 @@ dotenvConfig({ path: resolve(process.cwd(), '.env.local') })
 
 export default defineConfig({
   datasource: {
-    url: env('DATABASE_URL'),
+    // CLI/migrate connection — DIRECT (unpooled). Neon's pooled (PgBouncer)
+    // endpoint cannot run migrations. The runtime app uses the pooled
+    // DATABASE_URL via the @prisma/adapter-pg driver adapter (added in a later task).
+    url: env('DATABASE_URL_UNPOOLED'),
   },
 })
