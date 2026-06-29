@@ -115,6 +115,12 @@ function AddItemFlow({
     };
   }, [query, searchKind]);
 
+  // clear stale results immediately when the search kind changes (movie ↔ book ↔ music)
+  useEffect(() => {
+    setResults([]);
+    setPicked(null);
+  }, [searchKind]);
+
   // auto-pick a sensible destination list when type changes (home entry)
   useEffect(() => {
     if (presetListId) return;
