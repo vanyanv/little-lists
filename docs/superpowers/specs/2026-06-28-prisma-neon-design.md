@@ -59,26 +59,35 @@ user. The existing localStorage prototype UI is untouched and keeps working.
 
 ## Approach
 
-Standard Prisma Client over Neon's pooled connection. **No Neon serverless
-driver adapter** — keeps dependencies minimal and the node runtime is
-sufficient for this step. Migrations run against the direct (unpooled) URL.
-Auth stays Clerk's job; authorization is enforced in server code by scoping
-every query to the current Clerk user's `userId` (the helpers in §5 provide
-that identity). This step wires only one DB write into the UI: an idempotent
-Profile upsert on first app access.
+**Prisma 7 requires a driver adapter** — `PrismaClient` throws on init if none
+is provided (confirmed in Prisma 7.8's `ClientEngine`). For this Node-runtime
+Next.js app on Neon we use `@prisma/adapter-pg` (node-postgres over Neon's
+pooled connection) — lighter than the WebSocket-based `@prisma/adapter-neon`
+and sufficient for server components / server actions. `@prisma/adapter-pg`
+bundles `pg` and `@types/pg`, so no separate `pg` install is needed.
+Migrations run via the Prisma CLI, which reads the datasource block (pooled
+`url` + direct `directUrl`). Auth stays Clerk's job; authorization is enforced
+in server code by scoping every query to the current Clerk user's `userId`
+(the helpers in §5 provide that identity). This step wires only one DB write
+into the UI: an idempotent Profile upsert on first app access.
 
 ## Design
 
 ### 1. Dependencies (minimal)
 
-`npm install @prisma/client server-only` and `npm install -D prisma`.
+`npm install @prisma/client@7 @prisma/adapter-pg@7 server-only` and
+`npm install -D prisma@7`. Keep `prisma`, `@prisma/client`, and
+`@prisma/adapter-pg` on the same 7.x version (Prisma requires CLI, client, and
+adapter versions to match).
 
 - `prisma` — CLI / migration engine (dev).
 - `@prisma/client` — generated client.
+- `@prisma/adapter-pg` — required Prisma 7 driver adapter (node-postgres);
+  bundles `pg` + `@types/pg`.
 - `server-only` — tiny standard Next.js guard; importing DB modules from a
   client component then fails the build instead of leaking server code.
 
-No Neon adapter, no extra runtime deps.
+No WebSocket Neon adapter, no separate `pg` install.
 
 ### 2. Connection — `prisma/schema.prisma` datasource + generator
 
@@ -156,15 +165,19 @@ convention, validated in app code in later steps.
 
 ### 4. Prisma client singleton — `lib/prisma.ts`
 
-`import "server-only"` at top. Standard global-cached singleton so Next dev
-hot-reload reuses one `PrismaClient` instead of exhausting Neon connections:
+`import "server-only"` at top. Global-cached singleton (so Next dev hot-reload
+reuses one client instead of exhausting Neon connections) constructed with the
+**required** `@prisma/adapter-pg` driver adapter:
 
 ```ts
 import "server-only";
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ```
 
@@ -224,5 +237,6 @@ the connection URLs).
 ## Out of scope (explicitly not in this step)
 
 Connecting lists / items / people UI to the database (still localStorage),
-movie/book APIs, sharing, friends, comments, feed, the Neon serverless driver
-adapter, and any redesign of the existing app.
+movie/book APIs, sharing, friends, comments, feed, the WebSocket-based
+`@prisma/adapter-neon` (we use the lighter node-postgres `@prisma/adapter-pg`),
+and any redesign of the existing app.
