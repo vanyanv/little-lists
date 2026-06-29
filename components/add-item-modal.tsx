@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
@@ -12,12 +12,11 @@ import {
   type ListTemplate,
   type StatusId,
 } from "@/lib/types";
-import { BOOK_CATALOG, MOVIE_CATALOG, type SearchResult } from "@/lib/mock-data";
+import type { SearchHit } from "@/lib/search/types";
 import { themeClass } from "@/lib/visual";
 import { staggerContainer, riseItem, softSpring, tap } from "@/lib/motion";
 import { BottomSheet } from "./bottom-sheet";
 import { SoftDotLoader } from "./soft-dot-loader";
-import { PlaceholderPoster } from "./placeholder-poster";
 import { Cover } from "./cover";
 import { StatusPill } from "./status-pill";
 
@@ -79,21 +78,42 @@ function AddItemFlow({
   const tmeta = TEMPLATE_META[template];
   const statuses = presetList ? statusesForList(presetList) : tmeta.statuses;
   const searchable = meta.searchable;
-  const catalog = type === "movie" ? MOVIE_CATALOG : BOOK_CATALOG;
+  const searchKind = type === "movie" || type === "book" || type === "music" ? type : null;
 
-  // simulate a soft search whenever the query changes for searchable types
+  const [results, setResults] = useState<SearchHit[]>([]);
+  // carry the picked hit's cover + metadata into save()
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+  const [pickedMeta, setPickedMeta] = useState<Record<string, unknown> | undefined>(undefined);
+
   useEffect(() => {
-    if (!searchable) return;
+    if (!searchKind) return;
+    const term = query.trim();
+    if (!term) {
+      setResults([]);
+      setSearching(false);
+      return;
+    }
     setSearching(true);
-    const t = setTimeout(() => setSearching(false), 520);
-    return () => clearTimeout(t);
-  }, [query, searchable, type]);
-
-  const results = useMemo<SearchResult[]>(() => {
-    const q = query.trim().toLowerCase();
-    const base = q ? catalog.filter((r) => r.title.toLowerCase().includes(q)) : catalog;
-    return base.slice(0, 6);
-  }, [query, catalog]);
+    const controller = new AbortController();
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/search/${searchKind}?q=${encodeURIComponent(term)}`,
+          { signal: controller.signal },
+        );
+        const hits: SearchHit[] = res.ok ? await res.json() : [];
+        setResults(hits);
+      } catch {
+        if (!controller.signal.aborted) setResults([]);
+      } finally {
+        if (!controller.signal.aborted) setSearching(false);
+      }
+    }, 350);
+    return () => {
+      controller.abort();
+      clearTimeout(t);
+    };
+  }, [query, searchKind]);
 
   // auto-pick a sensible destination list when type changes (home entry)
   useEffect(() => {
@@ -102,11 +122,13 @@ function AddItemFlow({
     setTargetListId(match?.id ?? lists[0]?.id);
   }, [type, presetListId, lists]);
 
-  const pickResult = (r: SearchResult) => {
-    setPicked(r.seed);
+  const pickResult = (r: SearchHit) => {
+    setPicked(r.sourceId);
     setTitle(r.title);
     setSubtitle(r.subtitle);
-    setSeed(r.seed);
+    setSeed(r.title);
+    setImageUrl(r.imageUrl);
+    setPickedMeta(r.meta);
     setStatus(statuses[0]);
     // let the chosen row glow for a beat before sliding forward
     setTimeout(() => setStep("details"), 260);
@@ -115,6 +137,8 @@ function AddItemFlow({
   const continueManual = () => {
     if (!title.trim()) return;
     setSeed(title);
+    setImageUrl(undefined);
+    setPickedMeta(undefined);
     setStatus(statuses[0]);
     setStep("details");
   };
@@ -135,6 +159,8 @@ function AddItemFlow({
         tags: tag.trim() ? [tag.trim()] : undefined,
         emoji: meta.aspect === "note" ? emoji : undefined,
         seed: seed || title,
+        imageUrl,
+        meta: pickedMeta,
       });
 
       // rare milestone: this list just came alive
@@ -211,10 +237,10 @@ function AddItemFlow({
                 ) : (
                   <motion.div variants={staggerContainer} initial="hidden" animate="show" className="flex flex-col gap-2">
                     {results.map((r) => {
-                      const chosen = picked === r.seed;
+                      const chosen = picked === r.sourceId;
                       return (
                         <motion.button
-                          key={r.seed}
+                          key={r.sourceId}
                           variants={riseItem}
                           type="button"
                           onClick={() => pickResult(r)}
@@ -228,7 +254,11 @@ function AddItemFlow({
                           }`}
                         >
                           <div className="w-11 shrink-0">
-                            <PlaceholderPoster seed={r.seed} title={r.title} rounded="rounded-md" className="ring-1 ring-black/5" />
+                            <Cover
+                              item={{ id: r.sourceId, type, title: r.title, subtitle: r.subtitle, seed: r.title, imageUrl: r.imageUrl }}
+                              rounded="rounded-md"
+                              className="ring-1 ring-black/5"
+                            />
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="truncate font-display text-[0.98rem] font-semibold text-ink">{r.title}</p>
@@ -294,6 +324,7 @@ function AddItemFlow({
             subtitle={subtitle}
             setSubtitle={setSubtitle}
             seed={seed}
+            imageUrl={imageUrl}
             emoji={emoji}
             lists={lists}
             targetListId={targetListId}
@@ -323,6 +354,7 @@ function DetailsStep(props: {
   subtitle: string;
   setSubtitle: (s: string) => void;
   seed: string;
+  imageUrl?: string;
   emoji: string;
   lists: ReturnType<typeof useStore>["lists"];
   targetListId?: string;
@@ -341,7 +373,7 @@ function DetailsStep(props: {
   onSave: () => void;
 }) {
   const {
-    type, title, subtitle, setSubtitle, seed, emoji, lists, targetListId, setTargetListId,
+    type, title, subtitle, setSubtitle, seed, imageUrl, emoji, lists, targetListId, setTargetListId,
     statuses, statusHeading, extraField, status, setStatus, note, setNote, tag, setTag, saving, onBack, onSave,
   } = props;
   const isPoster = ITEM_TYPE_META[type].aspect !== "note";
@@ -365,7 +397,7 @@ function DetailsStep(props: {
         {isPoster ? (
           <div className="w-20 shrink-0">
             <Cover
-              item={{ id: "preview", type, title, subtitle, seed, imageUrl: undefined }}
+              item={{ id: "preview", type, title, subtitle, seed, imageUrl }}
               className="shadow-soft ring-1 ring-black/5"
             />
           </div>
