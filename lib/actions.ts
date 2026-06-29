@@ -63,6 +63,9 @@ export interface CreateItemInput {
   tags?: string[];
   emoji?: string;
   seed?: string;
+  imageUrl?: string;
+  /** extra provider fields persisted into metadata JSON (year, overview, author, isbn, sourceId, …) */
+  meta?: Record<string, unknown>;
 }
 
 export async function createItemAction(listId: string, input: CreateItemInput): Promise<Item> {
@@ -78,6 +81,7 @@ export async function createItemAction(listId: string, input: CreateItemInput): 
   const metadata = {
     type: input.type,
     ...(input.seed ? { seed: input.seed } : {}),
+    ...(input.meta ?? {}),
   } satisfies Prisma.InputJsonObject;
 
   const row = await prisma.listItem.create({
@@ -89,6 +93,7 @@ export async function createItemAction(listId: string, input: CreateItemInput): 
       note: input.note ?? null,
       status: input.status ?? null,
       emoji: input.emoji ?? null,
+      imageUrl: input.imageUrl ?? null,
       tags: input.tags ?? [],
       metadata,
     },

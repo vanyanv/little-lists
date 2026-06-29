@@ -47,6 +47,7 @@ export function mapItem(row: DbItem, fallbackType: ItemType): Item {
     type: meta.type ?? fallbackType,
     title: row.title,
     subtitle: row.subtitle ?? undefined,
+    imageUrl: row.imageUrl ?? undefined,
     note: row.note ?? undefined,
     status: (row.status as StatusId | null) ?? undefined,
     rating: meta.rating,
