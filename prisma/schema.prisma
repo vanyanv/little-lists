@@ -9,6 +9,7 @@ datasource db {
 enum TemplateType {
   movie
   book
+  music
   food
   place
   gift

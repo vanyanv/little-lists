@@ -19,7 +19,7 @@ export const THEME_COLORS: ThemeColor[] = [
   "clay",
 ];
 
-export type ItemType = "movie" | "book" | "food" | "place" | "custom";
+export type ItemType = "movie" | "book" | "music" | "food" | "place" | "custom";
 
 /** how a list is browsed; persisted per-list, falls back to its template default */
 export type ViewMode = "grid" | "list" | "cozy";
@@ -28,6 +28,7 @@ export type ViewMode = "grid" | "list" | "cozy";
 export type ListTemplate =
   | "movie"
   | "book"
+  | "music"
   | "food"
   | "place"
   | "gift"
@@ -44,6 +45,10 @@ export type StatusId =
   | "reading"
   | "finished"
   | "dnf"
+  // music
+  | "want-to-listen"
+  | "listened"
+  | "on-repeat"
   | "love"
   | "hate"
   | "maybe"
@@ -80,6 +85,9 @@ export const STATUS_META: Record<StatusId, { label: string; tone: StatusTone }> 
   reading: { label: "Reading", tone: "good" },
   finished: { label: "Finished", tone: "good" },
   dnf: { label: "DNF", tone: "bad" },
+  "want-to-listen": { label: "Want to listen", tone: "neutral" },
+  listened: { label: "Listened", tone: "good" },
+  "on-repeat": { label: "On repeat", tone: "love" },
   love: { label: "Love", tone: "love" },
   hate: { label: "Hate", tone: "bad" },
   maybe: { label: "Maybe", tone: "neutral" },
@@ -110,6 +118,7 @@ export const STATUS_META: Record<StatusId, { label: string; tone: StatusTone }> 
 export const STATUSES_FOR: Record<ItemType, StatusId[]> = {
   movie: ["want-to-watch", "watched", "favorite", "not-for-me"],
   book: ["want-to-read", "reading", "finished", "favorite", "dnf"],
+  music: ["want-to-listen", "listened", "on-repeat", "favorite", "not-for-me"],
   food: ["hate", "never-again", "not-for-me"],
   place: ["need-to-try", "favorite", "love", "maybe"],
   custom: ["love", "maybe", "favorite", "need-to-try"],
@@ -121,6 +130,8 @@ export interface Item {
   title: string;
   /** year for movies, author for books, a place's vibe, etc. */
   subtitle?: string;
+  /** real poster/cover/album-art URL from search; falls back to the designed placeholder when absent */
+  imageUrl?: string;
   note?: string;
   status?: StatusId;
   rating?: number; // 1..5, optional
@@ -188,10 +199,11 @@ export interface Profile {
 
 export const ITEM_TYPE_META: Record<
   ItemType,
-  { label: string; emoji: string; searchable: boolean; aspect: "poster" | "cover" | "note" }
+  { label: string; emoji: string; searchable: boolean; aspect: "poster" | "cover" | "square" | "note" }
 > = {
   movie: { label: "Movie", emoji: "🎬", searchable: true, aspect: "poster" },
   book: { label: "Book", emoji: "📚", searchable: true, aspect: "cover" },
+  music: { label: "Music", emoji: "🎧", searchable: true, aspect: "square" },
   food: { label: "Food", emoji: "🍴", searchable: false, aspect: "note" },
   place: { label: "Place", emoji: "📍", searchable: false, aspect: "note" },
   custom: { label: "Custom", emoji: "✨", searchable: false, aspect: "note" },
@@ -251,6 +263,19 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     searchable: true,
     statusHeading: "where are you with it?",
     addHeading: () => "Add a book to this little list.",
+  },
+  music: {
+    label: "Music list",
+    emoji: "🎧",
+    theme: "lavender",
+    kind: "music",
+    defaultView: "grid",
+    statuses: ["want-to-listen", "listened", "on-repeat", "favorite", "not-for-me"],
+    noun: "tunes on repeat",
+    sticker: "sparkle",
+    searchable: true,
+    statusHeading: "how's it sound?",
+    addHeading: () => "Add a song or album to this little list.",
   },
   food: {
     label: "Food list",

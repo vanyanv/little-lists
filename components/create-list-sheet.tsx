@@ -21,6 +21,7 @@ const TEMPLATE_ORDER: ListTemplate[] = [
   "custom",
   "movie",
   "book",
+  "music",
   "food",
   "place",
   "gift",
