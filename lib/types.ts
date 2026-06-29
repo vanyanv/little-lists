@@ -150,12 +150,20 @@ export interface List {
 
 export type PersonSectionKind = "chips" | "notes";
 
+/** one remembered detail about a person, persisted as a PersonDetail row */
+export interface PersonDetailEntry {
+  id: string;
+  title: string;
+  note?: string;
+  tags: string[];
+}
+
 export interface PersonSection {
   id: string;
   label: string;
   emoji: string;
   kind: PersonSectionKind;
-  entries: string[];
+  entries: PersonDetailEntry[];
 }
 
 export interface Person {
@@ -255,7 +263,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     sticker: "leaf",
     searchable: false,
     statusHeading: "how do you feel about it?",
-    addHeading: (t) => `Add something to ${t}.`,
+    addHeading: () => "Add something to this little list.",
   },
   place: {
     label: "Place list",

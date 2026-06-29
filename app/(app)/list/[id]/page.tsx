@@ -24,10 +24,16 @@ function defaultViewFor(list?: Pick<List, "template" | "defaultView">): ViewMode
 export default function ListDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const list = useList(id);
-  const { hydrated } = useStore();
+  const { hydrated, setListView } = useStore();
   const { openItemSheet } = useUi();
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState<ViewMode>(() => defaultViewFor(list));
+
+  // change the view here AND remember it on the list for next time
+  const changeView = (next: ViewMode) => {
+    setView(next);
+    if (list) setListView(list.id, next);
+  };
 
   // reset browsing state when moving to a different little world
   useEffect(() => {
@@ -93,7 +99,7 @@ export default function ListDetailScreen() {
       {list.items.length > 0 && (
         <div className="sticky top-0 z-10 bg-cream/85 px-4 pt-3 pb-2 backdrop-blur-md">
           <div className="mb-2 flex justify-end">
-            <ViewToggle value={view} onChange={setView} />
+            <ViewToggle value={view} onChange={changeView} />
           </div>
           <FilterChips options={options} active={filter} onChange={setFilter} />
         </div>

@@ -6,7 +6,13 @@ import type { PersonSection } from "@/lib/types";
 import { gentleSpring, softSpring } from "@/lib/motion";
 
 /** A warm, bouncy accordion card for one remembered facet of a person. */
-export function PersonDetailSection({ section }: { section: PersonSection }) {
+export function PersonDetailSection({
+  section,
+  onDelete,
+}: {
+  section: PersonSection;
+  onDelete?: (detailId: string) => void;
+}) {
   const [open, setOpen] = useState(true);
 
   return (
@@ -46,26 +52,49 @@ export function PersonDetailSection({ section }: { section: PersonSection }) {
             <div className="px-4 pb-4">
               {section.kind === "chips" ? (
                 <div className="flex flex-wrap gap-1.5">
-                  {section.entries.map((e, i) => (
+                  {section.entries.map((e) => (
                     <motion.span
-                      key={`${e}-${i}`}
+                      key={e.id}
                       layout
-                      className="rounded-pill px-3 py-1.5 text-[0.85rem] font-semibold text-[var(--t-ink)]"
+                      className="group inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-[0.85rem] font-semibold text-[var(--t-ink)]"
                       style={{ background: "var(--t-bg)" }}
                     >
-                      {e}
+                      {e.title}
+                      {onDelete && (
+                        <button
+                          type="button"
+                          onClick={() => onDelete(e.id)}
+                          aria-label={`Remove ${e.title}`}
+                          className="grid h-4 w-4 place-items-center rounded-full text-[var(--t-ink)]/50 transition-colors hover:bg-ink/10 hover:text-[var(--t-ink)]"
+                        >
+                          ×
+                        </button>
+                      )}
                     </motion.span>
                   ))}
                 </div>
               ) : (
                 <ul className="flex flex-col gap-2">
-                  {section.entries.map((e, i) => (
+                  {section.entries.map((e) => (
                     <motion.li
-                      key={`${e}-${i}`}
+                      key={e.id}
                       layout
-                      className="rounded-xl bg-cream-deep/70 px-3.5 py-2.5 text-[0.92rem] leading-relaxed text-ink-soft"
+                      className="flex items-start gap-2 rounded-xl bg-cream-deep/70 px-3.5 py-2.5 text-[0.92rem] leading-relaxed text-ink-soft"
                     >
-                      {e}
+                      <span className="flex-1">
+                        {e.title}
+                        {e.note && <span className="mt-0.5 block text-[0.82rem] text-brown">{e.note}</span>}
+                      </span>
+                      {onDelete && (
+                        <button
+                          type="button"
+                          onClick={() => onDelete(e.id)}
+                          aria-label={`Remove ${e.title}`}
+                          className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-brown-soft transition-colors hover:bg-ink/10 hover:text-ink"
+                        >
+                          ×
+                        </button>
+                      )}
                     </motion.li>
                   ))}
                 </ul>

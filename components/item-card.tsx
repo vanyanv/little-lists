@@ -13,7 +13,7 @@ import { SparkleBurst } from "./sparkle-burst";
 import type { ViewMode } from "./view-toggle";
 
 function ItemEditor({ listId, item }: { listId: string; item: Item }) {
-  const { updateItem } = useStore();
+  const { updateItem, deleteItem } = useStore();
   const options = STATUSES_FOR[item.type];
 
   return (
@@ -49,6 +49,16 @@ function ItemEditor({ listId, item }: { listId: string; item: Item }) {
         rows={2}
         className="w-full resize-none rounded-lg border border-line bg-paper px-3 py-2 text-[0.9rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none"
       />
+
+      <div className="mt-3 flex justify-end">
+        <button
+          type="button"
+          onClick={() => deleteItem(listId, item.id)}
+          className="rounded-pill px-3 py-1.5 text-[0.78rem] font-bold text-brown-soft transition-colors hover:bg-cream-deep hover:text-ink"
+        >
+          Remove from this little list
+        </button>
+      </div>
     </div>
   );
 }

@@ -4,10 +4,12 @@ import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { useUser } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
+import { useUi } from "@/lib/ui";
 import type { ItemType } from "@/lib/types";
-import { staggerContainer, riseItem } from "@/lib/motion";
+import { staggerContainer, riseItem, tap } from "@/lib/motion";
 import { ListCard } from "@/components/list-card";
 import { Chip } from "@/components/chip";
+import { EmptyState } from "@/components/empty-state";
 
 const CATEGORIES: { id: string; label: string; kinds: ItemType[] | null }[] = [
   { id: "all", label: "Everything", kinds: null },
@@ -19,9 +21,12 @@ const CATEGORIES: { id: string; label: string; kinds: ItemType[] | null }[] = [
 
 export default function HomeScreen() {
   const { lists, profile } = useStore();
+  const { openListSheet } = useUi();
   const { user } = useUser();
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState("all");
+
+  const hasLists = lists.length > 0;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -46,6 +51,24 @@ export default function HomeScreen() {
         <p className="mt-2 text-[0.95rem] text-brown">A tiny archive of your taste, plans, and people.</p>
       </header>
 
+      {!hasLists ? (
+        <EmptyState
+          sticker="sparkle"
+          title="No little worlds yet"
+          hint="Start your first list and watch your tiny archive begin ✨"
+          action={
+            <motion.button
+              type="button"
+              whileTap={tap}
+              onClick={openListSheet}
+              className="rounded-pill bg-ink px-6 py-3.5 text-[0.95rem] font-bold text-cream shadow-lift"
+            >
+              Start a little list
+            </motion.button>
+          }
+        />
+      ) : (
+        <>
       {/* search pill */}
       <div className="mt-4 flex items-center gap-2 rounded-pill bg-paper px-4 py-3 shadow-soft ring-1 ring-line/60">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 text-brown-soft">
@@ -91,6 +114,8 @@ export default function HomeScreen() {
             </div>
           )}
         </motion.div>
+      )}
+        </>
       )}
     </div>
   );

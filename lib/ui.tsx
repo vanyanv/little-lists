@@ -6,6 +6,7 @@ export type SheetState =
   | { kind: "item"; listId?: string }
   | { kind: "detail"; personId: string }
   | { kind: "list" }
+  | { kind: "person" }
   | null;
 
 export interface ToastSignal {
@@ -18,6 +19,7 @@ interface UiValue {
   openItemSheet: (listId?: string) => void;
   openDetailSheet: (personId: string) => void;
   openListSheet: () => void;
+  openPersonSheet: () => void;
   closeSheet: () => void;
   toast: ToastSignal | null;
   showToast: (message: string) => void;
@@ -38,6 +40,7 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
     setSheet({ kind: "detail", personId });
   }, []);
   const openListSheet = useCallback(() => setSheet({ kind: "list" }), []);
+  const openPersonSheet = useCallback(() => setSheet({ kind: "person" }), []);
   const closeSheet = useCallback(() => setSheet(null), []);
 
   const showToast = useCallback((message: string) => {
@@ -52,12 +55,13 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
       openItemSheet,
       openDetailSheet,
       openListSheet,
+      openPersonSheet,
       closeSheet,
       toast,
       showToast,
       dismissToast,
     }),
-    [sheet, openItemSheet, openDetailSheet, openListSheet, closeSheet, toast, showToast, dismissToast]
+    [sheet, openItemSheet, openDetailSheet, openListSheet, openPersonSheet, closeSheet, toast, showToast, dismissToast]
   );
 
   return <UiContext.Provider value={value}>{children}</UiContext.Provider>;

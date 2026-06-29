@@ -10,6 +10,7 @@ import { FloatingAddButton } from "./floating-add-button";
 import { AddItemModal } from "./add-item-modal";
 import { AddDetailSheet } from "./add-detail-sheet";
 import { CreateListSheet } from "./create-list-sheet";
+import { CreatePersonSheet } from "./create-person-sheet";
 import { Celebration } from "./celebration";
 import { Toast } from "./toast";
 
@@ -43,6 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <AddItemModal />
           <AddDetailSheet />
           <CreateListSheet />
+          <CreatePersonSheet />
           <Celebration signal={celebration} />
         </div>
       </div>

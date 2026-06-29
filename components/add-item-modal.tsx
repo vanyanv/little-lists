@@ -71,6 +71,7 @@ function AddItemFlow({
   const [status, setStatus] = useState<StatusId | undefined>(undefined);
   const [note, setNote] = useState("");
   const [tag, setTag] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const meta = ITEM_TYPE_META[type];
   const template: ListTemplate = presetList?.template ?? (type as ListTemplate);
@@ -117,27 +118,33 @@ function AddItemFlow({
     setStep("details");
   };
 
-  const save = () => {
+  const save = async () => {
     const listId = targetListId ?? lists[0]?.id;
-    if (!listId) return;
+    if (!listId || saving) return;
     const wasEmpty = (lists.find((l) => l.id === listId)?.items.length ?? 0) === 0;
 
-    addItem(listId, {
-      type,
-      title: title.trim(),
-      subtitle: subtitle.trim() || undefined,
-      note: note.trim() || undefined,
-      status,
-      tags: tag.trim() ? [tag.trim()] : undefined,
-      emoji: meta.aspect === "note" ? emoji : undefined,
-      seed: seed || title,
-    });
+    setSaving(true);
+    try {
+      await addItem(listId, {
+        type,
+        title: title.trim(),
+        subtitle: subtitle.trim() || undefined,
+        note: note.trim() || undefined,
+        status,
+        tags: tag.trim() ? [tag.trim()] : undefined,
+        emoji: meta.aspect === "note" ? emoji : undefined,
+        seed: seed || title,
+      });
 
-    // rare milestone: this list just came alive
-    if (wasEmpty) fireCelebration("confetti");
+      // rare milestone: this list just came alive
+      if (wasEmpty) fireCelebration("confetti");
 
-    onClose();
-    showToast("Saved to your little world ✨");
+      onClose();
+      showToast("Saved to your little world ✨");
+    } catch {
+      setSaving(false);
+      showToast("That didn't save — let's try again 🌿");
+    }
   };
 
   return (
@@ -299,6 +306,7 @@ function AddItemFlow({
             setNote={setNote}
             tag={tag}
             setTag={setTag}
+            saving={saving}
             onBack={() => setStep("compose")}
             onSave={save}
           />
@@ -327,12 +335,13 @@ function DetailsStep(props: {
   setNote: (s: string) => void;
   tag: string;
   setTag: (s: string) => void;
+  saving: boolean;
   onBack: () => void;
   onSave: () => void;
 }) {
   const {
     type, title, subtitle, setSubtitle, seed, emoji, lists, targetListId, setTargetListId,
-    statuses, statusHeading, extraField, status, setStatus, note, setNote, tag, setTag, onBack, onSave,
+    statuses, statusHeading, extraField, status, setStatus, note, setNote, tag, setTag, saving, onBack, onSave,
   } = props;
   const isPoster = ITEM_TYPE_META[type].aspect !== "note";
   const targetList = lists.find((l) => l.id === targetListId);
@@ -441,10 +450,10 @@ function DetailsStep(props: {
         type="button"
         whileTap={tap}
         onClick={onSave}
-        disabled={!title.trim()}
+        disabled={!title.trim() || saving}
         className="mt-6 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40"
       >
-        Save it to your little world
+        {saving ? "Saving…" : "Save it to your little world"}
       </motion.button>
     </motion.div>
   );

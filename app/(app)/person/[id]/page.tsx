@@ -3,15 +3,19 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { usePerson } from "@/lib/store";
+import { usePerson, useStore } from "@/lib/store";
+import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
-import { staggerContainer, riseItem } from "@/lib/motion";
+import { staggerContainer, riseItem, tap } from "@/lib/motion";
 import { DetailHeader } from "@/components/detail-header";
 import { PersonDetailSection } from "@/components/person-detail-section";
+import { EmptyState } from "@/components/empty-state";
 
 export default function PersonDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const person = usePerson(id);
+  const { deletePersonDetail } = useStore();
+  const { openDetailSheet } = useUi();
 
   if (!person) {
     return (
@@ -24,6 +28,8 @@ export default function PersonDetailScreen() {
     );
   }
 
+  const filledSections = person.sections.filter((s) => s.entries.length > 0);
+
   return (
     <div className={themeClass(person.theme)}>
       <DetailHeader
@@ -33,18 +39,39 @@ export default function PersonDetailScreen() {
         sticker="heart"
       />
 
-      <motion.div
-        variants={staggerContainer}
-        initial="hidden"
-        animate="show"
-        className="flex flex-col gap-3 px-4 pt-5"
-      >
-        {person.sections.map((s) => (
-          <motion.div key={s.id} variants={riseItem}>
-            <PersonDetailSection section={s} />
-          </motion.div>
-        ))}
-      </motion.div>
+      {filledSections.length === 0 ? (
+        <EmptyState
+          sticker="heart"
+          title="No little details yet"
+          hint="Save the first one and start a cozy archive of what makes them, them."
+          action={
+            <motion.button
+              type="button"
+              whileTap={tap}
+              onClick={() => openDetailSheet(person.id)}
+              className="rounded-pill bg-ink px-6 py-3.5 text-[0.95rem] font-bold text-cream shadow-lift"
+            >
+              Add a little detail
+            </motion.button>
+          }
+        />
+      ) : (
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+          className="flex flex-col gap-3 px-4 pt-5"
+        >
+          {filledSections.map((s) => (
+            <motion.div key={s.id} variants={riseItem}>
+              <PersonDetailSection
+                section={s}
+                onDelete={(detailId) => deletePersonDetail(person.id, s.id, detailId)}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
     </div>
   );
 }

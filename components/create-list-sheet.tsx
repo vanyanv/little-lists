@@ -78,23 +78,27 @@ function CreateListFlow({ onClose }: { onClose: () => void }) {
     if (!emojiTouched) setEmoji(meta.emoji);
   };
 
-  const canSave = name.trim().length > 0;
+  const [saving, setSaving] = useState(false);
+  const canSave = name.trim().length > 0 && !saving;
 
-  const save = () => {
+  const save = async () => {
     if (!canSave) return;
-    const meta = TEMPLATE_META[template];
-    const created = addList({
-      title: name.trim(),
-      emoji,
-      theme,
-      noun: meta.noun,
-      kind: meta.kind,
-      template,
-      defaultView: view,
-    });
-    onClose();
-    showToast("Your little world is ready ✨");
-    router.push(`/list/${created.id}`);
+    setSaving(true);
+    try {
+      const created = await addList({
+        title: name.trim(),
+        emoji,
+        theme,
+        template,
+        defaultView: view,
+      });
+      onClose();
+      showToast("Your little world is ready ✨");
+      router.push(`/list/${created.id}`);
+    } catch {
+      setSaving(false);
+      showToast("That didn't save — let's try again 🌿");
+    }
   };
 
   return (
@@ -307,7 +311,7 @@ function CreateListFlow({ onClose }: { onClose: () => void }) {
           disabled={!canSave}
           className="w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40"
         >
-          Save your little list
+          {saving ? "Making it…" : "Save your little list"}
         </motion.button>
       </div>
     </div>

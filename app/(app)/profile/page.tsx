@@ -14,10 +14,13 @@ import { PlaceholderPoster } from "@/components/placeholder-poster";
 export default function ProfileScreen() {
   const { profile, lists } = useStore();
 
-  const featured = useMemo(
-    () => profile.featuredListIds.map((id) => lists.find((l) => l.id === id)).filter(Boolean),
-    [profile.featuredListIds, lists]
-  );
+  const featured = useMemo(() => {
+    if (profile.featuredListIds.length) {
+      return profile.featuredListIds.map((id) => lists.find((l) => l.id === id)).filter(Boolean);
+    }
+    // no explicit favorites yet — feature the most recent little worlds
+    return lists.slice(0, 3);
+  }, [profile.featuredListIds, lists]);
 
   const loved = useMemo(() => {
     const out: { listId: string; item: (typeof lists)[number]["items"][number] }[] = [];

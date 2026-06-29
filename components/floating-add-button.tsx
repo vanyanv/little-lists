@@ -7,23 +7,27 @@ import { useUi } from "@/lib/ui";
 
 export function FloatingAddButton() {
   const pathname = usePathname();
-  const { openItemSheet, openDetailSheet, openListSheet } = useUi();
+  const { openItemSheet, openDetailSheet, openListSheet, openPersonSheet } = useUi();
 
   const onList = pathname.startsWith("/list/");
   const onPerson = pathname.startsWith("/person/");
+  const onPeople = pathname === "/people";
   const onHome = pathname === "/";
-  const visible = onHome || onList || onPerson;
+  const visible = onHome || onList || onPerson || onPeople;
   if (!visible) return null;
 
   const id = pathname.split("/")[2];
   const label = onPerson
-    ? "Remember a little detail"
-    : onList
-      ? "Add a little thing"
-      : "Start a little list";
+    ? "Add a little detail"
+    : onPeople
+      ? "Add someone to remember"
+      : onList
+        ? "Add to this list"
+        : "Start a little list";
 
   const handle = () => {
     if (onPerson && id) openDetailSheet(id);
+    else if (onPeople) openPersonSheet();
     else if (onList && id) openItemSheet(id);
     else openListSheet();
   };
