@@ -18,6 +18,7 @@ import { staggerContainer, riseItem, softSpring, tap } from "@/lib/motion";
 import { BottomSheet } from "./bottom-sheet";
 import { SoftDotLoader } from "./soft-dot-loader";
 import { PlaceholderPoster } from "./placeholder-poster";
+import { Cover } from "./cover";
 import { StatusPill } from "./status-pill";
 
 const TYPES: ItemType[] = ["movie", "book", "food", "place", "custom"];
@@ -363,7 +364,10 @@ function DetailsStep(props: {
       <div className="flex items-center gap-4">
         {isPoster ? (
           <div className="w-20 shrink-0">
-            <PlaceholderPoster seed={seed} title={title} className="shadow-soft ring-1 ring-black/5" />
+            <Cover
+              item={{ id: "preview", type, title, subtitle, seed, imageUrl: undefined }}
+              className="shadow-soft ring-1 ring-black/5"
+            />
           </div>
         ) : (
           <span className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl text-4xl" style={{ background: "var(--t-bg)" }}>

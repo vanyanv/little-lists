@@ -1,15 +1,13 @@
 import type { Item } from "@/lib/types";
-import { PlaceholderPoster } from "./placeholder-poster";
+import { Cover } from "./cover";
 import { StatusPill } from "./status-pill";
 
-/** Letterboxd-style poster/cover summary for movies and books. */
+/** Letterboxd-style poster/cover summary for movies, books, and music. */
 export function PosterCard({ item }: { item: Item }) {
-  const seed = item.seed || item.title;
   return (
     <div className="text-left">
-      <PlaceholderPoster
-        seed={seed}
-        title={item.title}
+      <Cover
+        item={item}
         badge={item.status === "favorite" ? "💗" : undefined}
         className="shadow-soft ring-1 ring-black/5"
       />
