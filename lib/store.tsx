@@ -24,15 +24,20 @@ import {
   createPersonAction,
   createPersonDetailAction,
   deleteItemAction,
+  deleteListAction,
+  deletePersonAction,
   deletePersonDetailAction,
   setListViewAction,
   updateItemAction,
+  updateListAction,
+  updatePersonAction,
+  updatePersonDetailAction,
   updateProfileAction,
   type CreateItemInput,
   type CreateListInput,
   type CreatePersonInput,
 } from "./actions";
-import { insertDetail, removeDetail, replaceDetail } from "./store-helpers";
+import { deriveListMeta, insertDetail, moveDetailBetweenSections, removeDetail, replaceDetail } from "./store-helpers";
 
 let _seq = 0;
 function makeId(prefix = "x"): string {
@@ -73,6 +78,16 @@ interface StoreValue {
   deletePersonDetail: (personId: string, sectionId: string, detailId: string) => void;
   setProfileTheme: (theme: ThemeColor) => void;
   fireCelebration: (variant?: CelebrationVariant) => void;
+  updateList: (listId: string, patch: Partial<Pick<List, "title" | "emoji" | "theme" | "template" | "defaultView">>) => void;
+  deleteList: (listId: string) => void;
+  updatePerson: (personId: string, patch: Partial<Pick<Person, "name" | "emoji" | "theme" | "note">>) => void;
+  deletePerson: (personId: string) => void;
+  updatePersonDetail: (
+    personId: string,
+    fromSectionId: string,
+    detailId: string,
+    patch: { title?: string; note?: string; tags?: string[]; toSectionId?: string }
+  ) => void;
 }
 
 const StoreContext = createContext<StoreValue | null>(null);
@@ -122,6 +137,35 @@ export function ListsProvider({
     void setListViewAction(listId, view).catch((err) =>
       console.error("setListView failed", err)
     );
+  }, []);
+
+  const updateList = useCallback<StoreValue["updateList"]>((listId, patch) => {
+    setLists((prev) =>
+      prev.map((l) => {
+        if (l.id !== listId) return l;
+        const next = { ...l, ...patch };
+        if (patch.template !== undefined) {
+          const meta = deriveListMeta(patch.template);
+          next.noun = meta.noun;
+          next.kind = meta.kind;
+        }
+        return next;
+      })
+    );
+    if (isTempId(listId)) return;
+    void updateListAction(listId, {
+      title: patch.title,
+      emoji: patch.emoji,
+      theme: patch.theme,
+      template: patch.template,
+      defaultView: patch.defaultView,
+    }).catch((err) => console.error("updateList failed", err));
+  }, []);
+
+  const deleteList = useCallback<StoreValue["deleteList"]>((listId) => {
+    setLists((prev) => prev.filter((l) => l.id !== listId));
+    if (isTempId(listId)) return;
+    void deleteListAction(listId).catch((err) => console.error("deleteList failed", err));
   }, []);
 
   /* ── items ─────────────────────────────────────────────────────── */
@@ -248,6 +292,44 @@ export function ListsProvider({
     []
   );
 
+  const updatePerson = useCallback<StoreValue["updatePerson"]>((personId, patch) => {
+    setPeople((prev) => prev.map((p) => (p.id === personId ? { ...p, ...patch } : p)));
+    if (isTempId(personId)) return;
+    void updatePersonAction(personId, {
+      name: patch.name,
+      emoji: patch.emoji,
+      theme: patch.theme,
+      note: patch.note,
+    }).catch((err) => console.error("updatePerson failed", err));
+  }, []);
+
+  const deletePerson = useCallback<StoreValue["deletePerson"]>((personId) => {
+    setPeople((prev) => prev.filter((p) => p.id !== personId));
+    if (isTempId(personId)) return;
+    void deletePersonAction(personId).catch((err) => console.error("deletePerson failed", err));
+  }, []);
+
+  const updatePersonDetail = useCallback<StoreValue["updatePersonDetail"]>(
+    (personId, fromSectionId, detailId, patch) => {
+      const toSectionId = patch.toSectionId ?? fromSectionId;
+      setPeople((prev) =>
+        moveDetailBetweenSections(prev, personId, fromSectionId, toSectionId, detailId, {
+          title: patch.title,
+          note: patch.note,
+          tags: patch.tags,
+        })
+      );
+      if (isTempId(detailId)) return;
+      void updatePersonDetailAction(detailId, {
+        title: patch.title,
+        note: patch.note,
+        tags: patch.tags,
+        sectionId: patch.toSectionId,
+      }).catch((err) => console.error("updatePersonDetail failed", err));
+    },
+    []
+  );
+
   /* ── profile ───────────────────────────────────────────────────── */
 
   const setProfileTheme = useCallback<StoreValue["setProfileTheme"]>((theme) => {
@@ -269,9 +351,14 @@ export function ListsProvider({
       updateItem,
       deleteItem,
       setListView,
+      updateList,
+      deleteList,
       addPerson,
       addPersonDetail,
       deletePersonDetail,
+      updatePerson,
+      deletePerson,
+      updatePersonDetail,
       setProfileTheme,
       fireCelebration,
     }),
@@ -285,9 +372,14 @@ export function ListsProvider({
       updateItem,
       deleteItem,
       setListView,
+      updateList,
+      deleteList,
       addPerson,
       addPersonDetail,
       deletePersonDetail,
+      updatePerson,
+      deletePerson,
+      updatePersonDetail,
       setProfileTheme,
       fireCelebration,
     ]
