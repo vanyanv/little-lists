@@ -32,6 +32,7 @@ import {
   type CreateListInput,
   type CreatePersonInput,
 } from "./actions";
+import { insertDetail, removeDetail, replaceDetail } from "./store-helpers";
 
 let _seq = 0;
 function makeId(prefix = "x"): string {
@@ -349,42 +350,4 @@ function mapDraftPerson(id: string, input: CreatePersonInput): Person {
   };
 }
 
-function mutateSection(
-  people: Person[],
-  personId: string,
-  sectionId: string,
-  fn: (entries: PersonDetailEntry[]) => PersonDetailEntry[]
-): Person[] {
-  return people.map((p) =>
-    p.id === personId
-      ? {
-          ...p,
-          sections: p.sections.map((s) =>
-            s.id === sectionId ? { ...s, entries: fn(s.entries) } : s
-          ),
-        }
-      : p
-  );
-}
 
-function insertDetail(people: Person[], personId: string, sectionId: string, entry: PersonDetailEntry) {
-  return mutateSection(people, personId, sectionId, (entries) => [...entries, entry]);
-}
-
-function replaceDetail(
-  people: Person[],
-  personId: string,
-  sectionId: string,
-  tempId: string,
-  entry: PersonDetailEntry
-) {
-  return mutateSection(people, personId, sectionId, (entries) =>
-    entries.map((e) => (e.id === tempId ? entry : e))
-  );
-}
-
-function removeDetail(people: Person[], personId: string, sectionId: string, detailId: string) {
-  return mutateSection(people, personId, sectionId, (entries) =>
-    entries.filter((e) => e.id !== detailId)
-  );
-}
