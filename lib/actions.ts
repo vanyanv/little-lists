@@ -1,9 +1,9 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
+import { Prisma, type PersonDetail } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserProfile } from "@/lib/server/profile";
-import { ID_TO_DB_SECTION } from "@/lib/people";
+import { DB_SECTION_TO_ID, ID_TO_DB_SECTION } from "@/lib/people";
 import { mapItem, mapList, mapPerson, mapProfile, templateToDb } from "@/lib/server/serialize";
 import type {
   Item,
@@ -50,6 +50,42 @@ export async function setListViewAction(listId: string, view: ViewMode): Promise
     where: { id: listId, userId: clerkUserId },
     data: { defaultViewMode: view },
   });
+}
+
+export interface UpdateListPatch {
+  title?: string;
+  emoji?: string;
+  theme?: ThemeColor;
+  template?: ListTemplate;
+  defaultView?: ViewMode;
+}
+
+export async function updateListAction(listId: string, patch: UpdateListPatch): Promise<List | null> {
+  const { clerkUserId } = await requireUserProfile();
+  const existing = await prisma.list.findFirst({
+    where: { id: listId, userId: clerkUserId },
+    select: { id: true },
+  });
+  if (!existing) return null;
+
+  const row = await prisma.list.update({
+    where: { id: listId },
+    data: {
+      ...(patch.title !== undefined ? { title: patch.title } : {}),
+      ...(patch.emoji !== undefined ? { emoji: patch.emoji } : {}),
+      ...(patch.theme !== undefined ? { themeColor: patch.theme } : {}),
+      ...(patch.template !== undefined ? { templateType: templateToDb(patch.template) } : {}),
+      ...(patch.defaultView !== undefined ? { defaultViewMode: patch.defaultView } : {}),
+    },
+    include: { items: true },
+  });
+  return mapList(row);
+}
+
+export async function deleteListAction(listId: string): Promise<void> {
+  const { clerkUserId } = await requireUserProfile();
+  // ListItem.list is onDelete: Cascade, so items go with it
+  await prisma.list.deleteMany({ where: { id: listId, userId: clerkUserId } });
 }
 
 /* ── items ───────────────────────────────────────────────────────────── */
@@ -207,6 +243,81 @@ export async function createPersonDetailAction(
 export async function deletePersonDetailAction(detailId: string): Promise<void> {
   const { clerkUserId } = await requireUserProfile();
   await prisma.personDetail.deleteMany({ where: { id: detailId, userId: clerkUserId } });
+}
+
+export interface UpdatePersonPatch {
+  name?: string;
+  emoji?: string;
+  theme?: ThemeColor;
+  note?: string;
+}
+
+export async function updatePersonAction(personId: string, patch: UpdatePersonPatch): Promise<Person | null> {
+  const { clerkUserId } = await requireUserProfile();
+  const existing = await prisma.person.findFirst({
+    where: { id: personId, userId: clerkUserId },
+    select: { id: true },
+  });
+  if (!existing) return null;
+
+  const row = await prisma.person.update({
+    where: { id: personId },
+    data: {
+      ...(patch.name !== undefined ? { name: patch.name } : {}),
+      ...(patch.emoji !== undefined ? { emoji: patch.emoji } : {}),
+      ...(patch.theme !== undefined ? { themeColor: patch.theme } : {}),
+      ...(patch.note !== undefined ? { shortNote: patch.note || null } : {}),
+    },
+    include: { details: true },
+  });
+  return mapPerson(row);
+}
+
+export async function deletePersonAction(personId: string): Promise<void> {
+  const { clerkUserId } = await requireUserProfile();
+  // PersonDetail.person is onDelete: Cascade, so details go with it
+  await prisma.person.deleteMany({ where: { id: personId, userId: clerkUserId } });
+}
+
+export interface UpdatePersonDetailPatch {
+  title?: string;
+  note?: string;
+  tags?: string[];
+  /** UI section id to move to (e.g. "dates"); maps to the db enum via ID_TO_DB_SECTION */
+  sectionId?: string;
+}
+
+export async function updatePersonDetailAction(
+  detailId: string,
+  patch: UpdatePersonDetailPatch
+): Promise<{ sectionId: string; entry: PersonDetailEntry } | null> {
+  const { clerkUserId } = await requireUserProfile();
+  const existing = await prisma.personDetail.findFirst({
+    where: { id: detailId, userId: clerkUserId },
+    select: { id: true },
+  });
+  if (!existing) return null;
+
+  let section: PersonDetail["section"] | undefined;
+  if (patch.sectionId !== undefined) {
+    section = ID_TO_DB_SECTION[patch.sectionId];
+    if (!section) throw new Error("updatePersonDetailAction: unknown section");
+  }
+
+  const row = await prisma.personDetail.update({
+    where: { id: detailId },
+    data: {
+      ...(patch.title !== undefined ? { title: patch.title } : {}),
+      ...(patch.note !== undefined ? { note: patch.note || null } : {}),
+      ...(patch.tags !== undefined ? { tags: patch.tags } : {}),
+      ...(section ? { section } : {}),
+    },
+  });
+
+  return {
+    sectionId: DB_SECTION_TO_ID[row.section],
+    entry: { id: row.id, title: row.title, note: row.note ?? undefined, tags: row.tags },
+  };
 }
 
 /* ── profile ─────────────────────────────────────────────────────────── */
