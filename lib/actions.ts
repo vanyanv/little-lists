@@ -79,9 +79,9 @@ export async function createItemAction(listId: string, input: CreateItemInput): 
   if (!list) throw new Error("createItemAction: list not found");
 
   const metadata = {
+    ...(input.meta ?? {}),
     type: input.type,
     ...(input.seed ? { seed: input.seed } : {}),
-    ...(input.meta ?? {}),
   } satisfies Prisma.InputJsonObject;
 
   const row = await prisma.listItem.create({
