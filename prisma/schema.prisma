@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TemplateType {
+  movie
+  book
+  food
+  place
+  gift
+  date
+  people_notes
+  custom
+}
+
+enum ViewMode {
+  grid
+  list
+  cozy
+}
+
+enum Visibility {
+  private
+  unlisted
+  public
+}
+
+enum PersonDetailSection {
+  likes
+  dislikes
+  food
+  movies
+  books
+  gifts
+  date_ideas
+  notes
+}
+
+model Profile {
+  id          String   @id @default(cuid())
+  clerkUserId String   @unique
+  displayName String
+  handle      String?
+  avatarUrl   String?
+  bio         String?
+  themeColor  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lists         List[]
+  items         ListItem[]
+  people        Person[]
+  personDetails PersonDetail[]
+}
+
+model List {
+  id              String       @id @default(cuid())
+  userId          String
+  title           String
+  emoji           String
+  templateType    TemplateType
+  themeColor      String
+  defaultViewMode ViewMode     @default(cozy)
+  visibility      Visibility   @default(private)
+  description     String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  user  Profile    @relation(fields: [userId], references: [clerkUserId], onDelete: Cascade)
+  items ListItem[]
+
+  @@index([userId])
+}
+
+model ListItem {
+  id        String   @id @default(cuid())
+  listId    String
+  userId    String
+  title     String
+  subtitle  String?
+  note      String?
+  status    String?
+  emoji     String?
+  imageUrl  String?
+  tags      String[] @default([])
+  metadata  Json     @default("{}")
+  position  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  list List    @relation(fields: [listId], references: [id], onDelete: Cascade)
+  user Profile @relation(fields: [userId], references: [clerkUserId], onDelete: Cascade)
+
+  @@index([listId])
+  @@index([userId])
+}
+
+model Person {
+  id         String   @id @default(cuid())
+  userId     String
+  name       String
+  emoji      String
+  shortNote  String?
+  themeColor String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user    Profile        @relation(fields: [userId], references: [clerkUserId], onDelete: Cascade)
+  details PersonDetail[]
+
+  @@index([userId])
+}
+
+model PersonDetail {
+  id        String              @id @default(cuid())
+  personId  String
+  userId    String
+  section   PersonDetailSection
+  title     String
+  note      String?
+  tags      String[]            @default([])
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  person Person  @relation(fields: [personId], references: [id], onDelete: Cascade)
+  user   Profile @relation(fields: [userId], references: [clerkUserId], onDelete: Cascade)
+
+  @@index([personId])
+  @@index([userId])
+}
