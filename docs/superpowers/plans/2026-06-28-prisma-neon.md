@@ -14,7 +14,8 @@
 - Keep `prisma`, `@prisma/client`, and `@prisma/adapter-pg` on the **same 7.x version**. `@prisma/adapter-pg` bundles `pg` + `@types/pg`; do **not** install `pg` separately.
 - **Ownership key = Clerk user id everywhere.** Every owned row's `userId` holds the Clerk user id string; `Profile.clerkUserId` is `@unique` and holds the same value; relations reference `clerkUserId`.
 - **Enums (exact members, lowercase/snake as written):** `TemplateType` = `movie, book, food, place, gift, date, people_notes, custom`; `ViewMode` = `grid, list, cozy`; `Visibility` = `private, unlisted, public`; `PersonDetailSection` = `likes, dislikes, food, movies, books, gifts, date_ideas, notes`. `ListItem.status` and all `themeColor` fields stay free-form `String?` — **not** enums.
-- **Env vars (already in `.env.local`, gitignored):** datasource `url = env("DATABASE_URL")` (pooled), `directUrl = env("DATABASE_URL_UNPOOLED")` (direct). Never print env-var *values*; only names.
+- **Prisma 7 config model:** Prisma 7 removed `url`/`directUrl` from the `datasource` block in `schema.prisma` (they now throw `P1012`) and no longer auto-loads `.env`. Connection config moves to a root `prisma.config.ts` (`defineConfig` from `prisma/config`), which loads `.env.local` (via `dotenv`) and sets `datasource.url`. `PrismaConfig.datasource` is only `{ url?, shadowDatabaseUrl? }` — there is no `directUrl` and no top-level `adapter`. The runtime client gets its adapter at construction (Task 2); the CLI/migrate engine connects through `prisma.config.ts`'s `datasource.url`.
+- **Env vars (already in `.env.local`, gitignored):** runtime adapter uses `DATABASE_URL` (pooled); `prisma.config.ts` `datasource.url` uses **`DATABASE_URL_UNPOOLED`** (direct — Neon's PgBouncer pooled endpoint cannot run migrations). Never print env-var *values*; only names.
 - **One UI hook only:** `app/(app)/layout.tsx` upserts the profile. No other UI is wired to the DB; the localStorage store (`lib/store.tsx`, `lib/mock-data.ts`) is untouched and the app behaves exactly as today.
 - **Repo rule (`AGENTS.md`):** this is a modified Next.js build — before writing the async server-component layout (Task 5), consult `node_modules/next/dist/docs/` for async-layout / dynamic-rendering guidance in this build.
 - **No new test framework.** The repo has none (`package.json` scripts are `dev`/`build`/`start`/`lint`). Verification for this DB-foundation work is `prisma validate` / `prisma generate` / `prisma migrate status` + `npx tsc --noEmit` + `npm run build`. Do **not** add jest/vitest (YAGNI) and do **not** write tests that assert nothing.
@@ -28,6 +29,7 @@
 **Files:**
 - Modify: `package.json` (dependencies — via `npm install`)
 - Create: `prisma/schema.prisma`
+- Create: `prisma.config.ts` (Prisma 7 config — connection + env loading)
 
 **Interfaces:**
 - Consumes: nothing (first task).
@@ -57,9 +59,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DATABASE_URL_UNPOOLED")
+  provider = "postgresql"
 }
 
 enum TemplateType {
@@ -190,17 +190,42 @@ model PersonDetail {
 }
 ```
 
-- [ ] **Step 3: Validate the schema**
+- [ ] **Step 3: Create `prisma.config.ts`**
+
+Prisma 7 requires a root `prisma.config.ts` for connection + env loading. Create it with exactly this content (note: `datasource.url` uses the **unpooled** URL — the CLI/migrate connection):
+
+```ts
+import { defineConfig, env } from "prisma/config";
+import { config as dotenvConfig } from "dotenv";
+import { resolve } from "node:path";
+
+// Prisma 7 no longer auto-loads .env files. Load .env.local so Prisma CLI
+// commands (validate, migrate, studio) can resolve the connection URL.
+dotenvConfig({ path: resolve(process.cwd(), ".env.local") });
+
+export default defineConfig({
+  datasource: {
+    // Migrations/introspection need a DIRECT connection — Neon's pooled
+    // (PgBouncer) endpoint can't run them. The runtime app uses the pooled
+    // DATABASE_URL via the driver adapter (Task 2); this is CLI-only.
+    url: env("DATABASE_URL_UNPOOLED"),
+  },
+});
+```
+
+`dotenv` is already present (transitive dep of the Prisma toolchain); if `npx prisma validate` reports it missing, `npm install -D dotenv`.
+
+- [ ] **Step 4: Validate the schema**
 
 Run: `npx prisma validate`
-Expected: `The schema at prisma/schema.prisma is valid 🚀`
+Expected: `Loaded Prisma config from prisma.config.ts.` then `The schema at prisma/schema.prisma is valid 🚀`
 
-(If it reports the relation-reference error "referenced field clerkUserId is not unique", confirm `Profile.clerkUserId` has `@unique`. If it cannot read env vars, confirm `.env.local` contains `DATABASE_URL` and `DATABASE_URL_UNPOOLED` — names only, never echo values.)
+(If it reports the relation-reference error "referenced field clerkUserId is not unique", confirm `Profile.clerkUserId` has `@unique`. If it cannot read the connection URL, confirm `.env.local` contains `DATABASE_URL_UNPOOLED` — names only, never echo values.)
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add package.json package-lock.json prisma/schema.prisma
+git add package.json package-lock.json prisma/schema.prisma prisma.config.ts
 git commit -m "Add Prisma 7 schema and Neon datasource for Little Lists"
 ```
 
@@ -275,10 +300,10 @@ git commit -m "Add Prisma client singleton with required pg driver adapter"
 - Create: `prisma/migrations/migration_lock.toml` (generated)
 
 **Interfaces:**
-- Consumes: validated schema (Task 1), `DATABASE_URL` + `DATABASE_URL_UNPOOLED` in `.env.local`.
+- Consumes: validated schema (Task 1), `prisma.config.ts` pointing `datasource.url` at `DATABASE_URL_UNPOOLED`.
 - Produces: the five tables + four enum types in Neon, and committed migration history.
 
-**Context:** Neon is reachable via the URLs already in `.env.local`. `migrate dev` uses `directUrl` (`DATABASE_URL_UNPOOLED`) and needs a shadow database; on Neon the connection-string role can create the shadow DB, so the primary command normally works. The Step-2 contingency handles the one known failure mode precisely.
+**Context:** The Prisma CLI connects through `prisma.config.ts` (Task 1), whose `datasource.url` is the direct/unpooled Neon connection — correct for migrations. `migrate dev` also needs a shadow database; on Neon the connection-string role can usually create it, so the primary command normally works. The Step-2 contingency handles the one known failure mode (P3014) precisely.
 
 - [ ] **Step 1: Create and apply the migration**
 

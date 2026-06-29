@@ -89,7 +89,11 @@ adapter versions to match).
 
 No WebSocket Neon adapter, no separate `pg` install.
 
-### 2. Connection — `prisma/schema.prisma` datasource + generator
+### 2. Connection — `prisma/schema.prisma` + `prisma.config.ts`
+
+Prisma 7 removed `url`/`directUrl` from the `datasource` block (they throw
+`P1012`) and no longer auto-loads `.env`. The schema datasource keeps only the
+provider; connection + env loading move to a root `prisma.config.ts`:
 
 ```prisma
 generator client {
@@ -97,15 +101,29 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")          // Neon pooled (…-pooler…, sslmode=require)
-  directUrl = env("DATABASE_URL_UNPOOLED") // Neon direct/unpooled — used for migrations
+  provider = "postgresql"
 }
 ```
 
-Both env vars already exist in `.env.local`. The implementer confirms the
-installed Prisma version's standard generator against
-`node_modules/prisma` docs before relying on `prisma-client-js`.
+```ts
+// prisma.config.ts
+import { defineConfig, env } from "prisma/config";
+import { config as dotenvConfig } from "dotenv";
+import { resolve } from "node:path";
+
+dotenvConfig({ path: resolve(process.cwd(), ".env.local") });
+
+export default defineConfig({
+  datasource: {
+    // CLI/migrate connection — DIRECT (unpooled); the runtime client uses the
+    // pooled DATABASE_URL via the adapter (§4). PrismaConfig.datasource is only
+    // { url, shadowDatabaseUrl } in Prisma 7 — no directUrl.
+    url: env("DATABASE_URL_UNPOOLED"),
+  },
+});
+```
+
+Both env vars already exist in `.env.local`.
 
 ### 3. Models
 
