@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { useUser } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import { themeClass } from "@/lib/visual";
 import { softSpring, tap } from "@/lib/motion";
@@ -10,6 +11,7 @@ import { Sticker } from "./sticker";
 
 export function ProfileHeader() {
   const { profile, setProfileTheme, fireCelebration } = useStore();
+  const { user } = useUser();
   const [shared, setShared] = useState(false);
 
   const share = () => {
@@ -37,7 +39,7 @@ export function ProfileHeader() {
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h1 className="font-display text-[1.8rem] font-semibold leading-none text-[var(--t-ink)]">
-              {profile.name}
+              {user?.firstName ?? profile.name}
             </h1>
           </div>
           <p className="mt-1 text-[0.9rem] font-semibold text-brown">{profile.handle}</p>

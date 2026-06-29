@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
+import { SignOutButton } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import { ITEM_TYPE_META } from "@/lib/types";
 import { staggerContainer, riseItem } from "@/lib/motion";
@@ -86,6 +87,17 @@ export default function ProfileScreen() {
           )}
         </motion.div>
       </section>
+
+      <div className="mt-10 mb-4 flex justify-center">
+        <SignOutButton>
+          <button
+            type="button"
+            className="rounded-pill bg-paper px-6 py-3 text-[0.92rem] font-bold text-brown ring-1 ring-line shadow-soft transition-colors hover:bg-cream-deep"
+          >
+            Sign out of your little world
+          </button>
+        </SignOutButton>
+      </div>
     </div>
   );
 }

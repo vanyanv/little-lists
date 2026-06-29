@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
+import { useUser } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import type { ItemType } from "@/lib/types";
 import { staggerContainer, riseItem } from "@/lib/motion";
@@ -18,6 +19,7 @@ const CATEGORIES: { id: string; label: string; kinds: ItemType[] | null }[] = [
 
 export default function HomeScreen() {
   const { lists, profile } = useStore();
+  const { user } = useUser();
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState("all");
 
@@ -37,7 +39,7 @@ export default function HomeScreen() {
     <div className="px-4 pt-[calc(env(safe-area-inset-top)+1.25rem)]">
       {/* greeting */}
       <header className="px-1">
-        <p className="text-[0.92rem] font-bold text-brown">Hi {profile.name} ✨</p>
+        <p className="text-[0.92rem] font-bold text-brown">Hi {user?.firstName ?? profile.name} ✨</p>
         <h1 className="mt-1 font-display text-[2.3rem] font-semibold leading-none text-ink">
           Your little worlds
         </h1>
