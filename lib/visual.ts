@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import type { List, ThemeColor } from "./types";
+import { TEMPLATE_META } from "./types";
 
 /** tiny stable string hash → positive int */
 export function hashString(str: string): number {
@@ -36,9 +37,10 @@ export function initialOf(title: string): string {
   return c ? c.toUpperCase() : "?";
 }
 
-/** live, truthful subtitle: "6 little films saved" / cozy empty copy */
+/** live, truthful subtitle: "1 little film saved" / "6 little films saved" / cozy empty copy */
 export function listCountLabel(list: List): string {
   const n = list.items.length;
   if (n === 0) return "waiting for its first little thing";
+  if (n === 1) return `1 ${TEMPLATE_META[list.template].nounSingular}`;
   return `${n} ${list.noun}`;
 }

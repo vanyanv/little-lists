@@ -71,7 +71,7 @@ function EditPersonFlow({ personId, onClose }: { personId: string; onClose: () =
           disabled={!canSave}
           className={`w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40 ${focusRingOnDark}`}
         >
-          Save changes
+          Save it
         </motion.button>
       </div>
     </div>

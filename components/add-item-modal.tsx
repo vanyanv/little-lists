@@ -289,7 +289,12 @@ function AddItemFlow({
                         </motion.button>
                       );
                     })}
-                    {results.length === 0 && (
+                    {results.length === 0 && query.trim().length === 0 && (
+                      <p className="px-1 py-6 text-center text-[0.9rem] text-brown">
+                        Start typing to find it ✨
+                      </p>
+                    )}
+                    {results.length === 0 && query.trim().length > 0 && (
                       <p className="px-1 py-6 text-center text-[0.9rem] text-brown">
                         No match, but you can still tuck it in. Try Custom ✨
                       </p>

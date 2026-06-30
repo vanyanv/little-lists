@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import {
   TEMPLATE_META,
-  THEME_COLORS,
   type ListTemplate,
   type ThemeColor,
   type ViewMode,
@@ -13,6 +12,8 @@ import { themeClass } from "@/lib/visual";
 import { softSpring, tap } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
 import { ViewToggle } from "./view-toggle";
+import { EmojiPicker } from "./emoji-picker";
+import { ThemeColorPicker } from "./theme-chip";
 
 const TEMPLATE_ORDER: ListTemplate[] = [
   "custom", "movie", "book", "music", "food", "place", "gift", "date", "people",
@@ -155,22 +156,7 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
       {/* emoji */}
       <div className="mt-5">
         <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">pick a vibe</p>
-        <div className="grid grid-cols-9 gap-1.5">
-          {EMOJI_CHOICES.map((e) => (
-            <button
-              key={e}
-              type="button"
-              aria-label={e}
-              aria-pressed={emoji === e}
-              onClick={() => onChange({ emoji: e })}
-              className={`grid aspect-square place-items-center rounded-lg text-xl transition ${focusRing} ${
-                emoji === e ? "bg-cream-deep ring-2 ring-ink/20" : "bg-cream-deep/40"
-              }`}
-            >
-              {e}
-            </button>
-          ))}
-        </div>
+        <EmojiPicker choices={EMOJI_CHOICES} value={emoji} onChange={(e) => onChange({ emoji: e })} />
       </div>
 
       {/* theme */}
@@ -179,40 +165,7 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
           <p className="text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">choose a color</p>
           <span className="text-[0.72rem] font-bold lowercase tracking-tight text-[var(--t-ink)]">{theme}</span>
         </div>
-        <div className="flex justify-between gap-2">
-          {THEME_COLORS.map((c) => {
-            const active = theme === c;
-            return (
-              <motion.button
-                key={c}
-                type="button"
-                whileTap={tap}
-                onClick={() => onChange({ theme: c })}
-                aria-label={`${c} theme`}
-                aria-pressed={active}
-                className={`${themeClass(c)} ${focusRing} relative grid h-11 w-11 place-items-center rounded-full transition`}
-                style={{
-                  background: "radial-gradient(125% 125% at 32% 24%, var(--t-wash), var(--t) 72%)",
-                  boxShadow: active
-                    ? "inset 0 0 0 1px var(--t-edge), 0 0 0 2px var(--color-paper), 0 0 0 4.5px var(--color-ink)"
-                    : "inset 0 0 0 1px var(--t-edge), var(--shadow-soft)",
-                }}
-              >
-                {active && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={softSpring}
-                    className="grid h-5 w-5 place-items-center rounded-full bg-ink/85 text-[0.58rem] font-bold text-cream"
-                    aria-hidden
-                  >
-                    ✓
-                  </motion.span>
-                )}
-              </motion.button>
-            );
-          })}
-        </div>
+        <ThemeColorPicker value={theme} onChange={(c) => onChange({ theme: c })} />
       </div>
 
       {/* default view */}

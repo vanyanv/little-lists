@@ -224,6 +224,8 @@ export interface TemplateMeta {
   statuses: StatusId[];
   /** default cute noun for the count label */
   noun: string;
+  /** singular form of `noun` for count === 1 */
+  nounSingular: string;
   /** corner scrapbook sticker */
   sticker: StickerName;
   /** movie/book search a catalog; everything else picks an emoji */
@@ -246,6 +248,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     defaultView: "grid",
     statuses: ["want-to-watch", "watched", "favorite", "not-for-me"],
     noun: "little films saved",
+    nounSingular: "little film saved",
     sticker: "film",
     searchable: true,
     statusHeading: "how do you feel about it?",
@@ -259,6 +262,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     defaultView: "grid",
     statuses: ["want-to-read", "reading", "finished", "dnf", "favorite"],
     noun: "cozy reads waiting",
+    nounSingular: "cozy read waiting",
     sticker: "book",
     searchable: true,
     statusHeading: "where are you with it?",
@@ -272,6 +276,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     defaultView: "grid",
     statuses: ["want-to-listen", "listened", "on-repeat", "favorite", "not-for-me"],
     noun: "tunes on repeat",
+    nounSingular: "tune on repeat",
     sticker: "sparkle",
     searchable: true,
     statusHeading: "how's it sound?",
@@ -285,6 +290,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     defaultView: "cozy",
     statuses: ["love", "hate", "maybe", "never-again", "need-to-try"],
     noun: "little tastes noted",
+    nounSingular: "little taste noted",
     sticker: "leaf",
     searchable: false,
     statusHeading: "how do you feel about it?",
@@ -298,6 +304,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     defaultView: "cozy",
     statuses: ["want-to-go", "been-there", "favorite", "not-again"],
     noun: "spots to wander",
+    nounSingular: "spot to wander",
     sticker: "star",
     searchable: false,
     statusHeading: "have you been?",
@@ -312,6 +319,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     defaultView: "cozy",
     statuses: ["idea", "bought", "maybe", "favorite"],
     noun: "thoughtful little ideas",
+    nounSingular: "thoughtful little idea",
     sticker: "heart",
     searchable: false,
     statusHeading: "where's it at?",
@@ -326,6 +334,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     defaultView: "cozy",
     statuses: ["want-to-do", "planned", "done", "favorite"],
     noun: "sweet little plans",
+    nounSingular: "sweet little plan",
     sticker: "flower",
     searchable: false,
     statusHeading: "what's the plan?",
@@ -340,6 +349,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     defaultView: "cozy",
     statuses: ["cat-likes", "cat-dislikes", "cat-food", "cat-movies", "cat-gifts", "cat-dates", "cat-notes"],
     noun: "little details remembered",
+    nounSingular: "little detail remembered",
     sticker: "flower",
     searchable: false,
     statusHeading: "which little corner?",
@@ -353,6 +363,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     defaultView: "cozy",
     statuses: ["love", "maybe", "favorite", "need-to-try"],
     noun: "little things",
+    nounSingular: "little thing",
     sticker: "sparkle",
     searchable: false,
     statusHeading: "how do you feel about it?",

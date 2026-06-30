@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import type { Item } from "@/lib/types";
 import { ITEM_TYPE_META } from "@/lib/types";
 import { PlaceholderPoster } from "./placeholder-poster";
@@ -41,15 +42,16 @@ export function Cover({
 
   return (
     <div className={`relative overflow-hidden ${ASPECT_CLASS[shape]} ${rounded} ${className}`}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={item.imageUrl}
         alt={item.title}
+        fill
+        sizes="(max-width: 640px) 50vw, 25vw"
+        className="object-cover"
         loading="lazy"
         onError={() => setErrored(true)}
-        className="h-full w-full object-cover"
       />
-      <span className={`pointer-events-none absolute inset-0 ${rounded} ring-1 ring-inset ring-black/10`} />
+      <span className={`pointer-events-none absolute inset-0 ${rounded} ring-1 ring-inset ring-line/40`} />
       {badge && (
         <span className="absolute left-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-paper/85 text-[0.95rem] shadow-soft backdrop-blur-[1px]">
           {badge}
