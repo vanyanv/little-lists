@@ -14,7 +14,7 @@ export function NoteCard({ item }: { item: Item }) {
             seed={item.seed || item.title}
             title={item.title}
             rounded="rounded-lg"
-            className="shadow-soft ring-1 ring-black/5"
+            className="shadow-soft ring-1 ring-line/50"
           />
         </div>
       ) : (

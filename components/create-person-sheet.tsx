@@ -69,15 +69,22 @@ function CreatePersonFlow({ onClose }: { onClose: () => void }) {
 
       <PersonFormFields value={value} onChange={patch} />
 
-      <motion.button
-        type="button"
-        whileTap={tap}
-        onClick={save}
-        disabled={!canSave}
-        className={`mt-6 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40 ${focusRingOnDark}`}
-      >
-        {saving ? "Making it…" : "Start their little world"}
-      </motion.button>
+      {/* sticky footer so the primary action is always reachable without scrolling */}
+      <div className="sticky bottom-0 z-10 -mx-5 mt-3 bg-paper px-5 pb-1 pt-3">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 -top-5 h-5 bg-gradient-to-t from-paper to-transparent"
+        />
+        <motion.button
+          type="button"
+          whileTap={tap}
+          onClick={save}
+          disabled={!canSave}
+          className={`w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40 ${focusRingOnDark}`}
+        >
+          {saving ? "Making it…" : "Start their little world"}
+        </motion.button>
+      </div>
     </div>
   );
 }

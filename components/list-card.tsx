@@ -84,7 +84,7 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
         whileHover={{ ...hover, rotate: 0 }}
         whileTap={tap}
         transition={softSpring}
-        className="relative overflow-hidden rounded-2xl shadow-soft ring-1 ring-black/[0.03]"
+        className="relative overflow-hidden rounded-2xl shadow-soft ring-1 ring-line/30"
         style={{ background: "var(--t-bg)" }}
       >
         {menu}
@@ -115,7 +115,7 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
             <div className="flex items-start justify-between gap-2">
               <EmojiTile emoji={list.emoji} />
               <div className="pt-0.5">
-                <CardStack items={list.items} kind={list.kind} size="sm" />
+                <CardStack items={list.items.slice(0, 3)} kind={list.kind} size="sm" />
               </div>
             </div>
             <h2 className="mt-3 font-display text-[1.12rem] font-semibold leading-tight text-[var(--t-ink)]">

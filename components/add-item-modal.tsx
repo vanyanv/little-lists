@@ -268,7 +268,7 @@ function AddItemFlow({
                             <Cover
                               item={{ id: r.sourceId, type, title: r.title, subtitle: r.subtitle, seed: r.title, imageUrl: r.imageUrl }}
                               rounded="rounded-md"
-                              className="ring-1 ring-black/5"
+                              className="ring-1 ring-ink/8"
                             />
                           </div>
                           <div className="min-w-0 flex-1">
@@ -411,7 +411,7 @@ function DetailsStep(props: {
           <div className="w-20 shrink-0">
             <Cover
               item={{ id: "preview", type, title, subtitle, seed, imageUrl }}
-              className="shadow-soft ring-1 ring-black/5"
+              className="shadow-soft ring-1 ring-ink/8"
             />
           </div>
         ) : (

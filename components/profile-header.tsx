@@ -29,7 +29,7 @@ export function ProfileHeader() {
   return (
     <motion.div
       layout
-      className={`relative overflow-hidden rounded-3xl p-6 shadow-soft ring-1 ring-black/[0.03] ${themeClass(profile.theme)}`}
+      className={`relative overflow-hidden rounded-[var(--radius-2xl)] p-6 shadow-soft ring-1 ring-ink/[0.03] ${themeClass(profile.theme)}`}
       style={{ background: "var(--t-bg)" }}
       transition={softSpring}
     >
@@ -38,7 +38,7 @@ export function ProfileHeader() {
       <div className="flex items-center gap-4">
         <motion.span
           layout
-          className="grid h-20 w-20 shrink-0 place-items-center rounded-3xl bg-paper text-4xl shadow-soft"
+          className="grid h-20 w-20 shrink-0 place-items-center rounded-[var(--radius-2xl)] bg-paper text-4xl shadow-soft"
         >
           {profile.avatarEmoji}
         </motion.span>

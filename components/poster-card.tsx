@@ -9,7 +9,7 @@ export function PosterCard({ item }: { item: Item }) {
       <Cover
         item={item}
         badge={item.status === "favorite" ? "💗" : undefined}
-        className="shadow-soft ring-1 ring-black/5"
+        className="shadow-soft ring-1 ring-line/50"
       />
       <div className="mt-2.5 px-0.5">
         <div className="flex items-start gap-1">

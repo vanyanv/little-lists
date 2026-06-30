@@ -55,7 +55,7 @@ export function ThemeChip({ theme, selected, onSelect, size = 34 }: ThemeChipPro
         />
       )}
       <span
-        className="rounded-full shadow-soft ring-1 ring-black/5"
+        className="rounded-full shadow-soft ring-1 ring-line"
         style={{ width: size, height: size, background: SWATCH[theme] }}
       />
     </motion.button>

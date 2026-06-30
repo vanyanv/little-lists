@@ -22,7 +22,7 @@ export function SparkleBurst() {
           key={i}
           className="absolute text-lg"
           initial={{ opacity: 0, scale: 0.4, x: 0, y: 0 }}
-          animate={{ opacity: [0, 1, 0], scale: [0.4, 1.05, 0.7], x: b.x, y: b.y }}
+          animate={{ opacity: [0, 1, 0], scale: [0.4, 1, 0.85], x: b.x, y: b.y }}
           transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1], delay: b.d }}
         >
           {b.emoji}

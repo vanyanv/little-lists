@@ -54,9 +54,9 @@ export function PlaceholderPoster({
         </span>
       </span>
       {/* grounding shadow at the foot, like a poster title block */}
-      <span className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/20 via-black/5 to-transparent" />
+      <span className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-[oklch(0.3_0.03_60/0.2)] via-[oklch(0.3_0.03_60/0.05)] to-transparent" />
       {/* poster frame / matte */}
-      <span className={`pointer-events-none absolute inset-0 ${rounded} ring-1 ring-inset ring-white/15`} />
+      <span className={`pointer-events-none absolute inset-0 ${rounded} ring-1 ring-inset ring-[oklch(0.99_0.006_78/0.15)]`} />
       {badge && (
         <span className="absolute left-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-paper/85 text-[0.95rem] shadow-soft backdrop-blur-[1px]">
           {badge}

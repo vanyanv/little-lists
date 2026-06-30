@@ -14,7 +14,7 @@ export function CompactRow({ item }: { item: Item }) {
             seed={item.seed || item.title}
             title={item.title}
             rounded="rounded-md"
-            className="shadow-soft ring-1 ring-black/5"
+            className="shadow-soft ring-1 ring-line/50"
           />
         </div>
       ) : (
@@ -35,7 +35,7 @@ export function CompactRow({ item }: { item: Item }) {
             <span
               role="img"
               className="shrink-0 text-[0.74rem] leading-none"
-              style={{ color: "oklch(0.72 0.13 75)" }}
+              style={{ color: "var(--color-rating)" }}
               aria-label={`${item.rating} stars`}
             >
               {"★".repeat(item.rating)}
@@ -54,7 +54,7 @@ export function CompactRow({ item }: { item: Item }) {
           )}
         </div>
         {item.subtitle && (
-          <p className="mt-0.5 truncate text-[0.8rem] font-medium text-brown">{item.subtitle}</p>
+          <p className="mt-0.5 truncate text-[0.82rem] font-semibold text-brown-soft">{item.subtitle}</p>
         )}
       </div>
 

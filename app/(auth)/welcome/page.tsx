@@ -12,7 +12,7 @@ export default function WelcomePage() {
       initial={reduce ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-[32px] bg-paper px-7 py-10 text-center shadow-lift ring-1 ring-line/60"
+      className="rounded-[var(--radius-2xl)] bg-paper px-7 py-10 text-center shadow-lift ring-1 ring-line/60"
     >
       <span className="mx-auto mb-5 grid h-20 w-20 place-items-center rounded-3xl bg-cream-deep text-5xl shadow-soft">
         🌸

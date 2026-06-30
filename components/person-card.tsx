@@ -22,7 +22,7 @@ export function PersonCard({ person }: { person: Person }) {
         whileHover={hover}
         whileTap={tap}
         transition={softSpring}
-        className="relative rounded-2xl p-4 shadow-soft ring-1 ring-black/[0.03]"
+        className="relative rounded-2xl p-4 shadow-soft ring-1 ring-line/30"
         style={{ background: "var(--t-bg)" }}
       >
         <div className="absolute right-2.5 top-2.5 z-20">

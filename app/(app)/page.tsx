@@ -98,9 +98,11 @@ export default function HomeScreen() {
 
       {/* cards */}
       {filtered.length === 0 ? (
-        <p className="px-1 py-16 text-center text-[0.98rem] text-brown">
-          No little worlds here yet. Try another nook ✨
-        </p>
+        <EmptyState
+          sticker="sparkle"
+          title="Nothing in this little corner yet"
+          hint="Peek at another filter, or start a new little world."
+        />
       ) : (
         <motion.div variants={staggerContainer} initial={reduce ? false : "hidden"} animate="show" className="mt-4 flex flex-col gap-3">
           {hero && (

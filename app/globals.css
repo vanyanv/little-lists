@@ -16,6 +16,9 @@
   --color-brown-soft: oklch(0.68 0.03 55);
   --color-line: oklch(0.9 0.012 70);
 
+  /* warm amber for star ratings */
+  --color-rating: oklch(0.72 0.13 75);
+
   /* list theme base hues (chips, dots, icon tiles) */
   --color-blush: oklch(0.86 0.052 18);
   --color-butter: oklch(0.9 0.075 95);

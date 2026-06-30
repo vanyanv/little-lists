@@ -26,7 +26,7 @@ export function EmptyState({ sticker = "sparkle", title, hint, action }: EmptySt
         {/* soft halo */}
         <span
           className="absolute inset-0 rounded-full blur-md opacity-70"
-          style={{ background: "var(--t-bg, oklch(0.955 0.018 73))" }}
+          style={{ background: "var(--t-bg, var(--color-cream-deep))" }}
         />
         {/* the floating sticker */}
         <motion.div

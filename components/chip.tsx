@@ -23,7 +23,7 @@ export function Chip({
   className = "",
 }: ChipProps) {
   const base =
-    "inline-flex items-center gap-1.5 rounded-pill whitespace-nowrap font-semibold leading-none select-none";
+    "inline-flex items-center gap-1.5 rounded-pill whitespace-nowrap font-semibold leading-none select-none transition-colors";
   // filter chips are tap targets, so give them a thumb-friendly ~44px height
   const size =
     variant === "filter"
@@ -34,9 +34,9 @@ export function Chip({
   if (variant === "filter") {
     look = active
       ? "bg-ink text-cream shadow-soft"
-      : "bg-paper text-brown ring-1 ring-line/70";
+      : `bg-paper text-brown ring-1 ring-line/70${onClick ? " hover:bg-cream-deep" : ""}`;
   } else if (variant === "tag") {
-    look = "bg-paper text-ink-soft ring-1 ring-line";
+    look = `bg-paper text-ink-soft ring-1 ring-line${onClick ? " hover:bg-cream-deep" : ""}`;
   } else {
     // soft — uses the surrounding theme vars
     look = "text-[var(--t-ink)]";

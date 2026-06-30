@@ -49,7 +49,7 @@ export function BottomNav() {
 
   return (
     <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center">
-      <div className="pointer-events-auto mx-3 mb-3 flex w-full max-w-[420px] items-stretch justify-around rounded-2xl border border-line/70 bg-paper/85 px-2 py-1.5 shadow-lift backdrop-blur-md">
+      <div className="pointer-events-auto mx-3 mb-[max(0.75rem,env(safe-area-inset-bottom))] flex w-full max-w-[420px] items-stretch justify-around rounded-2xl border border-line/70 bg-paper/85 px-2 py-1.5 shadow-lift backdrop-blur-md">
         {TABS.map(({ href, label, Icon, match }) => {
           const active = match(pathname);
           return (
