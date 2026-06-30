@@ -1,10 +1,10 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
 import type { PersonSection } from "@/lib/types";
 import { gentleSpring, softSpring } from "@/lib/motion";
-import { focusRing, focusRingInset } from "@/lib/a11y";
+import { focusRingInset } from "@/lib/a11y";
 
 /** A warm, bouncy accordion card for one remembered facet of a person. */
 export function PersonDetailSection({
@@ -17,12 +17,15 @@ export function PersonDetailSection({
   onEdit?: (detailId: string) => void;
 }) {
   const [open, setOpen] = useState(true);
+  const reduce = useReducedMotion();
+  const spring = reduce ? { duration: 0 } : softSpring;
+  const bodySpring = reduce ? { duration: 0 } : gentleSpring;
 
   return (
     <motion.div
       layout
-      transition={softSpring}
-      className="overflow-hidden rounded-2xl bg-paper shadow-soft ring-1 ring-line/60"
+      transition={spring}
+      className="overflow-hidden rounded-2xl bg-paper shadow-soft ring-1 ring-line/30"
     >
       <button
         type="button"
@@ -35,7 +38,7 @@ export function PersonDetailSection({
         </span>
         <span className="flex-1 font-display text-[1.06rem] font-semibold text-ink">{section.label}</span>
         <span className="text-[0.78rem] font-bold text-brown-soft">{section.entries.length}</span>
-        <motion.span animate={{ rotate: open ? 0 : -90 }} transition={gentleSpring} className="text-brown-soft">
+        <motion.span animate={{ rotate: open ? 0 : -90 }} transition={bodySpring} className="text-brown-soft">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -46,10 +49,10 @@ export function PersonDetailSection({
         {open && (
           <motion.div
             key="body"
-            initial={{ height: 0, opacity: 0 }}
+            initial={reduce ? false : { height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={gentleSpring}
+            exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={bodySpring}
             className="overflow-hidden"
           >
             <div className="px-4 pb-4">

@@ -145,7 +145,7 @@ export default function ListDetailScreen() {
               <button
                 type="button"
                 onClick={() => openItemSheet(list.id)}
-                className={`rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-soft ${focusRingOnDark}`}
+                className={`rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-lift ${focusRingOnDark}`}
               >
                 Add the first little thing
               </button>
@@ -160,7 +160,7 @@ export default function ListDetailScreen() {
               <button
                 type="button"
                 onClick={() => setFilter("all")}
-                className={`rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-soft ${focusRingOnDark}`}
+                className={`rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-lift ${focusRingOnDark}`}
               >
                 Show everything
               </button>

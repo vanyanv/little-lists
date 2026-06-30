@@ -4,7 +4,7 @@ import { SoftDotLoader } from "@/components/soft-dot-loader";
 export default function SignUpPage() {
   return (
     <div className="text-center">
-      <h1 className="font-display text-[2rem] font-semibold leading-tight text-ink">
+      <h1 className="font-display text-[clamp(1.6rem,7vw,2rem)] font-semibold leading-tight text-ink">
         Let&apos;s make your first little world
       </h1>
       <p className="mt-2 text-[0.98rem] text-brown">Your tiny archive starts here.</p>

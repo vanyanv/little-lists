@@ -1,9 +1,10 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { CSSProperties, ReactNode } from "react";
 import { useState } from "react";
 import { softSpring, tap } from "@/lib/motion";
+import { focusRingInset } from "@/lib/a11y";
 
 interface ExpandableCardProps {
   summary: ReactNode;
@@ -26,7 +27,9 @@ export function ExpandableCard({
   staticSummary = false,
 }: ExpandableCardProps) {
   const [open, setOpen] = useState(false);
+  const reduce = useReducedMotion();
   const canExpand = Boolean(detail);
+  const spring = reduce ? { duration: 0 } : softSpring;
 
   const handle = () => {
     if (canExpand) setOpen((o) => !o);
@@ -34,7 +37,7 @@ export function ExpandableCard({
   };
 
   return (
-    <motion.div layout transition={softSpring} className={className} style={style}>
+    <motion.div layout transition={spring} className={className} style={style}>
       {staticSummary ? (
         summary
       ) : (
@@ -44,7 +47,7 @@ export function ExpandableCard({
           onClick={handle}
           whileTap={tap}
           aria-expanded={canExpand ? open : undefined}
-          className="block w-full text-left"
+          className={`block w-full rounded-2xl text-left ${focusRingInset}`}
         >
           {summary}
         </motion.button>
@@ -53,10 +56,10 @@ export function ExpandableCard({
         {open && detail && (
           <motion.div
             key="detail"
-            initial={{ height: 0, opacity: 0 }}
+            initial={reduce ? false : { height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={softSpring}
+            exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={spring}
             className="overflow-hidden"
           >
             {detail}

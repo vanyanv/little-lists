@@ -11,7 +11,7 @@ interface EmojiPickerProps {
 /** A grid of tappable emoji buttons — shared across list and person form fields. */
 export function EmojiPicker({ choices, value, onChange }: EmojiPickerProps) {
   return (
-    <div className="grid grid-cols-9 gap-1.5">
+    <div className="grid grid-cols-8 gap-1.5">
       {choices.map((e) => (
         <button
           key={e}

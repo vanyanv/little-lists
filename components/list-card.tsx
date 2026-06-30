@@ -32,7 +32,7 @@ function ListMeta({ list, size = "normal" }: { list: List; size?: "hero" | "norm
   return (
     <div className={`flex items-center gap-1.5 ${size === "hero" ? "mt-2" : "mt-1.5"}`}>
       <span
-        className="rounded-pill px-2 py-0.5 text-[0.68rem] font-bold text-[var(--t-ink)]"
+        className="rounded-pill px-2.5 py-1 text-[0.7rem] font-bold text-[var(--t-ink)]"
         style={{ background: "var(--t-wash)" }}
       >
         {meta.label}

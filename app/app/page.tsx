@@ -102,6 +102,20 @@ export default function HomeScreen() {
           sticker="sparkle"
           title="Nothing in this little corner yet"
           hint="Peek at another filter, or start a new little world."
+          action={
+            (query || cat !== "all") && (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setCat("all");
+                }}
+                className={`rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-lift ${focusRingOnDark}`}
+              >
+                Show everything
+              </button>
+            )
+          }
         />
       ) : (
         <motion.div variants={staggerContainer} initial={reduce ? false : "hidden"} animate="show" className="mt-4 flex flex-col gap-3">
