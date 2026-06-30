@@ -82,7 +82,7 @@ export default function ListDetailScreen() {
               onConfirm: () => {
                 deleteList(list.id);
                 showToast("Removed from your little world");
-                router.replace("/");
+                router.replace("/app");
               },
             }),
         },
@@ -101,7 +101,7 @@ export default function ListDetailScreen() {
       <div className="px-6 pt-32 text-center">
         <p className="font-display text-[1.4rem] font-semibold text-ink">We can&apos;t find that little world</p>
         <p className="mt-2 text-brown">It may have wandered off.</p>
-        <Link href="/" className={`mt-6 inline-block rounded-pill bg-ink px-5 py-3 text-sm font-bold text-cream ${focusRingOnDark}`}>
+        <Link href="/app" className={`mt-6 inline-block rounded-pill bg-ink px-5 py-3 text-sm font-bold text-cream ${focusRingOnDark}`}>
           Back to your lists
         </Link>
       </div>

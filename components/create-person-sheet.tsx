@@ -53,7 +53,7 @@ function CreatePersonFlow({ onClose }: { onClose: () => void }) {
       });
       onClose();
       showToast("A new little world of details ✨");
-      router.push(`/person/${created.id}`);
+      router.push(`/app/person/${created.id}`);
     } catch {
       setSaving(false);
       showToast("That didn't save — let's try again 🌿");

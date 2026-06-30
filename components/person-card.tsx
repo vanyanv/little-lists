@@ -16,7 +16,7 @@ export function PersonCard({ person }: { person: Person }) {
   const { openEditPerson, openConfirm, showToast } = useUi();
 
   return (
-    <Link href={`/person/${person.id}`} className={`block rounded-2xl ${themeClass(person.theme)} ${focusRing}`}>
+    <Link href={`/app/person/${person.id}`} className={`block rounded-2xl ${themeClass(person.theme)} ${focusRing}`}>
       <motion.div
         layout
         whileHover={hover}

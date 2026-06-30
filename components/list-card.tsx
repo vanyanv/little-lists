@@ -77,7 +77,7 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
   );
 
   return (
-    <Link href={`/list/${list.id}`} className={`block rounded-2xl ${themeClass(list.theme)} ${focusRing}`}>
+    <Link href={`/app/list/${list.id}`} className={`block rounded-2xl ${themeClass(list.theme)} ${focusRing}`}>
       <motion.div
         layout
         initial={hero ? { rotate: -1 } : false}

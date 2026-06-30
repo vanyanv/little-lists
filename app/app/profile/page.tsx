@@ -49,7 +49,7 @@ export default function ProfileScreen() {
             {loved.map(({ listId, item }) => {
               const isPoster = ITEM_TYPE_META[item.type].aspect !== "note";
               return (
-                <Link key={item.id} href={`/list/${listId}`} className={`w-[5.5rem] shrink-0 rounded-xl ${focusRing}`}>
+                <Link key={item.id} href={`/app/list/${listId}`} className={`w-[5.5rem] shrink-0 rounded-xl ${focusRing}`}>
                   {isPoster ? (
                     <PlaceholderPoster
                       seed={item.seed || item.title}

@@ -11,14 +11,15 @@ export function FloatingAddButton() {
   const { openItemSheet, openDetailSheet, openListSheet, openPersonSheet } = useUi();
   const reduce = useReducedMotion();
 
-  const onList = pathname.startsWith("/list/");
-  const onPerson = pathname.startsWith("/person/");
-  const onPeople = pathname === "/people";
-  const onHome = pathname === "/";
+  const onList = pathname.startsWith("/app/list/");
+  const onPerson = pathname.startsWith("/app/person/");
+  const onPeople = pathname === "/app/people";
+  const onHome = pathname === "/app";
   const visible = onHome || onList || onPerson || onPeople;
   if (!visible) return null;
 
-  const id = pathname.split("/")[2];
+  // Paths are now /app/list/:id and /app/person/:id, so the id is the 4th segment.
+  const id = pathname.split("/")[3];
   const label = onPerson
     ? "Add a little detail"
     : onPeople

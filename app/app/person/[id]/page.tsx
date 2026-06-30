@@ -25,7 +25,7 @@ export default function PersonDetailScreen() {
     return (
       <div className="px-6 pt-32 text-center">
         <h1 className="font-display text-[1.4rem] font-semibold text-ink">We can&apos;t find that person</h1>
-        <Link href="/people" className={`mt-6 inline-block rounded-pill bg-ink px-5 py-3 text-sm font-bold text-cream ${focusRingOnDark}`}>
+        <Link href="/app/people" className={`mt-6 inline-block rounded-pill bg-ink px-5 py-3 text-sm font-bold text-cream ${focusRingOnDark}`}>
           Back to your people
         </Link>
       </div>
@@ -51,7 +51,7 @@ export default function PersonDetailScreen() {
               onConfirm: () => {
                 deletePerson(person.id);
                 showToast("Removed from your little world");
-                router.replace("/people");
+                router.replace("/app/people");
               },
             }),
         },
