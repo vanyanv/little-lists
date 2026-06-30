@@ -44,7 +44,7 @@ function EditPersonFlow({ personId, onClose }: { personId: string; onClose: () =
       name: value.name.trim(),
       emoji: value.emoji,
       theme: value.theme,
-      note: value.note.trim(),
+      note: value.note.trim() || undefined,
     });
     onClose();
     showToast("Updated ✨");

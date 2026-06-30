@@ -32,13 +32,14 @@ export function ConfirmSheet() {
             >
               {confirm.confirmLabel}
             </motion.button>
-            <button
+            <motion.button
               type="button"
+              whileTap={tap}
               onClick={closeConfirm}
               className="w-full rounded-pill py-3.5 text-[0.95rem] font-bold text-brown-soft transition-colors hover:bg-cream-deep"
             >
               Keep it
-            </button>
+            </motion.button>
           </div>
         </div>
       )}
