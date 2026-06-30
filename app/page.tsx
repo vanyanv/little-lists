@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { LandingHeader } from "@/components/landing/landing-header";
 import { LandingHero } from "@/components/landing/landing-hero";
 import { UseCases } from "@/components/landing/use-cases";
 import { ViewModes } from "@/components/landing/view-modes";
 import { PeopleMemory } from "@/components/landing/people-memory";
 import { Privacy } from "@/components/landing/privacy";
 import { FinalCta } from "@/components/landing/final-cta";
+import { LandingFooter } from "@/components/landing/landing-footer";
 
 export const metadata: Metadata = {
   title: "Little Lists — cozy little lists for everything you love",
@@ -14,19 +16,17 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
-    <main className="paper-grain relative min-h-dvh overflow-x-hidden bg-cream">
-      <LandingHero />
-      <UseCases />
-      <ViewModes />
-      <PeopleMemory />
-      <Privacy />
-      <FinalCta />
-
-      <footer className="px-5 pb-[calc(env(safe-area-inset-bottom)+2rem)] text-center">
-        <p className="text-[0.85rem] font-semibold text-brown-soft">
-          Little Lists, a tiny archive of your taste, plans, and people. 🌸
-        </p>
-      </footer>
-    </main>
+    <>
+      <LandingHeader />
+      <main className="paper-grain relative min-h-dvh overflow-x-hidden bg-cream">
+        <LandingHero />
+        <UseCases />
+        <ViewModes />
+        <PeopleMemory />
+        <Privacy />
+        <FinalCta />
+        <LandingFooter />
+      </main>
+    </>
   );
 }

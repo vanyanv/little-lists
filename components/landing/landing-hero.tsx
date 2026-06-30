@@ -4,11 +4,20 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { softSpring, tap } from "@/lib/motion";
 import { focusRing, focusRingOnDark } from "@/lib/a11y";
-import { Sticker } from "@/components/sticker";
 import { AppPreview } from "./app-preview";
 
 // Animate the CTAs as the app animates every tappable surface: a soft press.
 const MotionLink = motion.create(Link);
+
+/* A soft rounded check in the sage accent, for the reassurance line. */
+function CheckMark() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0 text-sage">
+      <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.35" />
+      <path d="M8 12.4l2.6 2.6L16 9.4" stroke="var(--color-ink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.75" />
+    </svg>
+  );
+}
 
 export function LandingHero() {
   const reduce = useReducedMotion();
@@ -18,25 +27,21 @@ export function LandingHero() {
 
   return (
     <section className="relative overflow-hidden px-5 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-      {/* soft pastel wash behind the hero */}
+      {/* two soft, deliberately placed warm glows — ambient wash, not stray ovals.
+          one cradles the headline, one sits behind the phone preview. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-20 -top-16 h-60 w-60 rounded-full bg-blush/40 blur-3xl" />
-        <div className="absolute -right-24 top-10 h-64 w-64 rounded-full bg-sky/35 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-56 w-56 rounded-full bg-lavender/30 blur-3xl" />
+        <div className="absolute -left-32 -top-28 h-[28rem] w-[28rem] rounded-full bg-blush/30 blur-[120px]" />
+        <div className="absolute -right-32 top-0 h-[32rem] w-[32rem] rounded-full bg-sky/25 blur-[130px]" />
       </div>
 
-      <div className="relative mx-auto grid max-w-5xl items-center gap-10 py-6 md:grid-cols-2 md:gap-8 md:py-12">
+      <div className="relative mx-auto grid max-w-5xl items-center gap-9 py-8 md:grid-cols-2 md:gap-10 md:py-16">
         {/* copy */}
         <motion.div
           {...rise}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="text-center md:text-left"
         >
-          <span className="inline-flex items-center gap-1.5 rounded-pill bg-paper px-3 py-1 text-[0.8rem] font-bold text-brown shadow-soft ring-1 ring-line/60">
-            <Sticker name="flower" size={16} /> Little Lists
-          </span>
-
-          <h1 className="mt-5 font-display font-semibold leading-[1.06] text-ink" style={{ fontSize: "clamp(2.05rem, 7.5vw, 3.4rem)" }}>
+          <h1 className="font-display font-semibold leading-[1.06] text-ink" style={{ fontSize: "clamp(2.05rem, 7.5vw, 3.4rem)" }}>
             Make little lists for everything you love, hate, and want to remember.
           </h1>
 
@@ -62,6 +67,16 @@ export function LandingHero() {
               See how it works
             </MotionLink>
           </div>
+
+          {/* honest, understated reassurance — no invented stats */}
+          <p className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[0.85rem] font-semibold text-ink-soft md:justify-start">
+            <span className="inline-flex items-center gap-1.5">
+              <CheckMark /> Free to start
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <CheckMark /> Private by default
+            </span>
+          </p>
         </motion.div>
 
         {/* phone preview */}

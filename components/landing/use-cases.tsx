@@ -16,7 +16,7 @@ const USE_CASES: UseCase[] = [
 
 export function UseCases() {
   return (
-    <section id="use-cases" className="scroll-mt-6 px-5 py-14">
+    <section id="use-cases" className="scroll-mt-20 px-5 py-12">
       <div className="mx-auto max-w-4xl">
         <header className="text-center">
           <h2 className="font-display font-semibold leading-tight text-ink" style={{ fontSize: "clamp(1.7rem, 6vw, 2.4rem)" }}>
@@ -41,7 +41,7 @@ export function UseCases() {
                   <h3 className="font-display text-[1.15rem] font-semibold leading-tight text-[var(--t-ink)]">
                     {c.title}
                   </h3>
-                  <p className="mt-1 text-[0.92rem] leading-snug text-brown">{c.line}</p>
+                  <p className="mt-1 text-[0.92rem] leading-snug text-[var(--t-ink)]/90">{c.line}</p>
                 </div>
               </div>
             </div>

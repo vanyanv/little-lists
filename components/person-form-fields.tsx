@@ -45,7 +45,7 @@ export function PersonFormFields({ value, onChange }: PersonFormFieldsProps) {
           autoFocus
           value={name}
           onChange={(e) => onChange({ name: e.target.value })}
-          placeholder="Maddie, Mom, best friend…"
+          placeholder="Mom, best friend, a partner…"
           className={`w-full rounded-xl border border-line bg-cream-deep/50 px-4 py-3.5 text-[1.05rem] font-medium text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
         />
       </label>

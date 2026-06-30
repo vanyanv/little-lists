@@ -30,6 +30,9 @@ export function FinalCta() {
         >
           Create my Little Lists
         </MotionLink>
+        <p className="mt-4 text-[0.85rem] font-semibold text-cream/75">Free to start, and private by default.</p>
+        {/* PLACEHOLDER: when a real, verifiable testimonial or usage stat exists, add it here.
+            Do not invent quotes or user counts. */}
       </div>
     </section>
   );

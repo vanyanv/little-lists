@@ -50,17 +50,17 @@ export const PREVIEW_GIFTS: List = {
   ],
 };
 
-export const PREVIEW_MADDIE: Person = {
-  id: "preview-maddie",
-  name: "Maddie",
-  emoji: "🌷",
+export const PREVIEW_PERSON: Person = {
+  id: "preview-person",
+  name: "Sam",
+  emoji: "🌼",
   theme: "butter",
-  note: "my favorite person to plan little things for",
+  note: "someone you love to plan little things for",
   sections: [
-    { id: "movies", label: "horror movies", emoji: "🎬", kind: "chips", entries: [{ id: "e1", title: "horror movies", tags: [] }] },
-    { id: "books", label: "cozy books", emoji: "📚", kind: "chips", entries: [{ id: "e2", title: "cozy books", tags: [] }] },
-    { id: "food", label: "Puerto Rican food", emoji: "🍴", kind: "chips", entries: [{ id: "e3", title: "Puerto Rican food", tags: [] }] },
-    { id: "dislikes", label: "no mushrooms", emoji: "🙅", kind: "chips", entries: [{ id: "e4", title: "no mushrooms", tags: [] }] },
-    { id: "dates", label: "Huntington Gardens", emoji: "🌷", kind: "chips", entries: [{ id: "e5", title: "Huntington Gardens", tags: [] }] },
+    { id: "coffee", label: "oat milk latte", emoji: "☕", kind: "chips", entries: [{ id: "e1", title: "oat milk latte", tags: [] }] },
+    { id: "reading", label: "loves cozy mysteries", emoji: "📚", kind: "chips", entries: [{ id: "e2", title: "loves cozy mysteries", tags: [] }] },
+    { id: "allergy", label: "allergic to peanuts", emoji: "🥜", kind: "chips", entries: [{ id: "e3", title: "allergic to peanuts", tags: [] }] },
+    { id: "flowers", label: "favorite flower: tulips", emoji: "🌷", kind: "chips", entries: [{ id: "e4", title: "favorite flower: tulips", tags: [] }] },
+    { id: "dates", label: "always up for a hike", emoji: "🥾", kind: "chips", entries: [{ id: "e5", title: "always up for a hike", tags: [] }] },
   ],
 };

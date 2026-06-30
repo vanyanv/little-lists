@@ -1,4 +1,4 @@
-import { PREVIEW_MOVIES, PREVIEW_FOODS, PREVIEW_GIFTS, PREVIEW_MADDIE } from "@/lib/landing-data";
+import { PREVIEW_MOVIES, PREVIEW_FOODS, PREVIEW_GIFTS, PREVIEW_PERSON } from "@/lib/landing-data";
 import { PreviewListCard, PreviewPersonCard } from "./preview-card";
 
 /* A phone-shaped preview of the real app home, built from the actual card
@@ -36,7 +36,7 @@ export function AppPreview() {
                 <PreviewListCard list={PREVIEW_FOODS} />
                 <PreviewListCard list={PREVIEW_GIFTS} />
               </div>
-              <PreviewPersonCard person={PREVIEW_MADDIE} />
+              <PreviewPersonCard person={PREVIEW_PERSON} />
             </div>
           </div>
 

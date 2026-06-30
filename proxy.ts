@@ -1,9 +1,19 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// The landing page (/) and the sign-in/up screens are the only routes a
-// signed-out visitor may see. Everything else (the /app/* world) is protected.
+// Routes a signed-out visitor may see. The /app/* world is protected; the
+// informational pages (privacy, terms) are open to everyone.
 const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/privacy",
+  "/terms",
+]);
+
+// The entry screens a signed-in user should skip past, straight to their world.
+// (Privacy/terms are public but NOT entry screens, so signed-in users can read them.)
+const isAuthEntry = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
@@ -11,15 +21,14 @@ const isPublicRoute = createRouteMatcher([
 
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
-  const onPublic = isPublicRoute(req);
 
   // Signed-in users skip the landing/auth screens and go straight to their world.
-  if (userId && onPublic) {
+  if (userId && isAuthEntry(req)) {
     return NextResponse.redirect(new URL("/app", req.url));
   }
 
   // Signed-out users hitting a protected route are sent to sign in.
-  if (!userId && !onPublic) {
+  if (!userId && !isPublicRoute(req)) {
     return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 });

@@ -1,11 +1,11 @@
-import { PREVIEW_MADDIE } from "@/lib/landing-data";
+import { PREVIEW_PERSON } from "@/lib/landing-data";
 import { themeClass } from "@/lib/visual";
 import { Sticker } from "@/components/sticker";
 
 export function PeopleMemory() {
-  const details = PREVIEW_MADDIE.sections;
+  const details = PREVIEW_PERSON.sections;
   return (
-    <section className="px-5 py-14">
+    <section className="px-5 py-12">
       <div className="mx-auto grid max-w-4xl items-center gap-9 md:grid-cols-2">
         <div className="text-center md:text-left">
           <span className="inline-flex items-center gap-1.5 rounded-pill bg-butter/50 px-3 py-1 text-[0.8rem] font-bold text-ink ring-1 ring-line/40">
@@ -19,19 +19,19 @@ export function PeopleMemory() {
           </p>
         </div>
 
-        {/* Maddie card */}
-        <div className={`mx-auto w-full max-w-sm rounded-[var(--radius-2xl)] ${themeClass(PREVIEW_MADDIE.theme)}`}>
+        {/* sample person card */}
+        <div className={`mx-auto w-full max-w-sm rounded-[var(--radius-2xl)] ${themeClass(PREVIEW_PERSON.theme)}`}>
           <div className="relative overflow-hidden rounded-[var(--radius-2xl)] p-6 shadow-lift ring-1 ring-line/40" style={{ background: "var(--t-bg)" }}>
             <Sticker name="flower" size={56} rotate={-12} className="pointer-events-none absolute -right-3 -top-3 opacity-25" />
             <div className="flex items-center gap-3.5">
               <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-paper text-3xl shadow-soft">
-                {PREVIEW_MADDIE.emoji}
+                {PREVIEW_PERSON.emoji}
               </span>
               <div>
                 <h3 className="font-display text-[1.45rem] font-semibold leading-tight text-[var(--t-ink)]">
-                  Little things about Maddie
+                  Little things about {PREVIEW_PERSON.name}
                 </h3>
-                <p className="mt-0.5 text-[0.9rem] font-medium text-brown">{PREVIEW_MADDIE.note}</p>
+                <p className="mt-0.5 text-[0.9rem] font-medium text-[var(--t-ink)]/90">{PREVIEW_PERSON.note}</p>
               </div>
             </div>
 
