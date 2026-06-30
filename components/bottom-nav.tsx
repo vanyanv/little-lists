@@ -38,9 +38,9 @@ function ProfileIcon({ active }: IconProps) {
 }
 
 const TABS = [
-  { href: "/", label: "Lists", Icon: ListsIcon, match: (p: string) => p === "/" || p.startsWith("/list") },
-  { href: "/people", label: "People", Icon: PeopleIcon, match: (p: string) => p.startsWith("/people") || p.startsWith("/person") },
-  { href: "/profile", label: "Profile", Icon: ProfileIcon, match: (p: string) => p.startsWith("/profile") },
+  { href: "/app", label: "Lists", Icon: ListsIcon, match: (p: string) => p === "/app" || p.startsWith("/app/list") },
+  { href: "/app/people", label: "People", Icon: PeopleIcon, match: (p: string) => p.startsWith("/app/people") || p.startsWith("/app/person") },
+  { href: "/app/profile", label: "Profile", Icon: ProfileIcon, match: (p: string) => p.startsWith("/app/profile") },
 ];
 
 export function BottomNav() {

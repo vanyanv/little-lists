@@ -74,7 +74,7 @@ function CreateListFlow({ onClose }: { onClose: () => void }) {
       });
       onClose();
       showToast("Your little world is ready ✨");
-      router.push(`/list/${created.id}`);
+      router.push(`/app/list/${created.id}`);
     } catch {
       setSaving(false);
       showToast("That didn't save — let's try again 🌿");

@@ -1,18 +1,14 @@
-"use client";
-
-import Link from "next/link";
-import { motion } from "motion/react";
-import type { List } from "@/lib/types";
+import type { List, Person } from "@/lib/types";
 import { TEMPLATE_META } from "@/lib/types";
 import { listCountLabel, themeClass } from "@/lib/visual";
-import { hover, softSpring, tap } from "@/lib/motion";
-import { useStore } from "@/lib/store";
-import { useUi } from "@/lib/ui";
-import { focusRing } from "@/lib/a11y";
-import { CardStack } from "./card-stack";
-import { Sticker } from "./sticker";
-import { ViewIcon } from "./view-toggle";
-import { OverflowMenu } from "./overflow-menu";
+import { CardStack } from "@/components/card-stack";
+import { Sticker } from "@/components/sticker";
+import { ViewIcon } from "@/components/view-toggle";
+
+/* Presentational twins of ListCard / PersonCard for the marketing preview.
+   They reproduce the real cards' look but drop the <Link>, store/ui context,
+   overflow menu, and hover motion, so they render with zero auth or data deps
+   inside the static landing page. Keep these in visual sync with the originals. */
 
 function EmojiTile({ emoji, size = 46 }: { emoji: string; size?: number }) {
   return (
@@ -25,7 +21,6 @@ function EmojiTile({ emoji, size = 46 }: { emoji: string; size?: number }) {
   );
 }
 
-/** template label + the list's default-view glyph, the "what kind of world is this" line */
 function ListMeta({ list, size = "normal" }: { list: List; size?: "hero" | "normal" }) {
   const meta = TEMPLATE_META[list.template];
   const view = list.defaultView ?? meta.defaultView;
@@ -37,58 +32,21 @@ function ListMeta({ list, size = "normal" }: { list: List; size?: "hero" | "norm
       >
         {meta.label}
       </span>
-      <span className="text-[var(--t-ink)] opacity-70" title={`${view} view`}>
+      <span className="text-[var(--t-ink)] opacity-70">
         <ViewIcon mode={view} size={13} />
       </span>
     </div>
   );
 }
 
-export function ListCard({ list, variant = "normal" }: { list: List; variant?: "hero" | "normal" }) {
+export function PreviewListCard({ list, variant = "normal" }: { list: List; variant?: "hero" | "normal" }) {
   const hero = variant === "hero";
-  const { deleteList } = useStore();
-  const { openEditList, openConfirm, showToast } = useUi();
-
-  const menu = (
-    <div className="absolute right-2.5 top-2.5 z-20">
-      <OverflowMenu
-        ariaLabel={`Options for ${list.title}`}
-        stopPropagation
-        items={[
-          { label: "Edit list", onSelect: () => openEditList(list.id) },
-          {
-            label: "Delete list",
-            tone: "danger",
-            onSelect: () =>
-              openConfirm({
-                title: "Remove this little list?",
-                body: "This will delete the list and everything inside it.",
-                confirmLabel: "Delete list",
-                tone: "danger",
-                onConfirm: () => {
-                  deleteList(list.id);
-                  showToast("Removed from your little world");
-                },
-              }),
-          },
-        ]}
-      />
-    </div>
-  );
-
   return (
-    <Link href={`/app/list/${list.id}`} className={`block rounded-2xl ${themeClass(list.theme)} ${focusRing}`}>
-      <motion.div
-        layout
-        initial={hero ? { rotate: -1 } : false}
-        whileHover={{ ...hover, rotate: 0 }}
-        whileTap={tap}
-        transition={softSpring}
+    <div className={`block rounded-2xl ${themeClass(list.theme)}`}>
+      <div
         className="relative overflow-hidden rounded-2xl shadow-soft ring-1 ring-line/30"
         style={{ background: "var(--t-bg)" }}
       >
-        {menu}
-        {/* faint corner sticker, tucked like scrapbook tape */}
         <Sticker
           name={TEMPLATE_META[list.template].sticker}
           size={hero ? 64 : 44}
@@ -100,9 +58,9 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
           <div className="relative flex items-end justify-between gap-3 p-5">
             <div className="min-w-0 flex-1">
               <EmojiTile emoji={list.emoji} size={52} />
-              <h2 className="mt-3 font-display text-[1.4rem] font-semibold leading-[1.12] text-[var(--t-ink)]">
+              <h3 className="mt-3 font-display text-[1.4rem] font-semibold leading-[1.12] text-[var(--t-ink)]">
                 {list.title}
-              </h2>
+              </h3>
               <p className="mt-1 text-[0.9rem] font-semibold text-brown">{listCountLabel(list)}</p>
               <ListMeta list={list} size="hero" />
             </div>
@@ -118,14 +76,48 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
                 <CardStack items={list.items.slice(0, 3)} kind={list.kind} size="sm" />
               </div>
             </div>
-            <h2 className="mt-3 font-display text-[1.12rem] font-semibold leading-tight text-[var(--t-ink)]">
+            <h3 className="mt-3 font-display text-[1.12rem] font-semibold leading-tight text-[var(--t-ink)]">
               {list.title}
-            </h2>
+            </h3>
             <p className="mt-0.5 text-[0.82rem] font-semibold text-brown">{listCountLabel(list)}</p>
             <ListMeta list={list} />
           </div>
         )}
-      </motion.div>
-    </Link>
+      </div>
+    </div>
+  );
+}
+
+export function PreviewPersonCard({ person }: { person: Person }) {
+  const chips = person.sections.filter((s) => s.entries.length > 0).slice(0, 5);
+  return (
+    <div className={`block rounded-2xl ${themeClass(person.theme)}`}>
+      <div
+        className="relative rounded-2xl p-4 shadow-soft ring-1 ring-line/30"
+        style={{ background: "var(--t-bg)" }}
+      >
+        <div className="flex items-center gap-3.5">
+          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-paper text-2xl shadow-soft">
+            {person.emoji}
+          </span>
+          <div className="min-w-0">
+            <h3 className="font-display text-[1.2rem] font-semibold leading-tight text-[var(--t-ink)]">
+              {person.name}
+            </h3>
+            <p className="mt-0.5 line-clamp-1 text-[0.86rem] font-medium text-brown">{person.note}</p>
+          </div>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {chips.map((s) => (
+            <span
+              key={s.id}
+              className="rounded-pill bg-paper/70 px-2.5 py-1 text-[0.72rem] font-semibold text-[var(--t-ink)]"
+            >
+              {s.emoji} {s.label}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
