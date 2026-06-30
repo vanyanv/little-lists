@@ -6,9 +6,12 @@ import type { List } from "@/lib/types";
 import { TEMPLATE_META } from "@/lib/types";
 import { listCountLabel, themeClass } from "@/lib/visual";
 import { hover, softSpring, tap } from "@/lib/motion";
+import { useStore } from "@/lib/store";
+import { useUi } from "@/lib/ui";
 import { CardStack } from "./card-stack";
 import { Sticker } from "./sticker";
 import { ViewIcon } from "./view-toggle";
+import { OverflowMenu } from "./overflow-menu";
 
 function EmojiTile({ emoji, size = 46 }: { emoji: string; size?: number }) {
   return (
@@ -42,6 +45,35 @@ function ListMeta({ list, size = "normal" }: { list: List; size?: "hero" | "norm
 
 export function ListCard({ list, variant = "normal" }: { list: List; variant?: "hero" | "normal" }) {
   const hero = variant === "hero";
+  const { deleteList } = useStore();
+  const { openEditList, openConfirm, showToast } = useUi();
+
+  const menu = (
+    <div className="absolute right-2.5 top-2.5 z-20">
+      <OverflowMenu
+        ariaLabel={`Options for ${list.title}`}
+        stopPropagation
+        items={[
+          { label: "Edit list", onSelect: () => openEditList(list.id) },
+          {
+            label: "Delete list",
+            tone: "danger",
+            onSelect: () =>
+              openConfirm({
+                title: "Remove this little list?",
+                body: "This will delete the list and everything inside it.",
+                confirmLabel: "Delete list",
+                tone: "danger",
+                onConfirm: () => {
+                  deleteList(list.id);
+                  showToast("Removed from your little world");
+                },
+              }),
+          },
+        ]}
+      />
+    </div>
+  );
 
   return (
     <Link href={`/list/${list.id}`} className={`block ${themeClass(list.theme)}`}>
@@ -54,6 +86,7 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
         className="relative overflow-hidden rounded-2xl shadow-soft ring-1 ring-black/[0.03]"
         style={{ background: "var(--t-bg)" }}
       >
+        {menu}
         {/* faint corner sticker, tucked like scrapbook tape */}
         <Sticker
           name={TEMPLATE_META[list.template].sticker}

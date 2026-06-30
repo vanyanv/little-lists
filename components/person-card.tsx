@@ -5,9 +5,14 @@ import { motion } from "motion/react";
 import type { Person } from "@/lib/types";
 import { themeClass } from "@/lib/visual";
 import { hover, softSpring, tap } from "@/lib/motion";
+import { useStore } from "@/lib/store";
+import { useUi } from "@/lib/ui";
+import { OverflowMenu } from "./overflow-menu";
 
 export function PersonCard({ person }: { person: Person }) {
   const chips = person.sections.filter((s) => s.entries.length > 0).slice(0, 5);
+  const { deletePerson } = useStore();
+  const { openEditPerson, openConfirm, showToast } = useUi();
 
   return (
     <Link href={`/person/${person.id}`} className={`block ${themeClass(person.theme)}`}>
@@ -16,10 +21,34 @@ export function PersonCard({ person }: { person: Person }) {
         whileHover={hover}
         whileTap={tap}
         transition={softSpring}
-        className="rounded-2xl p-4 shadow-soft ring-1 ring-black/[0.03]"
+        className="relative rounded-2xl p-4 shadow-soft ring-1 ring-black/[0.03]"
         style={{ background: "var(--t-bg)" }}
       >
-        <div className="flex items-center gap-3.5">
+        <div className="absolute right-2.5 top-2.5 z-20">
+          <OverflowMenu
+            ariaLabel={`Options for ${person.name}`}
+            stopPropagation
+            items={[
+              { label: "Edit person", onSelect: () => openEditPerson(person.id) },
+              {
+                label: "Delete person",
+                tone: "danger",
+                onSelect: () =>
+                  openConfirm({
+                    title: "Remove this person?",
+                    body: "This will delete them and every little detail you saved.",
+                    confirmLabel: "Delete person",
+                    tone: "danger",
+                    onConfirm: () => {
+                      deletePerson(person.id);
+                      showToast("Removed from your little world");
+                    },
+                  }),
+              },
+            ]}
+          />
+        </div>
+        <div className="flex items-center gap-3.5 pr-10">
           <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-paper text-2xl shadow-soft">
             {person.emoji}
           </span>
