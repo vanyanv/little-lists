@@ -16,7 +16,7 @@ export default function PersonDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const person = usePerson(id);
   const { deletePersonDetail, deletePerson } = useStore();
-  const { openDetailSheet, openEditPerson, openConfirm, showToast } = useUi();
+  const { openDetailSheet, openEditPerson, openConfirm, showToast, openEditDetail } = useUi();
   const router = useRouter();
 
   if (!person) {
@@ -94,7 +94,19 @@ export default function PersonDetailScreen() {
             <motion.div key={s.id} variants={riseItem}>
               <PersonDetailSection
                 section={s}
-                onDelete={(detailId) => deletePersonDetail(person.id, s.id, detailId)}
+                onEdit={(detailId) => openEditDetail(person.id, s.id, detailId)}
+                onDelete={(detailId) =>
+                  openConfirm({
+                    title: "Remove this little thing?",
+                    body: "It'll be gone from their little world.",
+                    confirmLabel: "Remove",
+                    tone: "danger",
+                    onConfirm: () => {
+                      deletePersonDetail(person.id, s.id, detailId);
+                      showToast("Removed from your little world");
+                    },
+                  })
+                }
               />
             </motion.div>
           ))}

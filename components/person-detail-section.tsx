@@ -9,9 +9,11 @@ import { gentleSpring, softSpring } from "@/lib/motion";
 export function PersonDetailSection({
   section,
   onDelete,
+  onEdit,
 }: {
   section: PersonSection;
   onDelete?: (detailId: string) => void;
+  onEdit?: (detailId: string) => void;
 }) {
   const [open, setOpen] = useState(true);
 
@@ -59,7 +61,13 @@ export function PersonDetailSection({
                       className="group inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-[0.85rem] font-semibold text-[var(--t-ink)]"
                       style={{ background: "var(--t-bg)" }}
                     >
-                      {e.title}
+                      <button
+                        type="button"
+                        onClick={() => onEdit?.(e.id)}
+                        className="cursor-pointer text-left"
+                      >
+                        {e.title}
+                      </button>
                       {onDelete && (
                         <button
                           type="button"
@@ -81,10 +89,14 @@ export function PersonDetailSection({
                       layout
                       className="flex items-start gap-2 rounded-xl bg-cream-deep/70 px-3.5 py-2.5 text-[0.92rem] leading-relaxed text-ink-soft"
                     >
-                      <span className="flex-1">
+                      <button
+                        type="button"
+                        onClick={() => onEdit?.(e.id)}
+                        className="flex-1 text-left"
+                      >
                         {e.title}
                         {e.note && <span className="mt-0.5 block text-[0.82rem] text-brown">{e.note}</span>}
-                      </span>
+                      </button>
                       {onDelete && (
                         <button
                           type="button"
