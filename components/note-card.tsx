@@ -43,7 +43,7 @@ export function NoteCard({ item }: { item: Item }) {
             {item.tags.map((t) => (
               <span
                 key={t}
-                className="rounded-pill px-2 py-0.5 text-[0.72rem] font-semibold text-[var(--t-ink)]"
+                className="rounded-pill px-2.5 py-1 text-[0.72rem] font-semibold text-[var(--t-ink)]"
                 style={{ background: "var(--t-bg)" }}
               >
                 #{t}

@@ -55,7 +55,7 @@ export default function ProfileScreen() {
                       seed={item.seed || item.title}
                       title={item.title}
                       badge="💗"
-                      className="shadow-soft ring-1 ring-black/5"
+                      className="shadow-soft ring-1 ring-ink/5"
                     />
                   ) : (
                     <div className="grid aspect-[2/3] place-items-center rounded-xl bg-cream-deep text-4xl shadow-soft ring-1 ring-line/60">

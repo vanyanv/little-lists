@@ -305,7 +305,7 @@ function AddItemFlow({
             ) : (
               <div className="mt-4">
                 <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">pick a little icon</p>
-                <div className="grid grid-cols-9 gap-1.5">
+                <div className="grid grid-cols-8 gap-1.5">
                   {EMOJI_CHOICES.map((e) => (
                     <button
                       key={e}
@@ -326,7 +326,7 @@ function AddItemFlow({
                   whileTap={tap}
                   onClick={continueManual}
                   disabled={!title.trim()}
-                  className={`mt-4 w-full rounded-pill bg-ink py-3.5 text-[0.95rem] font-bold text-cream shadow-soft disabled:opacity-40 ${focusRingOnDark}`}
+                  className={`mt-4 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40 ${focusRingOnDark}`}
                 >
                   Continue
                 </motion.button>

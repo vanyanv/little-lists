@@ -129,7 +129,7 @@ function ItemEditor({ listId, item }: { listId: string; item: Item }) {
 /** Square cover tile for non-media items shown in the visual Grid view. */
 function GridTile({ item }: { item: Item }) {
   return (
-    <div className="overflow-hidden rounded-2xl bg-paper shadow-soft ring-1 ring-line/60">
+    <div className="overflow-hidden rounded-2xl bg-paper shadow-soft ring-1 ring-line/30">
       <div className="grid aspect-square place-items-center text-4xl" style={{ background: "var(--t-bg)" }}>
         {item.emoji ?? "✨"}
       </div>
@@ -163,10 +163,10 @@ export function ItemCard({ listId, item, view }: { listId: string; item: Item; v
     summary = isMedia ? <PosterCard item={item} /> : <GridTile item={item} />;
   } else if (view === "list") {
     summary = <CompactRow item={item} />;
-    chrome = "rounded-2xl bg-paper px-3 py-2 shadow-soft ring-1 ring-line/60";
+    chrome = "rounded-2xl bg-paper px-3 py-2 shadow-soft ring-1 ring-line/30";
   } else {
     summary = <NoteCard item={item} />;
-    chrome = "rounded-2xl bg-paper p-3.5 shadow-soft ring-1 ring-line/60";
+    chrome = "rounded-2xl bg-paper p-3.5 shadow-soft ring-1 ring-line/30";
   }
 
   return (
