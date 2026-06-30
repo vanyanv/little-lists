@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import { useUi } from "@/lib/ui";
 import { tap } from "@/lib/motion";
+import { focusRing, focusRingOnDark } from "@/lib/a11y";
 import { BottomSheet } from "./bottom-sheet";
 
 /** A cozy confirmation sheet, summoned via useUi().openConfirm(). */
@@ -26,7 +27,7 @@ export function ConfirmSheet() {
                 confirm.onConfirm();
                 closeConfirm();
               }}
-              className={`w-full rounded-pill py-4 text-[1rem] font-bold text-cream shadow-lift ${
+              className={`w-full rounded-pill py-4 text-[1rem] font-bold text-cream shadow-lift ${focusRingOnDark} ${
                 confirm.tone === "danger" ? "bg-rosewood" : "bg-ink"
               }`}
             >
@@ -36,7 +37,7 @@ export function ConfirmSheet() {
               type="button"
               whileTap={tap}
               onClick={closeConfirm}
-              className="w-full rounded-pill py-3.5 text-[0.95rem] font-bold text-brown-soft transition-colors hover:bg-cream-deep"
+              className={`w-full rounded-pill py-3.5 text-[0.95rem] font-bold text-brown-soft transition-colors hover:bg-cream-deep ${focusRing}`}
             >
               Keep it
             </motion.button>

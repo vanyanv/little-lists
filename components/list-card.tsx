@@ -8,6 +8,7 @@ import { listCountLabel, themeClass } from "@/lib/visual";
 import { hover, softSpring, tap } from "@/lib/motion";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
+import { focusRing } from "@/lib/a11y";
 import { CardStack } from "./card-stack";
 import { Sticker } from "./sticker";
 import { ViewIcon } from "./view-toggle";
@@ -76,7 +77,7 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
   );
 
   return (
-    <Link href={`/list/${list.id}`} className={`block ${themeClass(list.theme)}`}>
+    <Link href={`/list/${list.id}`} className={`block rounded-2xl ${themeClass(list.theme)} ${focusRing}`}>
       <motion.div
         layout
         initial={hero ? { rotate: -1 } : false}

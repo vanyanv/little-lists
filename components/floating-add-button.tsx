@@ -1,13 +1,15 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { softSpring } from "@/lib/motion";
+import { focusRingOnDark } from "@/lib/a11y";
 import { useUi } from "@/lib/ui";
 
 export function FloatingAddButton() {
   const pathname = usePathname();
   const { openItemSheet, openDetailSheet, openListSheet, openPersonSheet } = useUi();
+  const reduce = useReducedMotion();
 
   const onList = pathname.startsWith("/list/");
   const onPerson = pathname.startsWith("/person/");
@@ -39,17 +41,17 @@ export function FloatingAddButton() {
           type="button"
           onClick={handle}
           aria-label={label}
-          initial={{ scale: 0, rotate: -20 }}
+          initial={reduce ? false : { scale: 0, rotate: -20 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ ...softSpring, delay: 0.15 }}
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.9 }}
-          className="pointer-events-auto absolute bottom-[5.25rem] right-5 grid place-items-center rounded-full text-cream shadow-lift"
+          className={`pointer-events-auto absolute bottom-[5.25rem] right-5 grid place-items-center rounded-full text-cream shadow-lift ${focusRingOnDark}`}
           style={{ height: 60, width: 60, background: "var(--color-ink)" }}
         >
           <motion.span
-            animate={{ y: [0, -1.5, 0] }}
-            transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+            animate={reduce ? {} : { y: [0, -1.5, 0] }}
+            transition={reduce ? {} : { duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
             className="text-[1.7rem] leading-none font-light"
           >
             +

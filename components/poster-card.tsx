@@ -16,7 +16,7 @@ export function PosterCard({ item }: { item: Item }) {
           <h3 className="line-clamp-2 flex-1 font-display text-[0.98rem] font-semibold leading-tight text-ink">
             {item.title}
           </h3>
-          {item.note && <span className="mt-0.5 text-[0.8rem] opacity-60" aria-label="has a note">📝</span>}
+          {item.note && <span role="img" className="mt-0.5 text-[0.8rem] opacity-60" aria-label="has a note">📝</span>}
         </div>
         {item.subtitle && (
           <p className="mt-0.5 text-[0.8rem] font-medium text-brown">{item.subtitle}</p>

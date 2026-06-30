@@ -6,6 +6,7 @@ import { useUser } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import { themeClass } from "@/lib/visual";
 import { softSpring, tap } from "@/lib/motion";
+import { focusRingOnDark } from "@/lib/a11y";
 import { ThemeColorPicker } from "./theme-chip";
 import { Sticker } from "./sticker";
 
@@ -14,7 +15,12 @@ export function ProfileHeader() {
   const { user } = useUser();
   const [shared, setShared] = useState(false);
 
-  const share = () => {
+  const share = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.origin);
+    } catch {
+      window.prompt("Copy your little world", window.location.origin);
+    }
     fireCelebration("balloons");
     setShared(true);
     setTimeout(() => setShared(false), 2200);
@@ -70,7 +76,7 @@ export function ProfileHeader() {
           type="button"
           whileTap={tap}
           onClick={share}
-          className="flex-1 rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-soft"
+          className={`flex-1 rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-soft ${focusRingOnDark}`}
         >
           Share your little world
         </motion.button>

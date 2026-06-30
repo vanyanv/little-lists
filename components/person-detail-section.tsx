@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import type { PersonSection } from "@/lib/types";
 import { gentleSpring, softSpring } from "@/lib/motion";
+import { focusRing, focusRingInset } from "@/lib/a11y";
 
 /** A warm, bouncy accordion card for one remembered facet of a person. */
 export function PersonDetailSection({
@@ -27,7 +28,7 @@ export function PersonDetailSection({
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
+        className={`flex w-full items-center gap-3 px-4 py-3.5 text-left ${focusRingInset}`}
       >
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-lg" style={{ background: "var(--t-bg)" }}>
           {section.emoji}
@@ -64,7 +65,7 @@ export function PersonDetailSection({
                       <button
                         type="button"
                         onClick={() => onEdit?.(e.id)}
-                        className="cursor-pointer text-left"
+                        className={`cursor-pointer text-left rounded ${focusRingInset}`}
                       >
                         {e.title}
                       </button>
@@ -73,9 +74,9 @@ export function PersonDetailSection({
                           type="button"
                           onClick={() => onDelete(e.id)}
                           aria-label={`Remove ${e.title}`}
-                          className="grid h-4 w-4 place-items-center rounded-full text-[var(--t-ink)]/50 transition-colors hover:bg-ink/10 hover:text-[var(--t-ink)]"
+                          className={`grid h-7 w-7 place-items-center rounded-full text-[var(--t-ink)]/50 transition-colors hover:bg-ink/10 hover:text-[var(--t-ink)] ${focusRingInset}`}
                         >
-                          ×
+                          <span aria-hidden className="text-base leading-none">×</span>
                         </button>
                       )}
                     </motion.span>
@@ -92,7 +93,7 @@ export function PersonDetailSection({
                       <button
                         type="button"
                         onClick={() => onEdit?.(e.id)}
-                        className="flex-1 text-left"
+                        className={`flex-1 text-left rounded ${focusRingInset}`}
                       >
                         {e.title}
                         {e.note && <span className="mt-0.5 block text-[0.82rem] text-brown">{e.note}</span>}
@@ -102,9 +103,9 @@ export function PersonDetailSection({
                           type="button"
                           onClick={() => onDelete(e.id)}
                           aria-label={`Remove ${e.title}`}
-                          className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-brown-soft transition-colors hover:bg-ink/10 hover:text-ink"
+                          className={`mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full text-brown-soft transition-colors hover:bg-ink/10 hover:text-ink ${focusRingInset}`}
                         >
-                          ×
+                          <span aria-hidden className="text-base leading-none">×</span>
                         </button>
                       )}
                     </motion.li>

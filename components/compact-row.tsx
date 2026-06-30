@@ -33,6 +33,7 @@ export function CompactRow({ item }: { item: Item }) {
           </h3>
           {item.rating ? (
             <span
+              role="img"
               className="shrink-0 text-[0.74rem] leading-none"
               style={{ color: "oklch(0.72 0.13 75)" }}
               aria-label={`${item.rating} stars`}
@@ -41,13 +42,13 @@ export function CompactRow({ item }: { item: Item }) {
             </span>
           ) : (
             item.status === "favorite" && (
-              <span className="shrink-0 text-[0.74rem] leading-none" aria-label="favorite">
+              <span role="img" className="shrink-0 text-[0.74rem] leading-none" aria-label="favorite">
                 💗
               </span>
             )
           )}
           {item.note && (
-            <span className="shrink-0 text-[0.72rem] opacity-55" aria-label="has a note">
+            <span role="img" className="shrink-0 text-[0.72rem] opacity-55" aria-label="has a note">
               📝
             </span>
           )}

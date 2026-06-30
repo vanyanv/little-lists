@@ -1,15 +1,17 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { staggerContainer, riseItem, tap } from "@/lib/motion";
+import { focusRingOnDark } from "@/lib/a11y";
 import { PersonCard } from "@/components/person-card";
 import { EmptyState } from "@/components/empty-state";
 
 export default function PeopleScreen() {
   const { people } = useStore();
   const { openPersonSheet } = useUi();
+  const reduce = useReducedMotion();
 
   return (
     <div className="px-4 pt-[calc(env(safe-area-inset-top)+1.25rem)]">
@@ -33,7 +35,7 @@ export default function PeopleScreen() {
               type="button"
               whileTap={tap}
               onClick={openPersonSheet}
-              className="rounded-pill bg-ink px-6 py-3.5 text-[0.95rem] font-bold text-cream shadow-lift"
+              className={`rounded-pill bg-ink px-6 py-3.5 text-[0.95rem] font-bold text-cream shadow-lift ${focusRingOnDark}`}
             >
               Add someone to remember
             </motion.button>
@@ -42,7 +44,7 @@ export default function PeopleScreen() {
       ) : (
         <motion.div
           variants={staggerContainer}
-          initial="hidden"
+          initial={reduce ? false : "hidden"}
           animate="show"
           className="mt-5 flex flex-col gap-3"
         >

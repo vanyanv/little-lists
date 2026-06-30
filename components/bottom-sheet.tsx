@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { sheetSpring } from "@/lib/motion";
@@ -15,6 +15,8 @@ interface BottomSheetProps {
 
 /** A native-feeling mobile sheet: scrim fade + spring slide, drag to dismiss. */
 export function BottomSheet({ open, onClose, children, ariaLabel }: BottomSheetProps) {
+  const reduce = useReducedMotion();
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -38,7 +40,7 @@ export function BottomSheet({ open, onClose, children, ariaLabel }: BottomSheetP
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={reduce ? { duration: 0.001 } : { duration: 0.25 }}
             className="absolute inset-0 bg-ink/30 backdrop-blur-[2px]"
           />
           {/* sheet, aligned to the phone frame */}
@@ -53,10 +55,10 @@ export function BottomSheet({ open, onClose, children, ariaLabel }: BottomSheetP
               onDragEnd={(_, info) => {
                 if (info.offset.y > 120 || info.velocity.y > 700) onClose();
               }}
-              initial={{ y: "100%" }}
+              initial={reduce ? false : { y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              transition={sheetSpring}
+              transition={reduce ? { duration: 0.001 } : sheetSpring}
               className="pointer-events-auto relative w-full max-w-[440px] rounded-t-2xl bg-paper shadow-[var(--shadow-sheet)]"
               style={{ maxHeight: "92dvh" }}
             >

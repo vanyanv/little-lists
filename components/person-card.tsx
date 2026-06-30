@@ -7,6 +7,7 @@ import { themeClass } from "@/lib/visual";
 import { hover, softSpring, tap } from "@/lib/motion";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
+import { focusRing } from "@/lib/a11y";
 import { OverflowMenu } from "./overflow-menu";
 
 export function PersonCard({ person }: { person: Person }) {
@@ -15,7 +16,7 @@ export function PersonCard({ person }: { person: Person }) {
   const { openEditPerson, openConfirm, showToast } = useUi();
 
   return (
-    <Link href={`/person/${person.id}`} className={`block ${themeClass(person.theme)}`}>
+    <Link href={`/person/${person.id}`} className={`block rounded-2xl ${themeClass(person.theme)} ${focusRing}`}>
       <motion.div
         layout
         whileHover={hover}

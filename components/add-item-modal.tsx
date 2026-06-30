@@ -15,6 +15,7 @@ import {
 import type { SearchHit } from "@/lib/search/types";
 import { themeClass } from "@/lib/visual";
 import { staggerContainer, riseItem, softSpring, tap } from "@/lib/motion";
+import { focusRing, focusRingOnDark } from "@/lib/a11y";
 import { BottomSheet } from "./bottom-sheet";
 import { SoftDotLoader } from "./soft-dot-loader";
 import { Cover } from "./cover";
@@ -204,13 +205,14 @@ function AddItemFlow({
 
             <input
               autoFocus
+              aria-label={searchable ? "Search a title" : "Give it a name"}
               value={query || title}
               onChange={(e) => {
                 setQuery(e.target.value);
                 if (!searchable) setTitle(e.target.value);
               }}
               placeholder={searchable ? "Search a title…" : "Give it a name…"}
-              className="mt-4 w-full rounded-xl border border-line bg-cream-deep/50 px-4 py-3.5 text-[1.05rem] font-medium text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none"
+              className={`mt-4 w-full rounded-xl border border-line bg-cream-deep/50 px-4 py-3.5 text-[1.05rem] font-medium text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
             />
 
             {/* type picker only when there's no list context yet */}
@@ -223,8 +225,9 @@ function AddItemFlow({
                     <button
                       key={t}
                       type="button"
+                      aria-pressed={active}
                       onClick={() => setType(t)}
-                      className={`flex shrink-0 items-center gap-1.5 rounded-pill px-3.5 py-2 text-[0.85rem] font-bold transition ${
+                      className={`flex shrink-0 items-center gap-1.5 rounded-pill px-3.5 py-2 text-[0.85rem] font-bold transition ${focusRing} ${
                         active ? "bg-ink text-cream shadow-soft" : "bg-cream-deep text-brown ring-1 ring-line/60"
                       }`}
                     >
@@ -241,7 +244,7 @@ function AddItemFlow({
                 {searching ? (
                   <SoftDotLoader />
                 ) : (
-                  <motion.div variants={staggerContainer} initial="hidden" animate="show" className="flex flex-col gap-2">
+                  <motion.div role="listbox" aria-label="Search results" variants={staggerContainer} initial="hidden" animate="show" className="flex flex-col gap-2">
                     {results.map((r) => {
                       const chosen = picked === r.sourceId;
                       return (
@@ -249,11 +252,13 @@ function AddItemFlow({
                           key={r.sourceId}
                           variants={riseItem}
                           type="button"
+                          role="option"
+                          aria-selected={chosen}
                           onClick={() => pickResult(r)}
                           whileTap={tap}
                           animate={{ scale: chosen ? 1.015 : 1 }}
                           transition={{ ...softSpring }}
-                          className={`flex items-center gap-3 rounded-xl p-2 text-left transition ${
+                          className={`flex items-center gap-3 rounded-xl p-2 text-left transition ${focusRing} ${
                             chosen
                               ? "bg-cream-deep ring-2 ring-ink/15"
                               : "bg-cream-deep/40 hover:bg-cream-deep/70"
@@ -300,8 +305,10 @@ function AddItemFlow({
                     <button
                       key={e}
                       type="button"
+                      aria-label={e}
+                      aria-pressed={emoji === e}
                       onClick={() => setEmoji(e)}
-                      className={`grid aspect-square place-items-center rounded-lg text-xl transition ${
+                      className={`grid aspect-square place-items-center rounded-lg text-xl transition ${focusRing} ${
                         emoji === e ? "bg-cream-deep ring-2 ring-ink/20" : "bg-cream-deep/40"
                       }`}
                     >
@@ -314,7 +321,7 @@ function AddItemFlow({
                   whileTap={tap}
                   onClick={continueManual}
                   disabled={!title.trim()}
-                  className="mt-4 w-full rounded-pill bg-ink py-3.5 text-[0.95rem] font-bold text-cream shadow-soft disabled:opacity-40"
+                  className={`mt-4 w-full rounded-pill bg-ink py-3.5 text-[0.95rem] font-bold text-cream shadow-soft disabled:opacity-40 ${focusRingOnDark}`}
                 >
                   Continue
                 </motion.button>
@@ -426,8 +433,9 @@ function DetailsStep(props: {
               <button
                 key={l.id}
                 type="button"
+                aria-pressed={l.id === targetListId}
                 onClick={() => setTargetListId(l.id)}
-                className={`flex shrink-0 items-center gap-1.5 rounded-pill px-3 py-2 text-[0.82rem] font-bold transition ${
+                className={`flex shrink-0 items-center gap-1.5 rounded-pill px-3 py-2 text-[0.82rem] font-bold transition ${focusRing} ${
                   l.id === targetListId ? "bg-ink text-cream" : "bg-cream-deep text-brown ring-1 ring-line/60"
                 }`}
               >
@@ -446,8 +454,9 @@ function DetailsStep(props: {
             <button
               key={s}
               type="button"
+              aria-pressed={status === s}
               onClick={() => setStatus(s)}
-              className={`rounded-pill transition ${status === s ? "ring-2 ring-ink/20" : "opacity-55 hover:opacity-90"}`}
+              className={`rounded-pill transition ${focusRing} ${status === s ? "ring-2 ring-ink/20" : "opacity-55 hover:opacity-90"}`}
             >
               <StatusPill status={s} />
             </button>
@@ -457,34 +466,37 @@ function DetailsStep(props: {
 
       {extraField && (
         <div className="mt-5">
-          <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">{extraField.label}</p>
+          <label htmlFor="add-item-extra" className="mb-2 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">{extraField.label}</label>
           <input
+            id="add-item-extra"
             value={subtitle}
             onChange={(e) => setSubtitle(e.target.value)}
             placeholder={extraField.placeholder}
-            className="w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none"
+            className={`w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
           />
         </div>
       )}
 
       <div className="mt-5">
-        <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">a little note</p>
+        <label htmlFor="add-item-note" className="mb-2 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">a little note</label>
         <textarea
+          id="add-item-note"
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={2}
           placeholder="Add a note so future you remembers why ✨"
-          className="w-full resize-none rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none"
+          className={`w-full resize-none rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
         />
       </div>
 
       <div className="mt-4">
-        <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">a tag (optional)</p>
+        <label htmlFor="add-item-tag" className="mb-2 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">a tag (optional)</label>
         <input
+          id="add-item-tag"
           value={tag}
           onChange={(e) => setTag(e.target.value)}
           placeholder="like a person, a mood, a someday…"
-          className="w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none"
+          className={`w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
         />
       </div>
 
@@ -493,7 +505,7 @@ function DetailsStep(props: {
         whileTap={tap}
         onClick={onSave}
         disabled={!title.trim() || saving}
-        className="mt-6 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40"
+        className={`mt-6 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40 ${focusRingOnDark}`}
       >
         {saving ? "Saving…" : "Save it to your little world"}
       </motion.button>

@@ -2,17 +2,19 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { SignOutButton } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import { ITEM_TYPE_META } from "@/lib/types";
 import { staggerContainer, riseItem } from "@/lib/motion";
+import { focusRing } from "@/lib/a11y";
 import { ProfileHeader } from "@/components/profile-header";
 import { ListCard } from "@/components/list-card";
 import { PlaceholderPoster } from "@/components/placeholder-poster";
 
 export default function ProfileScreen() {
   const { profile, lists } = useStore();
+  const reduce = useReducedMotion();
 
   const featured = useMemo(() => {
     if (profile.featuredListIds.length) {
@@ -41,13 +43,13 @@ export default function ProfileScreen() {
 
       {/* things you love */}
       {loved.length > 0 && (
-        <section className="mt-8">
+        <section className="mt-8" aria-label="A few things you love">
           <h2 className="px-1 font-display text-[1.3rem] font-semibold text-ink">A few things you love</h2>
           <div className="no-scrollbar -mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-1">
             {loved.map(({ listId, item }) => {
               const isPoster = ITEM_TYPE_META[item.type].aspect !== "note";
               return (
-                <Link key={item.id} href={`/list/${listId}`} className="w-[5.5rem] shrink-0">
+                <Link key={item.id} href={`/list/${listId}`} className={`w-[5.5rem] shrink-0 rounded-xl ${focusRing}`}>
                   {isPoster ? (
                     <PlaceholderPoster
                       seed={item.seed || item.title}
@@ -76,7 +78,7 @@ export default function ProfileScreen() {
         <p className="px-1 text-[0.88rem] text-brown">the ones that feel most like you.</p>
         <motion.div
           variants={staggerContainer}
-          initial="hidden"
+          initial={reduce ? false : "hidden"}
           animate="show"
           className="mt-3 grid grid-cols-2 gap-3"
         >
@@ -95,7 +97,7 @@ export default function ProfileScreen() {
         <SignOutButton>
           <button
             type="button"
-            className="rounded-pill bg-paper px-6 py-3 text-[0.92rem] font-bold text-brown ring-1 ring-line shadow-soft transition-colors hover:bg-cream-deep"
+            className={`rounded-pill bg-paper px-6 py-3 text-[0.92rem] font-bold text-brown ring-1 ring-line shadow-soft transition-colors hover:bg-cream-deep ${focusRing}`}
           >
             Sign out of your little world
           </button>

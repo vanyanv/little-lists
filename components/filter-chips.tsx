@@ -1,7 +1,8 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { tap } from "@/lib/motion";
+import { focusRing } from "@/lib/a11y";
 
 export interface FilterOption {
   id: string;
@@ -17,6 +18,8 @@ interface FilterChipsProps {
 
 /** A swipeable rail of status filters with live counts and a sliding highlight. */
 export function FilterChips({ options, active, onChange }: FilterChipsProps) {
+  const reduce = useReducedMotion();
+
   return (
     <div className="no-scrollbar fade-x -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
       {options.map((opt) => {
@@ -29,7 +32,7 @@ export function FilterChips({ options, active, onChange }: FilterChipsProps) {
             onClick={() => onChange(opt.id)}
             whileTap={tap}
             aria-pressed={isActive}
-            className="relative flex min-h-11 shrink-0 items-center gap-1.5 rounded-pill px-4 text-[0.82rem] font-bold leading-none"
+            className={`relative flex min-h-11 shrink-0 items-center gap-1.5 rounded-pill px-4 text-[0.82rem] font-bold leading-none ${focusRing}`}
             style={{
               color: isActive ? "var(--color-cream)" : "var(--color-brown)",
             }}
@@ -37,7 +40,7 @@ export function FilterChips({ options, active, onChange }: FilterChipsProps) {
             {isActive && (
               <motion.span
                 layoutId="filter-pill"
-                transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 32 }}
                 className="absolute inset-0 rounded-pill bg-ink shadow-soft"
               />
             )}

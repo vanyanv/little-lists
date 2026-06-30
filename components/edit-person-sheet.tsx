@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
 import { tap } from "@/lib/motion";
+import { focusRingOnDark } from "@/lib/a11y";
 import { BottomSheet } from "./bottom-sheet";
 import { PersonFormFields, type PersonFormValue } from "./person-form-fields";
 
@@ -62,7 +63,7 @@ function EditPersonFlow({ personId, onClose }: { personId: string; onClose: () =
         whileTap={tap}
         onClick={save}
         disabled={!canSave}
-        className="mt-6 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40"
+        className={`mt-6 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40 ${focusRingOnDark}`}
       >
         Save changes
       </motion.button>

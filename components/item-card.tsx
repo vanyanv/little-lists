@@ -5,6 +5,7 @@ import type { Item } from "@/lib/types";
 import { ITEM_TYPE_META, STATUSES_FOR } from "@/lib/types";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
+import { focusRing, focusRingOnDark } from "@/lib/a11y";
 import { ExpandableCard } from "./expandable-card";
 import { PosterCard } from "./poster-card";
 import { NoteCard } from "./note-card";
@@ -24,24 +25,27 @@ function ItemEditor({ listId, item }: { listId: string; item: Item }) {
   return (
     <div className="mt-3 rounded-xl bg-cream-deep/60 p-3.5">
       {/* title */}
-      <p className="mb-1.5 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">the name</p>
+      <label htmlFor={`item-title-${item.id}`} className="mb-1.5 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">the name</label>
       <input
+        id={`item-title-${item.id}`}
         defaultValue={item.title}
         onChange={(e) => updateItem(listId, item.id, { title: e.target.value })}
-        className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-[0.95rem] font-medium text-ink focus:border-[var(--t-edge)] focus:outline-none"
+        className={`w-full rounded-lg border border-line bg-paper px-3 py-2 text-[0.95rem] font-medium text-ink focus:border-[var(--t-edge)] focus:outline-none ${focusRing}`}
       />
 
       {/* emoji — note-type items only */}
       {isNote && (
         <>
           <p className="mb-1.5 mt-3.5 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">its little face</p>
-          <div className="grid grid-cols-6 gap-1.5">
+          <div role="group" aria-label="its little face" className="grid grid-cols-6 gap-1.5">
             {NOTE_EMOJI_CHOICES.map((e) => (
               <button
                 key={e}
                 type="button"
+                aria-label={e}
+                aria-pressed={item.emoji === e}
                 onClick={() => updateItem(listId, item.id, { emoji: e })}
-                className={`grid aspect-square place-items-center rounded-lg text-xl transition ${
+                className={`grid aspect-square place-items-center rounded-lg text-xl transition ${focusRing} ${
                   item.emoji === e ? "bg-cream-deep ring-2 ring-ink/20" : "bg-cream-deep/40"
                 }`}
               >
@@ -53,36 +57,41 @@ function ItemEditor({ listId, item }: { listId: string; item: Item }) {
       )}
 
       {/* status */}
-      <p className="mb-2 mt-3.5 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">how do you feel about it?</p>
-      <div className="flex flex-wrap gap-1.5">
-        {options.map((s) => {
-          const selected = item.status === s;
-          return (
-            <button
-              key={s}
-              type="button"
-              onClick={() => updateItem(listId, item.id, { status: s })}
-              className={`rounded-pill transition ${selected ? "ring-2 ring-ink/20" : "opacity-55 hover:opacity-90"}`}
-            >
-              <StatusPill status={s} />
-            </button>
-          );
-        })}
+      <div role="group" aria-label="how do you feel about it?" className="mt-3.5">
+        <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">how do you feel about it?</p>
+        <div className="flex flex-wrap gap-1.5">
+          {options.map((s) => {
+            const selected = item.status === s;
+            return (
+              <button
+                key={s}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => updateItem(listId, item.id, { status: s })}
+                className={`rounded-pill transition ${focusRing} ${selected ? "ring-2 ring-ink/20" : "opacity-55 hover:opacity-90"}`}
+              >
+                <StatusPill status={s} />
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* note */}
-      <p className="mb-1.5 mt-3.5 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">a little note</p>
+      <label htmlFor={`item-note-${item.id}`} className="mb-1.5 mt-3.5 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">a little note</label>
       <textarea
+        id={`item-note-${item.id}`}
         defaultValue={item.note ?? ""}
         onChange={(e) => updateItem(listId, item.id, { note: e.target.value })}
         placeholder="Add a note so future you remembers why ✨"
         rows={2}
-        className="w-full resize-none rounded-lg border border-line bg-paper px-3 py-2 text-[0.9rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none"
+        className={`w-full resize-none rounded-lg border border-line bg-paper px-3 py-2 text-[0.9rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none ${focusRing}`}
       />
 
       {/* tags */}
-      <p className="mb-1.5 mt-3.5 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">tags (optional)</p>
+      <label htmlFor={`item-tags-${item.id}`} className="mb-1.5 mt-3.5 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">tags (optional)</label>
       <input
+        id={`item-tags-${item.id}`}
         defaultValue={(item.tags ?? []).join(", ")}
         onChange={(e) =>
           updateItem(listId, item.id, {
@@ -90,7 +99,7 @@ function ItemEditor({ listId, item }: { listId: string; item: Item }) {
           })
         }
         placeholder="comma, separated, little, labels"
-        className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-[0.9rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none"
+        className={`w-full rounded-lg border border-line bg-paper px-3 py-2 text-[0.9rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none ${focusRing}`}
       />
 
       <div className="mt-3 flex justify-end">
@@ -108,7 +117,7 @@ function ItemEditor({ listId, item }: { listId: string; item: Item }) {
               },
             })
           }
-          className="rounded-pill px-3 py-1.5 text-[0.78rem] font-bold text-brown-soft transition-colors hover:bg-cream-deep hover:text-ink"
+          className={`rounded-pill px-3 py-1.5 text-[0.78rem] font-bold text-brown-soft transition-colors hover:bg-cream-deep hover:text-ink ${focusRing}`}
         >
           Remove from this little list
         </button>

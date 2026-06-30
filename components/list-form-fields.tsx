@@ -11,6 +11,7 @@ import {
 } from "@/lib/types";
 import { themeClass } from "@/lib/visual";
 import { softSpring, tap } from "@/lib/motion";
+import { focusRing } from "@/lib/a11y";
 import { ViewToggle } from "./view-toggle";
 
 const TEMPLATE_ORDER: ListTemplate[] = [
@@ -75,7 +76,7 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
           value={name}
           onChange={(e) => onChange({ name: e.target.value })}
           placeholder="Things that give me the ick…"
-          className="w-full rounded-xl border border-line bg-cream-deep/50 px-4 py-3.5 text-[1.05rem] font-medium text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none"
+          className={`w-full rounded-xl border border-line bg-cream-deep/50 px-4 py-3.5 text-[1.05rem] font-medium text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
         />
       </label>
 
@@ -124,7 +125,7 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
                   whileTap={tap}
                   onClick={() => onChooseTemplate(t)}
                   aria-pressed={active}
-                  className={`${themeClass(meta.theme)} relative flex w-[6.25rem] shrink-0 snap-start flex-col items-center gap-1.5 rounded-xl px-2 py-2.5 text-center transition ${
+                  className={`${themeClass(meta.theme)} ${focusRing} relative flex w-[6.25rem] shrink-0 snap-start flex-col items-center gap-1.5 rounded-xl px-2 py-2.5 text-center transition ${
                     active ? "shadow-soft ring-2 ring-[var(--t-edge)]" : "ring-1 ring-[var(--t-edge)]"
                   }`}
                   style={{ background: active ? "var(--t-wash)" : "var(--t-bg)" }}
@@ -159,8 +160,10 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
             <button
               key={e}
               type="button"
+              aria-label={e}
+              aria-pressed={emoji === e}
               onClick={() => onChange({ emoji: e })}
-              className={`grid aspect-square place-items-center rounded-lg text-xl transition ${
+              className={`grid aspect-square place-items-center rounded-lg text-xl transition ${focusRing} ${
                 emoji === e ? "bg-cream-deep ring-2 ring-ink/20" : "bg-cream-deep/40"
               }`}
             >
@@ -187,7 +190,7 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
                 onClick={() => onChange({ theme: c })}
                 aria-label={`${c} theme`}
                 aria-pressed={active}
-                className={`${themeClass(c)} relative grid h-11 w-11 place-items-center rounded-full transition`}
+                className={`${themeClass(c)} ${focusRing} relative grid h-11 w-11 place-items-center rounded-full transition`}
                 style={{
                   background: "radial-gradient(125% 125% at 32% 24%, var(--t-wash), var(--t) 72%)",
                   boxShadow: active

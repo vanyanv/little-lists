@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 
 const BITS = [
   { emoji: "✨", x: -26, y: -22, d: 0 },
@@ -12,6 +12,9 @@ const BITS = [
 
 /** A tiny, local emoji sparkle pop — shown briefly near a just-saved item. */
 export function SparkleBurst() {
+  const reduce = useReducedMotion();
+  if (reduce) return null;
+
   return (
     <div className="pointer-events-none absolute inset-0 z-20 grid place-items-center">
       {BITS.map((b, i) => (

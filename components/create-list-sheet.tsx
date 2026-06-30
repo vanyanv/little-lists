@@ -11,6 +11,7 @@ import {
 } from "@/lib/types";
 import { themeClass } from "@/lib/visual";
 import { tap } from "@/lib/motion";
+import { focusRingOnDark } from "@/lib/a11y";
 import { BottomSheet } from "./bottom-sheet";
 import { ListFormFields, type ListFormValue } from "./list-form-fields";
 
@@ -102,7 +103,7 @@ function CreateListFlow({ onClose }: { onClose: () => void }) {
           whileTap={tap}
           onClick={save}
           disabled={!canSave}
-          className="w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40"
+          className={`w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40 ${focusRingOnDark}`}
         >
           {saving ? "Making it…" : "Save your little list"}
         </motion.button>

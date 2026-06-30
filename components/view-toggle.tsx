@@ -1,7 +1,8 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { tap } from "@/lib/motion";
+import { focusRing } from "@/lib/a11y";
 import type { ViewMode } from "@/lib/types";
 
 export type { ViewMode } from "@/lib/types";
@@ -56,6 +57,8 @@ const MODES: { id: ViewMode; label: string }[] = [
 
 /** A subtle segmented control to switch how a list is browsed: covers, rows, or cozy notes. */
 export function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v: ViewMode) => void }) {
+  const reduce = useReducedMotion();
+
   return (
     <div className="inline-flex items-center gap-0.5 rounded-pill bg-paper p-0.5 shadow-soft ring-1 ring-line/60">
       {MODES.map((m) => {
@@ -69,13 +72,13 @@ export function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v:
             aria-pressed={active}
             aria-label={`${m.label} view`}
             title={`${m.label} view`}
-            className="relative grid h-8 w-8 place-items-center rounded-full"
+            className={`relative grid h-8 w-8 place-items-center rounded-full ${focusRing}`}
             style={{ color: active ? "var(--color-cream)" : "var(--color-brown)" }}
           >
             {active && (
               <motion.span
                 layoutId="view-pill"
-                transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 32 }}
                 className="absolute inset-0 rounded-full bg-ink shadow-soft"
               />
             )}

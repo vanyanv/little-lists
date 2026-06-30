@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import type { ThemeColor } from "@/lib/types";
 import { THEME_COLORS } from "@/lib/types";
 import { softSpring, tap } from "@/lib/motion";
+import { focusRing } from "@/lib/a11y";
 
 const SWATCH: Record<ThemeColor, string> = {
   blush: "oklch(0.86 0.052 18)",
@@ -43,7 +44,7 @@ export function ThemeChip({ theme, selected, onSelect, size = 34 }: ThemeChipPro
       onClick={() => onSelect?.(theme)}
       aria-label={LABEL[theme]}
       aria-pressed={selected}
-      className="relative grid place-items-center rounded-full"
+      className={`relative grid place-items-center rounded-full ${focusRing}`}
       style={{ width: size + 10, height: size + 10 }}
     >
       {selected && (
@@ -70,7 +71,7 @@ export function ThemeColorPicker({
   onChange: (t: ThemeColor) => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div role="group" aria-label="Theme color" className="flex flex-wrap items-center gap-1.5">
       {THEME_COLORS.map((t) => (
         <ThemeChip key={t} theme={t} selected={t === value} onSelect={onChange} />
       ))}

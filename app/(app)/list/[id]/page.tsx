@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useList, useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { listCountLabel, themeClass } from "@/lib/visual";
 import { softSpring } from "@/lib/motion";
+import { focusRing, focusRingOnDark } from "@/lib/a11y";
 import { STATUS_META, TEMPLATE_META, statusesForList, type List } from "@/lib/types";
 import { DetailHeader } from "@/components/detail-header";
 import { ItemCard } from "@/components/item-card";
@@ -31,6 +32,7 @@ export default function ListDetailScreen() {
   const router = useRouter();
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState<ViewMode>(() => defaultViewFor(list));
+  const reduce = useReducedMotion();
 
   // change the view here AND remember it on the list for next time
   const changeView = (next: ViewMode) => {
@@ -99,7 +101,7 @@ export default function ListDetailScreen() {
       <div className="px-6 pt-32 text-center">
         <p className="font-display text-[1.4rem] font-semibold text-ink">We can&apos;t find that little world</p>
         <p className="mt-2 text-brown">It may have wandered off.</p>
-        <Link href="/" className="mt-6 inline-block rounded-pill bg-ink px-5 py-3 text-sm font-bold text-cream">
+        <Link href="/" className={`mt-6 inline-block rounded-pill bg-ink px-5 py-3 text-sm font-bold text-cream ${focusRingOnDark}`}>
           Back to your lists
         </Link>
       </div>
@@ -143,7 +145,7 @@ export default function ListDetailScreen() {
               <button
                 type="button"
                 onClick={() => openItemSheet(list.id)}
-                className="rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-soft"
+                className={`rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-soft ${focusRingOnDark}`}
               >
                 Add the first little thing
               </button>
@@ -158,7 +160,7 @@ export default function ListDetailScreen() {
               <button
                 type="button"
                 onClick={() => setFilter("all")}
-                className="rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-soft"
+                className={`rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-soft ${focusRingOnDark}`}
               >
                 Show everything
               </button>
@@ -178,9 +180,9 @@ export default function ListDetailScreen() {
                 <motion.div
                   key={item.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.92, y: 12 }}
+                  initial={reduce ? false : { opacity: 0, scale: 0.92, y: 12 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ ...softSpring, delay: Math.min(i, 8) * 0.04 }}
+                  transition={reduce ? softSpring : { ...softSpring, delay: Math.min(i, 8) * 0.04 }}
                 >
                   <ItemCard listId={list.id} item={item} view={view} />
                 </motion.div>

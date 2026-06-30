@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { tap } from "@/lib/motion";
+import { focusRing } from "@/lib/a11y";
 
 type ChipVariant = "filter" | "tag" | "soft";
 
@@ -56,7 +57,7 @@ export function Chip({
       type="button"
       onClick={onClick}
       whileTap={tap}
-      className={`${base} ${size} ${look} ${className}`}
+      className={`${base} ${size} ${look} ${focusRing} ${className}`}
       style={softStyle}
     >
       {children}

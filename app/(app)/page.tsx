@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useUser } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import type { ItemType } from "@/lib/types";
 import { staggerContainer, riseItem, tap } from "@/lib/motion";
+import { focusRing, focusRingOnDark } from "@/lib/a11y";
 import { ListCard } from "@/components/list-card";
 import { Chip } from "@/components/chip";
 import { EmptyState } from "@/components/empty-state";
@@ -25,6 +26,7 @@ export default function HomeScreen() {
   const { user } = useUser();
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState("all");
+  const reduce = useReducedMotion();
 
   const hasLists = lists.length > 0;
 
@@ -61,7 +63,7 @@ export default function HomeScreen() {
               type="button"
               whileTap={tap}
               onClick={openListSheet}
-              className="rounded-pill bg-ink px-6 py-3.5 text-[0.95rem] font-bold text-cream shadow-lift"
+              className={`rounded-pill bg-ink px-6 py-3.5 text-[0.95rem] font-bold text-cream shadow-lift ${focusRingOnDark}`}
             >
               Start a little list
             </motion.button>
@@ -71,15 +73,17 @@ export default function HomeScreen() {
         <>
       {/* search pill */}
       <div className="mt-4 flex items-center gap-2 rounded-pill bg-paper px-4 py-3 shadow-soft ring-1 ring-line/60">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 text-brown-soft">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 text-brown-soft">
           <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2" />
           <path d="M16 16l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>
+        <label htmlFor="home-search" className="sr-only">Search your little worlds</label>
         <input
+          id="home-search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Find a little world…"
-          className="w-full bg-transparent text-[0.98rem] text-ink placeholder:text-brown-soft/80 focus:outline-none"
+          className={`w-full bg-transparent text-[0.98rem] text-ink placeholder:text-brown-soft/80 focus:outline-none ${focusRing}`}
         />
       </div>
 
@@ -98,7 +102,7 @@ export default function HomeScreen() {
           No little worlds here yet. Try another nook ✨
         </p>
       ) : (
-        <motion.div variants={staggerContainer} initial="hidden" animate="show" className="mt-4 flex flex-col gap-3">
+        <motion.div variants={staggerContainer} initial={reduce ? false : "hidden"} animate="show" className="mt-4 flex flex-col gap-3">
           {hero && (
             <motion.div variants={riseItem}>
               <ListCard list={hero} variant="hero" />

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { tap } from "@/lib/motion";
+import { focusRing } from "@/lib/a11y";
 import { Sticker, type StickerName } from "./sticker";
 
 interface DetailHeaderProps {
@@ -28,7 +29,7 @@ export function DetailHeader({ emoji, title, subtitle, sticker = "sparkle", menu
           whileTap={tap}
           onClick={() => router.back()}
           aria-label="Back"
-          className="grid h-10 w-10 place-items-center rounded-full bg-paper/80 text-ink shadow-soft backdrop-blur-sm"
+          className={`grid h-10 w-10 place-items-center rounded-full bg-paper/80 text-ink shadow-soft backdrop-blur-sm ${focusRing}`}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />

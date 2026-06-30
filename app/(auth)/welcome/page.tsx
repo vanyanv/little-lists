@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
+import { focusRingOnDark, focusRing } from "@/lib/a11y";
 
 export default function WelcomePage() {
+  const reduce = useReducedMotion();
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={reduce ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="rounded-[32px] bg-paper px-7 py-10 text-center shadow-lift ring-1 ring-line/60"
@@ -23,13 +26,13 @@ export default function WelcomePage() {
       <div className="mt-8 flex flex-col gap-3">
         <Link
           href="/sign-up"
-          className="rounded-pill bg-ink px-6 py-4 text-[1rem] font-bold text-cream shadow-soft transition-colors hover:bg-ink-soft"
+          className={`rounded-pill bg-ink px-6 py-4 text-[1rem] font-bold text-cream shadow-soft transition-colors hover:bg-ink-soft ${focusRingOnDark}`}
         >
           Create my Little Lists
         </Link>
         <Link
           href="/sign-in"
-          className="rounded-pill bg-paper px-6 py-4 text-[1rem] font-bold text-brown ring-1 ring-line transition-colors hover:bg-cream-deep"
+          className={`rounded-pill bg-paper px-6 py-4 text-[1rem] font-bold text-brown ring-1 ring-line transition-colors hover:bg-cream-deep ${focusRing}`}
         >
           I already have an account
         </Link>

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 import { Sticker, type StickerName } from "./sticker";
 import { softSpring } from "@/lib/motion";
@@ -13,6 +13,8 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ sticker = "sparkle", title, hint, action }: EmptyStateProps) {
+  const reduce = useReducedMotion();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -28,13 +30,13 @@ export function EmptyState({ sticker = "sparkle", title, hint, action }: EmptySt
         />
         {/* the floating sticker */}
         <motion.div
-          animate={{ y: [0, -8, 0], rotate: [-3, 3, -3] }}
-          transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+          animate={reduce ? {} : { y: [0, -8, 0], rotate: [-3, 3, -3] }}
+          transition={reduce ? {} : { duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
         >
           <Sticker name={sticker} size={64} />
         </motion.div>
         {/* twinkles */}
-        {[
+        {!reduce && [
           { x: -38, y: -6, d: 0 },
           { x: 40, y: 8, d: 0.8 },
           { x: 18, y: -40, d: 1.6 },

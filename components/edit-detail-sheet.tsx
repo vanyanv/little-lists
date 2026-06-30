@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
 import { tap } from "@/lib/motion";
+import { focusRing, focusRingOnDark } from "@/lib/a11y";
 import { BottomSheet } from "./bottom-sheet";
 
 export function EditDetailSheet() {
@@ -75,8 +76,9 @@ function EditDetailFlow({
           <button
             key={s.id}
             type="button"
+            aria-pressed={s.id === toSectionId}
             onClick={() => setToSectionId(s.id)}
-            className={`flex shrink-0 items-center gap-1.5 rounded-pill px-3.5 py-2 text-[0.84rem] font-bold transition ${
+            className={`flex shrink-0 items-center gap-1.5 rounded-pill px-3.5 py-2 text-[0.84rem] font-bold transition ${focusRing} ${
               s.id === toSectionId ? "bg-ink text-cream" : "bg-cream-deep text-brown ring-1 ring-line/60"
             }`}
           >
@@ -86,28 +88,33 @@ function EditDetailFlow({
         ))}
       </div>
 
-      <p className="mb-2 mt-5 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">the little thing</p>
+      <label htmlFor="edit-detail-title" className="mb-2 mt-5 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">the little thing</label>
       <input
+        id="edit-detail-title"
         autoFocus
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        className="w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.98rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none"
+        placeholder="What's this little detail?"
+        className={`w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.98rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none ${focusRing}`}
       />
 
-      <p className="mb-2 mt-5 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">a note (optional)</p>
+      <label htmlFor="edit-detail-note" className="mb-2 mt-5 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">a note (optional)</label>
       <textarea
+        id="edit-detail-note"
         value={note}
         onChange={(e) => setNote(e.target.value)}
         rows={2}
-        className="w-full resize-none rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none"
+        placeholder="Why it matters…"
+        className={`w-full resize-none rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none ${focusRing}`}
       />
 
-      <p className="mb-2 mt-5 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">tags (optional)</p>
+      <label htmlFor="edit-detail-tags" className="mb-2 mt-5 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">tags (optional)</label>
       <input
+        id="edit-detail-tags"
         value={tags}
         onChange={(e) => setTags(e.target.value)}
         placeholder="comma, separated, little, labels"
-        className="w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none"
+        className={`w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none ${focusRing}`}
       />
 
       <motion.button
@@ -115,7 +122,7 @@ function EditDetailFlow({
         whileTap={tap}
         onClick={save}
         disabled={!canSave}
-        className="mt-6 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40"
+        className={`mt-6 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40 ${focusRingOnDark}`}
       >
         Save changes
       </motion.button>

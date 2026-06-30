@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { STATUS_META, type StatusId, type StatusTone } from "@/lib/types";
+import { focusRing } from "@/lib/a11y";
 
 const TONE: Record<StatusTone, { bg: string; fg: string; glyph: string }> = {
   good: { bg: "oklch(0.93 0.04 145)", fg: "oklch(0.42 0.07 150)", glyph: "✓" },
@@ -26,7 +27,7 @@ export function StatusPill({ status, size = "sm", onClick, className = "", style
       type={onClick ? "button" : undefined}
       onClick={onClick}
       className={`inline-flex items-center gap-1.5 rounded-pill font-semibold leading-none whitespace-nowrap ${pad} ${
-        onClick ? "transition-transform active:scale-95" : ""
+        onClick ? `transition-transform active:scale-95 ${focusRing}` : ""
       } ${className}`}
       style={{ background: tone.bg, color: tone.fg, ...style }}
     >

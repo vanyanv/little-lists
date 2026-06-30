@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { softSpring } from "@/lib/motion";
+import { focusRingInset } from "@/lib/a11y";
 
 type IconProps = { active: boolean };
 
@@ -44,6 +45,7 @@ const TABS = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const reduce = useReducedMotion();
 
   return (
     <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center">
@@ -54,13 +56,14 @@ export function BottomNav() {
             <Link
               key={href}
               href={href}
-              className="relative flex flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5"
+              aria-current={active ? "page" : undefined}
+              className={`relative flex flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 ${focusRingInset}`}
               style={{ color: active ? "var(--color-ink)" : "var(--color-brown-soft)" }}
             >
               {active && (
                 <motion.span
                   layoutId="nav-pill"
-                  transition={softSpring}
+                  transition={reduce ? { duration: 0 } : softSpring}
                   className="absolute inset-0 rounded-xl bg-cream-deep"
                 />
               )}
