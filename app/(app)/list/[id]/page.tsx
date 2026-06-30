@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { useList, useStore } from "@/lib/store";
@@ -14,6 +14,8 @@ import { ItemCard } from "@/components/item-card";
 import { FilterChips, type FilterOption } from "@/components/filter-chips";
 import { ViewToggle, type ViewMode } from "@/components/view-toggle";
 import { EmptyState } from "@/components/empty-state";
+import { OverflowMenu } from "@/components/overflow-menu";
+import { filterItemsByStatus } from "@/lib/store-helpers";
 
 /** the list's saved view, falling back to its template default */
 function defaultViewFor(list?: Pick<List, "template" | "defaultView">): ViewMode {
@@ -24,8 +26,9 @@ function defaultViewFor(list?: Pick<List, "template" | "defaultView">): ViewMode
 export default function ListDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const list = useList(id);
-  const { hydrated, setListView } = useStore();
-  const { openItemSheet } = useUi();
+  const { hydrated, setListView, deleteList } = useStore();
+  const { openItemSheet, openEditList, openConfirm, showToast } = useUi();
+  const router = useRouter();
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState<ViewMode>(() => defaultViewFor(list));
 
@@ -57,9 +60,33 @@ export default function ListDetailScreen() {
 
   const visible = useMemo(() => {
     if (!list) return [];
-    if (filter === "all") return list.items;
-    return list.items.filter((i) => i.status === filter);
+    return filterItemsByStatus(list.items, filter);
   }, [list, filter]);
+
+  const listMenu = list ? (
+    <OverflowMenu
+      ariaLabel="List options"
+      items={[
+        { label: "Edit list", onSelect: () => openEditList(list.id) },
+        {
+          label: "Delete list",
+          tone: "danger",
+          onSelect: () =>
+            openConfirm({
+              title: "Remove this little list?",
+              body: "This will delete the list and everything inside it.",
+              confirmLabel: "Delete list",
+              tone: "danger",
+              onConfirm: () => {
+                deleteList(list.id);
+                showToast("Removed from your little world");
+                router.replace("/");
+              },
+            }),
+        },
+      ]}
+    />
+  ) : null;
 
   // saved lists load from localStorage after mount — wait for that before
   // deciding a list is truly missing, so a direct URL visit doesn't flash 404
@@ -94,6 +121,7 @@ export default function ListDetailScreen() {
         title={list.title}
         subtitle={listCountLabel(list)}
         sticker={TEMPLATE_META[list.template].sticker}
+        menu={listMenu}
       />
 
       {list.items.length > 0 && (

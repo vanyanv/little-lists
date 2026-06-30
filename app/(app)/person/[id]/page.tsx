@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { usePerson, useStore } from "@/lib/store";
@@ -10,12 +10,14 @@ import { staggerContainer, riseItem, tap } from "@/lib/motion";
 import { DetailHeader } from "@/components/detail-header";
 import { PersonDetailSection } from "@/components/person-detail-section";
 import { EmptyState } from "@/components/empty-state";
+import { OverflowMenu } from "@/components/overflow-menu";
 
 export default function PersonDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const person = usePerson(id);
-  const { deletePersonDetail } = useStore();
-  const { openDetailSheet } = useUi();
+  const { deletePersonDetail, deletePerson } = useStore();
+  const { openDetailSheet, openEditPerson, openConfirm, showToast } = useUi();
+  const router = useRouter();
 
   if (!person) {
     return (
@@ -30,6 +32,31 @@ export default function PersonDetailScreen() {
 
   const filledSections = person.sections.filter((s) => s.entries.length > 0);
 
+  const personMenu = (
+    <OverflowMenu
+      ariaLabel="Person options"
+      items={[
+        { label: "Edit person", onSelect: () => openEditPerson(person.id) },
+        {
+          label: "Delete person",
+          tone: "danger",
+          onSelect: () =>
+            openConfirm({
+              title: "Remove this person?",
+              body: "This will delete them and every little detail you saved.",
+              confirmLabel: "Delete person",
+              tone: "danger",
+              onConfirm: () => {
+                deletePerson(person.id);
+                showToast("Removed from your little world");
+                router.replace("/people");
+              },
+            }),
+        },
+      ]}
+    />
+  );
+
   return (
     <div className={themeClass(person.theme)}>
       <DetailHeader
@@ -37,6 +64,7 @@ export default function PersonDetailScreen() {
         title={`Little things about ${person.name}`}
         subtitle={person.note}
         sticker="heart"
+        menu={personMenu}
       />
 
       {filledSections.length === 0 ? (
