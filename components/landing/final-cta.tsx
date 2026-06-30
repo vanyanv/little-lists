@@ -1,8 +1,16 @@
+"use client";
+
 import Link from "next/link";
+import { motion, useReducedMotion } from "motion/react";
+import { softSpring, tap } from "@/lib/motion";
 import { focusRingOnDark } from "@/lib/a11y";
 import { Sticker } from "@/components/sticker";
 
+// Same tactile press as every tappable surface in the app.
+const MotionLink = motion.create(Link);
+
 export function FinalCta() {
+  const reduce = useReducedMotion();
   return (
     <section className="px-5 pb-[calc(env(safe-area-inset-bottom)+4rem)] pt-6">
       <div className="relative mx-auto max-w-2xl overflow-hidden rounded-[var(--radius-2xl)] bg-ink px-6 py-14 text-center shadow-lift">
@@ -14,12 +22,14 @@ export function FinalCta() {
         <p className="mx-auto mt-3 max-w-[26rem] text-[1.02rem] leading-relaxed text-cream/80">
           It only takes a few taps. Watch your tiny archive begin.
         </p>
-        <Link
+        <MotionLink
           href="/sign-up"
-          className={`mt-7 inline-flex items-center justify-center rounded-pill bg-cream px-8 py-4 text-[1.02rem] font-bold text-ink shadow-soft transition-transform hover:scale-[1.03] ${focusRingOnDark}`}
+          whileTap={reduce ? undefined : tap}
+          transition={softSpring}
+          className={`mt-7 inline-flex items-center justify-center rounded-pill bg-cream px-8 py-4 text-[1.02rem] font-bold text-ink shadow-soft transition-colors hover:bg-paper ${focusRingOnDark}`}
         >
           Create my Little Lists
-        </Link>
+        </MotionLink>
       </div>
     </section>
   );

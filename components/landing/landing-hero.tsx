@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
+import { softSpring, tap } from "@/lib/motion";
 import { focusRing, focusRingOnDark } from "@/lib/a11y";
 import { Sticker } from "@/components/sticker";
 import { AppPreview } from "./app-preview";
+
+// Animate the CTAs as the app animates every tappable surface: a soft press.
+const MotionLink = motion.create(Link);
 
 export function LandingHero() {
   const reduce = useReducedMotion();
@@ -41,18 +45,22 @@ export function LandingHero() {
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
-            <Link
+            <MotionLink
               href="/sign-up"
+              whileTap={reduce ? undefined : tap}
+              transition={softSpring}
               className={`inline-flex items-center justify-center rounded-pill bg-ink px-7 py-4 text-[1rem] font-bold text-cream shadow-lift transition-colors hover:bg-ink-soft ${focusRingOnDark}`}
             >
               Start your little world
-            </Link>
-            <Link
+            </MotionLink>
+            <MotionLink
               href="#use-cases"
+              whileTap={reduce ? undefined : tap}
+              transition={softSpring}
               className={`inline-flex items-center justify-center rounded-pill bg-paper px-7 py-4 text-[1rem] font-bold text-brown ring-1 ring-line transition-colors hover:bg-cream-deep ${focusRing}`}
             >
               See how it works
-            </Link>
+            </MotionLink>
           </div>
         </motion.div>
 
