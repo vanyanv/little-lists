@@ -47,7 +47,7 @@ export function FloatingAddButton() {
           transition={{ ...softSpring, delay: 0.15 }}
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.9 }}
-          className={`pointer-events-auto absolute bottom-[5.25rem] right-5 grid place-items-center rounded-full text-cream shadow-lift ${focusRingOnDark}`}
+          className={`pointer-events-auto absolute bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-5 grid place-items-center rounded-full text-cream shadow-lift ${focusRingOnDark}`}
           style={{ height: 60, width: 60, background: "var(--color-ink)" }}
         >
           <motion.span

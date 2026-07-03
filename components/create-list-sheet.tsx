@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "motion/react";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import {
@@ -10,8 +9,7 @@ import {
   type ListTemplate,
 } from "@/lib/types";
 import { themeClass } from "@/lib/visual";
-import { tap } from "@/lib/motion";
-import { focusRingOnDark } from "@/lib/a11y";
+import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
 import { ListFormFields, type ListFormValue } from "./list-form-fields";
 
@@ -98,15 +96,9 @@ function CreateListFlow({ onClose }: { onClose: () => void }) {
           aria-hidden
           className="pointer-events-none absolute inset-x-0 -top-5 h-5 bg-gradient-to-t from-paper to-transparent"
         />
-        <motion.button
-          type="button"
-          whileTap={tap}
-          onClick={save}
-          disabled={!canSave}
-          className={`w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40 ${focusRingOnDark}`}
-        >
+        <Button block size="lg" onClick={save} disabled={!canSave}>
           {saving ? "Making it…" : "Save your little list"}
-        </motion.button>
+        </Button>
       </div>
     </div>
   );

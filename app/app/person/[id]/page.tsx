@@ -1,17 +1,16 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { usePerson, useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
-import { staggerContainer, riseItem, tap } from "@/lib/motion";
-import { focusRing, focusRingOnDark } from "@/lib/a11y";
+import { staggerContainer, riseItem } from "@/lib/motion";
 import { DetailHeader } from "@/components/detail-header";
 import { PersonDetailSection } from "@/components/person-detail-section";
 import { EmptyState } from "@/components/empty-state";
 import { OverflowMenu } from "@/components/overflow-menu";
+import { Button } from "@/components/button";
 
 export default function PersonDetailScreen() {
   const { id } = useParams<{ id: string }>();
@@ -25,9 +24,9 @@ export default function PersonDetailScreen() {
     return (
       <div className="px-6 pt-32 text-center">
         <h1 className="font-display text-[1.4rem] font-semibold text-ink">We can&apos;t find that person</h1>
-        <Link href="/app/people" className={`mt-6 inline-block rounded-pill bg-ink px-5 py-3 text-sm font-bold text-cream ${focusRingOnDark}`}>
+        <Button href="/app/people" size="sm" className="mt-6">
           Back to your people
-        </Link>
+        </Button>
       </div>
     );
   }
@@ -74,16 +73,7 @@ export default function PersonDetailScreen() {
           sticker="heart"
           title="No little details yet"
           hint="Save the first one and start a cozy archive of what makes them, them."
-          action={
-            <motion.button
-              type="button"
-              whileTap={tap}
-              onClick={() => openDetailSheet(person.id)}
-              className={`rounded-pill bg-ink px-6 py-3.5 text-[0.95rem] font-bold text-cream shadow-lift ${focusRingOnDark}`}
-            >
-              Add a little detail
-            </motion.button>
-          }
+          action={<Button onClick={() => openDetailSheet(person.id)}>Add a little detail</Button>}
         />
       ) : (
         <motion.div

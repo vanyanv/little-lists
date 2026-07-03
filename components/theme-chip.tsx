@@ -6,13 +6,14 @@ import { THEME_COLORS } from "@/lib/types";
 import { softSpring, tap } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
 
+// the theme base hues, straight from the design tokens
 const SWATCH: Record<ThemeColor, string> = {
-  blush: "oklch(0.86 0.052 18)",
-  butter: "oklch(0.9 0.075 95)",
-  sage: "oklch(0.85 0.045 145)",
-  sky: "oklch(0.86 0.045 248)",
-  lavender: "oklch(0.84 0.058 300)",
-  clay: "oklch(0.85 0.045 55)",
+  blush: "var(--color-blush)",
+  butter: "var(--color-butter)",
+  sage: "var(--color-sage)",
+  sky: "var(--color-sky)",
+  lavender: "var(--color-lavender)",
+  clay: "var(--color-clay)",
 };
 
 const LABEL: Record<ThemeColor, string> = {
@@ -23,10 +24,6 @@ const LABEL: Record<ThemeColor, string> = {
   lavender: "Lavender",
   clay: "Clay",
 };
-
-export function swatchOf(theme: ThemeColor): string {
-  return SWATCH[theme];
-}
 
 interface ThemeChipProps {
   theme: ThemeColor;

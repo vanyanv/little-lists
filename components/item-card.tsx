@@ -5,7 +5,7 @@ import type { Item } from "@/lib/types";
 import { ITEM_TYPE_META, STATUSES_FOR } from "@/lib/types";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
-import { focusRing, focusRingOnDark } from "@/lib/a11y";
+import { focusRing } from "@/lib/a11y";
 import { ExpandableCard } from "./expandable-card";
 import { PosterCard } from "./poster-card";
 import { NoteCard } from "./note-card";
@@ -30,7 +30,7 @@ function ItemEditor({ listId, item }: { listId: string; item: Item }) {
         id={`item-title-${item.id}`}
         defaultValue={item.title}
         onChange={(e) => updateItem(listId, item.id, { title: e.target.value })}
-        className={`w-full rounded-lg border border-line bg-paper px-3 py-2 text-[0.95rem] font-medium text-ink focus:border-[var(--t-edge)] focus:outline-none ${focusRing}`}
+        className={`w-full rounded-lg border border-line bg-paper px-3 py-2 text-[0.95rem] font-medium text-ink focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
       />
 
       {/* emoji — note-type items only */}
@@ -85,7 +85,7 @@ function ItemEditor({ listId, item }: { listId: string; item: Item }) {
         onChange={(e) => updateItem(listId, item.id, { note: e.target.value })}
         placeholder="Add a note so future you remembers why ✨"
         rows={2}
-        className={`w-full resize-none rounded-lg border border-line bg-paper px-3 py-2 text-[0.9rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none ${focusRing}`}
+        className={`w-full resize-none rounded-lg border border-line bg-paper px-3 py-2 text-[0.9rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
       />
 
       {/* tags */}
@@ -99,7 +99,7 @@ function ItemEditor({ listId, item }: { listId: string; item: Item }) {
           })
         }
         placeholder="comma, separated, little, labels"
-        className={`w-full rounded-lg border border-line bg-paper px-3 py-2 text-[0.9rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none ${focusRing}`}
+        className={`w-full rounded-lg border border-line bg-paper px-3 py-2 text-[0.9rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
       />
 
       <div className="mt-3 flex justify-end">

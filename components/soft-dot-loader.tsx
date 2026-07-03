@@ -2,11 +2,12 @@
 
 import { motion, useReducedMotion } from "motion/react";
 
+// the theme base hues, straight from the design tokens
 const DOTS = [
-  "oklch(0.86 0.052 18)",
-  "oklch(0.9 0.075 95)",
-  "oklch(0.85 0.045 145)",
-  "oklch(0.84 0.058 300)",
+  "var(--color-blush)",
+  "var(--color-butter)",
+  "var(--color-sage)",
+  "var(--color-lavender)",
 ];
 
 interface SoftDotLoaderProps {

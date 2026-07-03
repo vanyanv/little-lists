@@ -11,6 +11,7 @@ import { focusRing } from "@/lib/a11y";
 import { ProfileHeader } from "@/components/profile-header";
 import { ListCard } from "@/components/list-card";
 import { PlaceholderPoster } from "@/components/placeholder-poster";
+import { Button } from "@/components/button";
 
 export default function ProfileScreen() {
   const { profile, lists } = useStore();
@@ -95,12 +96,7 @@ export default function ProfileScreen() {
 
       <div className="mt-10 mb-4 flex justify-center">
         <SignOutButton>
-          <button
-            type="button"
-            className={`rounded-pill bg-paper px-6 py-3 text-[0.92rem] font-bold text-brown ring-1 ring-line shadow-soft transition-colors hover:bg-cream-deep ${focusRing}`}
-          >
-            Sign out of your little world
-          </button>
+          <Button variant="soft" size="sm">Sign out of your little world</Button>
         </SignOutButton>
       </div>
     </div>

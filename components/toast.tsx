@@ -26,7 +26,7 @@ export function Toast() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.96 }}
               transition={softSpring}
-              className="pointer-events-auto absolute inset-x-0 bottom-[5.5rem] mx-auto flex w-fit max-w-[88%] items-center gap-2 rounded-pill bg-ink px-4 py-3 text-cream shadow-lift"
+              className="pointer-events-auto absolute inset-x-0 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] mx-auto flex w-fit max-w-[88%] items-center gap-2 rounded-pill bg-ink px-4 py-3 text-cream shadow-lift"
             >
               <span className="text-[0.92rem] font-bold leading-none">{toast.message}</span>
             </motion.div>

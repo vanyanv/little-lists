@@ -1,7 +1,7 @@
 "use client";
 
 import type { ThemeColor } from "@/lib/types";
-import { focusRing } from "@/lib/a11y";
+import { inputPrimary, inputField } from "@/lib/field";
 import { EmojiPicker } from "./emoji-picker";
 import { ThemeColorPicker } from "./theme-chip";
 
@@ -46,7 +46,7 @@ export function PersonFormFields({ value, onChange }: PersonFormFieldsProps) {
           value={name}
           onChange={(e) => onChange({ name: e.target.value })}
           placeholder="Mom, best friend, a partner…"
-          className={`w-full rounded-xl border border-line bg-cream-deep/50 px-4 py-3.5 text-[1.05rem] font-medium text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
+          className={inputPrimary}
         />
       </label>
 
@@ -71,7 +71,7 @@ export function PersonFormFields({ value, onChange }: PersonFormFieldsProps) {
           value={note}
           onChange={(e) => onChange({ note: e.target.value })}
           placeholder="horror movies, cozy books, no mushrooms…"
-          className={`w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
+          className={inputField}
         />
       </label>
     </>

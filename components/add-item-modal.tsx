@@ -15,7 +15,9 @@ import {
 import type { SearchHit } from "@/lib/search/types";
 import { themeClass } from "@/lib/visual";
 import { staggerContainer, riseItem, softSpring, tap } from "@/lib/motion";
-import { focusRing, focusRingOnDark } from "@/lib/a11y";
+import { focusRing } from "@/lib/a11y";
+import { inputPrimary, inputField, textareaField } from "@/lib/field";
+import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
 import { SoftDotLoader } from "./soft-dot-loader";
 import { Cover } from "./cover";
@@ -212,7 +214,7 @@ function AddItemFlow({
                 if (!searchable) setTitle(e.target.value);
               }}
               placeholder={searchable ? "Search a title…" : "Give it a name…"}
-              className={`mt-4 w-full rounded-xl border border-line bg-cream-deep/50 px-4 py-3.5 text-[1.05rem] font-medium text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
+              className={`mt-4 ${inputPrimary}`}
             />
 
             {/* type picker only when there's no list context yet */}
@@ -321,15 +323,9 @@ function AddItemFlow({
                     </button>
                   ))}
                 </div>
-                <motion.button
-                  type="button"
-                  whileTap={tap}
-                  onClick={continueManual}
-                  disabled={!title.trim()}
-                  className={`mt-4 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40 ${focusRingOnDark}`}
-                >
+                <Button block size="lg" onClick={continueManual} disabled={!title.trim()} className="mt-4">
                   Continue
-                </motion.button>
+                </Button>
               </div>
             )}
           </motion.div>
@@ -477,7 +473,7 @@ function DetailsStep(props: {
             value={subtitle}
             onChange={(e) => setSubtitle(e.target.value)}
             placeholder={extraField.placeholder}
-            className={`w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
+            className={inputField}
           />
         </div>
       )}
@@ -490,7 +486,7 @@ function DetailsStep(props: {
           onChange={(e) => setNote(e.target.value)}
           rows={2}
           placeholder="Add a note so future you remembers why ✨"
-          className={`w-full resize-none rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
+          className={textareaField}
         />
       </div>
 
@@ -501,19 +497,13 @@ function DetailsStep(props: {
           value={tag}
           onChange={(e) => setTag(e.target.value)}
           placeholder="like a person, a mood, a someday…"
-          className={`w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
+          className={inputField}
         />
       </div>
 
-      <motion.button
-        type="button"
-        whileTap={tap}
-        onClick={onSave}
-        disabled={!title.trim() || saving}
-        className={`mt-6 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40 ${focusRingOnDark}`}
-      >
+      <Button block size="lg" onClick={onSave} disabled={!title.trim() || saving} className="mt-6">
         {saving ? "Saving…" : "Save it to your little world"}
-      </motion.button>
+      </Button>
     </motion.div>
   );
 }

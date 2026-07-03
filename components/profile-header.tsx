@@ -5,10 +5,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { useUser } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import { themeClass } from "@/lib/visual";
-import { softSpring, tap } from "@/lib/motion";
-import { focusRingOnDark } from "@/lib/a11y";
+import { softSpring } from "@/lib/motion";
 import { ThemeColorPicker } from "./theme-chip";
 import { Sticker } from "./sticker";
+import { Button } from "./button";
 
 export function ProfileHeader() {
   const { profile, setProfileTheme, fireCelebration } = useStore();
@@ -72,14 +72,9 @@ export function ProfileHeader() {
       </div>
 
       <div className="mt-5 flex items-center gap-3">
-        <motion.button
-          type="button"
-          whileTap={tap}
-          onClick={share}
-          className={`flex-1 rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-soft ${focusRingOnDark}`}
-        >
+        <Button size="sm" onClick={share} className="flex-1">
           Share your little world
-        </motion.button>
+        </Button>
       </div>
 
       <div className="mt-5">

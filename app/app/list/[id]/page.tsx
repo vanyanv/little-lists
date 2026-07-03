@@ -2,13 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useList, useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { listCountLabel, themeClass } from "@/lib/visual";
 import { softSpring } from "@/lib/motion";
-import { focusRing, focusRingOnDark } from "@/lib/a11y";
 import { STATUS_META, TEMPLATE_META, statusesForList, type List } from "@/lib/types";
 import { DetailHeader } from "@/components/detail-header";
 import { ItemCard } from "@/components/item-card";
@@ -16,6 +14,7 @@ import { FilterChips, type FilterOption } from "@/components/filter-chips";
 import { ViewToggle, type ViewMode } from "@/components/view-toggle";
 import { EmptyState } from "@/components/empty-state";
 import { OverflowMenu } from "@/components/overflow-menu";
+import { Button } from "@/components/button";
 import { filterItemsByStatus } from "@/lib/store-helpers";
 
 /** the list's saved view, falling back to its template default */
@@ -101,9 +100,9 @@ export default function ListDetailScreen() {
       <div className="px-6 pt-32 text-center">
         <p className="font-display text-[1.4rem] font-semibold text-ink">We can&apos;t find that little world</p>
         <p className="mt-2 text-brown">It may have wandered off.</p>
-        <Link href="/app" className={`mt-6 inline-block rounded-pill bg-ink px-5 py-3 text-sm font-bold text-cream ${focusRingOnDark}`}>
+        <Button href="/app" size="sm" className="mt-6">
           Back to your lists
-        </Link>
+        </Button>
       </div>
     );
   }
@@ -142,13 +141,9 @@ export default function ListDetailScreen() {
             title="Nothing here yet"
             hint="Add the first little thing and watch your collection begin ✨"
             action={
-              <button
-                type="button"
-                onClick={() => openItemSheet(list.id)}
-                className={`rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-lift ${focusRingOnDark}`}
-              >
+              <Button size="sm" onClick={() => openItemSheet(list.id)}>
                 Add the first little thing
-              </button>
+              </Button>
             }
           />
         ) : visible.length === 0 ? (
@@ -157,13 +152,9 @@ export default function ListDetailScreen() {
             title={`Nothing under ${activeLabel.toLowerCase()} yet`}
             hint="Peek at another filter, or add something new to this little world."
             action={
-              <button
-                type="button"
-                onClick={() => setFilter("all")}
-                className={`rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-lift ${focusRingOnDark}`}
-              >
+              <Button size="sm" onClick={() => setFilter("all")}>
                 Show everything
-              </button>
+              </Button>
             }
           />
         ) : (

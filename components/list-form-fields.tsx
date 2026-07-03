@@ -11,6 +11,7 @@ import {
 import { themeClass } from "@/lib/visual";
 import { softSpring, tap } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
+import { inputPrimary } from "@/lib/field";
 import { ViewToggle } from "./view-toggle";
 import { EmojiPicker } from "./emoji-picker";
 import { ThemeColorPicker } from "./theme-chip";
@@ -77,7 +78,7 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
           value={name}
           onChange={(e) => onChange({ name: e.target.value })}
           placeholder="Things that give me the ick…"
-          className={`w-full rounded-xl border border-line bg-cream-deep/50 px-4 py-3.5 text-[1.05rem] font-medium text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
+          className={inputPrimary}
         />
       </label>
 

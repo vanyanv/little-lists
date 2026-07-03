@@ -6,11 +6,12 @@ import { useUser } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import type { ItemType } from "@/lib/types";
-import { staggerContainer, riseItem, tap } from "@/lib/motion";
-import { focusRing, focusRingOnDark } from "@/lib/a11y";
+import { staggerContainer, riseItem } from "@/lib/motion";
+import { focusRing } from "@/lib/a11y";
 import { ListCard } from "@/components/list-card";
 import { Chip } from "@/components/chip";
 import { EmptyState } from "@/components/empty-state";
+import { Button } from "@/components/button";
 
 const CATEGORIES: { id: string; label: string; kinds: ItemType[] | null }[] = [
   { id: "all", label: "Everything", kinds: null },
@@ -58,16 +59,7 @@ export default function HomeScreen() {
           sticker="sparkle"
           title="No little worlds yet"
           hint="Start your first list and watch your tiny archive begin ✨"
-          action={
-            <motion.button
-              type="button"
-              whileTap={tap}
-              onClick={openListSheet}
-              className={`rounded-pill bg-ink px-6 py-3.5 text-[0.95rem] font-bold text-cream shadow-lift ${focusRingOnDark}`}
-            >
-              Start a little list
-            </motion.button>
-          }
+          action={<Button onClick={openListSheet}>Start a little list</Button>}
         />
       ) : (
         <>
@@ -104,16 +96,15 @@ export default function HomeScreen() {
           hint="Peek at another filter, or start a new little world."
           action={
             (query || cat !== "all") && (
-              <button
-                type="button"
+              <Button
+                size="sm"
                 onClick={() => {
                   setQuery("");
                   setCat("all");
                 }}
-                className={`rounded-pill bg-ink px-5 py-3 text-[0.92rem] font-bold text-cream shadow-lift ${focusRingOnDark}`}
               >
                 Show everything
-              </button>
+              </Button>
             )
           }
         />

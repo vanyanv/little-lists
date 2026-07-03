@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "motion/react";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
-import { tap } from "@/lib/motion";
-import { focusRing, focusRingOnDark } from "@/lib/a11y";
+import { focusRing } from "@/lib/a11y";
+import { inputPrimary, inputField, textareaField } from "@/lib/field";
+import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
 
 export function AddDetailSheet() {
@@ -89,7 +89,7 @@ function DetailFlow({ personId, onClose }: { personId: string; onClose: () => vo
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="loves matcha, allergic to cilantro, birthday in March…"
-        className={`w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.98rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none ${focusRing}`}
+        className={inputPrimary}
       />
 
       <label htmlFor="add-detail-note" className="mb-2 mt-5 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">a note (optional)</label>
@@ -99,7 +99,7 @@ function DetailFlow({ personId, onClose }: { personId: string; onClose: () => vo
         onChange={(e) => setNote(e.target.value)}
         rows={2}
         placeholder="why it matters, the little context behind it…"
-        className={`w-full resize-none rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none ${focusRing}`}
+        className={textareaField}
       />
 
       <label htmlFor="add-detail-tags" className="mb-2 mt-5 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">tags (optional)</label>
@@ -108,18 +108,12 @@ function DetailFlow({ personId, onClose }: { personId: string; onClose: () => vo
         value={tags}
         onChange={(e) => setTags(e.target.value)}
         placeholder="comma, separated, little, labels"
-        className={`w-full rounded-xl border border-line bg-cream-deep/40 px-4 py-3 text-[0.95rem] text-ink placeholder:text-brown-soft/70 focus:border-[var(--t-edge)] focus:outline-none ${focusRing}`}
+        className={inputField}
       />
 
-      <motion.button
-        type="button"
-        whileTap={tap}
-        onClick={save}
-        disabled={!canSave}
-        className={`mt-6 w-full rounded-pill bg-ink py-4 text-[1rem] font-bold text-cream shadow-lift disabled:opacity-40 ${focusRingOnDark}`}
-      >
+      <Button block size="lg" onClick={save} disabled={!canSave} className="mt-6">
         {saving ? "Saving…" : "Keep it in their little world"}
-      </motion.button>
+      </Button>
     </div>
   );
 }
