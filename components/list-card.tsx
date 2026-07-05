@@ -11,19 +11,9 @@ import { useUi } from "@/lib/ui";
 import { focusRing } from "@/lib/a11y";
 import { CardStack } from "./card-stack";
 import { Sticker } from "./sticker";
+import { StickerBadge } from "./icons/sticker-badge";
 import { ViewIcon } from "./view-toggle";
 import { OverflowMenu } from "./overflow-menu";
-
-function EmojiTile({ emoji, size = 46 }: { emoji: string; size?: number }) {
-  return (
-    <span
-      className="grid shrink-0 place-items-center rounded-xl bg-paper shadow-soft"
-      style={{ width: size, height: size, fontSize: size * 0.5 }}
-    >
-      {emoji}
-    </span>
-  );
-}
 
 /** template label + the list's default-view glyph, the "what kind of world is this" line */
 function ListMeta({ list, size = "normal" }: { list: List; size?: "hero" | "normal" }) {
@@ -99,7 +89,7 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
         {hero ? (
           <div className="relative flex items-end justify-between gap-3 p-5">
             <div className="min-w-0 flex-1">
-              <EmojiTile emoji={list.emoji} size={52} />
+              <StickerBadge emoji={list.emoji} size={52} rounded="rounded-xl" />
               <h2 className="mt-3 font-display text-[1.4rem] font-semibold leading-[1.12] text-[var(--t-ink)]">
                 {list.title}
               </h2>
@@ -113,7 +103,7 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
         ) : (
           <div className="relative p-4">
             <div className="flex items-start justify-between gap-2">
-              <EmojiTile emoji={list.emoji} />
+              <StickerBadge emoji={list.emoji} size={46} rounded="rounded-xl" />
               <div className="pt-0.5">
                 <CardStack items={list.items.slice(0, 3)} kind={list.kind} size="sm" />
               </div>

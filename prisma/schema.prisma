@@ -42,15 +42,18 @@ enum PersonDetailSection {
 }
 
 model Profile {
-  id          String   @id @default(cuid())
-  clerkUserId String   @unique
-  displayName String
-  handle      String?
-  avatarUrl   String?
-  bio         String?
-  themeColor  String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  clerkUserId         String   @unique
+  displayName         String
+  handle              String?
+  avatarUrl           String?
+  bio                 String?
+  themeColor          String?
+  onboardingCompleted Boolean  @default(false)
+  demoSeeded          Boolean  @default(false)
+  checklistDismissed  Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   lists         List[]
   items         ListItem[]

@@ -5,17 +5,19 @@ import { prisma } from "@/lib/prisma";
 import { requireUserProfile } from "@/lib/server/profile";
 import { DB_SECTION_TO_ID, ID_TO_DB_SECTION } from "@/lib/people";
 import { mapItem, mapList, mapPerson, mapProfile, templateToDb } from "@/lib/server/serialize";
-import type {
-  Item,
-  ItemType,
-  List,
-  ListTemplate,
-  Person,
-  PersonDetailEntry,
-  Profile,
-  StatusId,
-  ThemeColor,
-  ViewMode,
+import { DEMO_PERSON, STARTER_OPTIONS } from "@/lib/onboarding";
+import {
+  TEMPLATE_META,
+  type Item,
+  type ItemType,
+  type List,
+  type ListTemplate,
+  type Person,
+  type PersonDetailEntry,
+  type Profile,
+  type StatusId,
+  type ThemeColor,
+  type ViewMode,
 } from "@/lib/types";
 
 /* ── lists ───────────────────────────────────────────────────────────── */
@@ -327,6 +329,7 @@ export interface UpdateProfilePatch {
   handle?: string;
   bio?: string;
   themeColor?: ThemeColor;
+  checklistDismissed?: boolean;
 }
 
 export async function updateProfileAction(patch: UpdateProfilePatch): Promise<Profile> {
@@ -338,7 +341,93 @@ export async function updateProfileAction(patch: UpdateProfilePatch): Promise<Pr
       ...(patch.handle !== undefined ? { handle: patch.handle } : {}),
       ...(patch.bio !== undefined ? { bio: patch.bio } : {}),
       ...(patch.themeColor !== undefined ? { themeColor: patch.themeColor } : {}),
+      ...(patch.checklistDismissed !== undefined ? { checklistDismissed: patch.checklistDismissed } : {}),
     },
   });
   return mapProfile(row);
+}
+
+/* ── onboarding ──────────────────────────────────────────────────────── */
+
+export interface OnboardingSelections {
+  /** STARTER_OPTIONS ids the user picked */
+  starters: string[];
+  /** the "Little things about someone" card */
+  includePerson: boolean;
+  /** the "add a few example ideas" toggle */
+  seedExamples: boolean;
+}
+
+export async function completeOnboardingAction(sel: OnboardingSelections): Promise<void> {
+  const { clerkUserId } = await requireUserProfile();
+
+  const chosen = STARTER_OPTIONS.filter((opt) => sel.starters.includes(opt.id));
+  // Sam comes along either way: picking the person card asks for them, and the
+  // examples toggle includes them so the people feature isn't an empty mystery.
+  const seedPerson = sel.includePerson || sel.seedExamples;
+  const demoSeeded = sel.seedExamples || sel.includePerson;
+
+  await prisma.$transaction(async (tx) => {
+    // Claim the flag first: a double-submit (or back-button replay) loses this
+    // updateMany and returns without seeding anything twice.
+    const claimed = await tx.profile.updateMany({
+      where: { clerkUserId, onboardingCompleted: false },
+      data: { onboardingCompleted: true, demoSeeded },
+    });
+    if (claimed.count === 0) return;
+
+    for (const opt of chosen) {
+      const meta = TEMPLATE_META[opt.template];
+      await tx.list.create({
+        data: {
+          userId: clerkUserId,
+          title: opt.title,
+          emoji: opt.emoji,
+          themeColor: meta.theme,
+          templateType: templateToDb(opt.template),
+          defaultViewMode: meta.defaultView,
+          ...(sel.seedExamples
+            ? {
+                items: {
+                  create: opt.demoItems.map((item) => ({
+                    userId: clerkUserId,
+                    title: item.title,
+                    status: item.status,
+                    emoji: item.emoji ?? null,
+                    metadata: { type: meta.kind } satisfies Prisma.InputJsonObject,
+                  })),
+                },
+              }
+            : {}),
+        },
+      });
+    }
+
+    if (seedPerson) {
+      await tx.person.create({
+        data: {
+          userId: clerkUserId,
+          name: DEMO_PERSON.name,
+          emoji: DEMO_PERSON.emoji,
+          themeColor: DEMO_PERSON.theme,
+          shortNote: DEMO_PERSON.note,
+          details: {
+            create: DEMO_PERSON.details.map((d) => ({
+              userId: clerkUserId,
+              section: ID_TO_DB_SECTION[d.sectionId],
+              title: d.title,
+            })),
+          },
+        },
+      });
+    }
+  });
+}
+
+export async function skipOnboardingAction(): Promise<void> {
+  const { clerkUserId } = await requireUserProfile();
+  await prisma.profile.update({
+    where: { clerkUserId },
+    data: { onboardingCompleted: true },
+  });
 }

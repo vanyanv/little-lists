@@ -119,5 +119,7 @@ export function mapProfile(row: DbProfile): Profile {
     tags: [],
     featuredListIds: [],
     isPublic: false,
+    demoSeeded: row.demoSeeded,
+    checklistDismissed: row.checklistDismissed,
   };
 }

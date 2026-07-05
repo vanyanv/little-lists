@@ -195,6 +195,10 @@ export interface Profile {
   tags: string[];
   featuredListIds: string[];
   isPublic: boolean;
+  /** onboarding seeded example content — drives the "make them yours" banner */
+  demoSeeded: boolean;
+  /** the Home first-steps checklist was hidden (or shouldn't be shown) */
+  checklistDismissed: boolean;
 }
 
 export const ITEM_TYPE_META: Record<

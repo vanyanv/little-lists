@@ -8,6 +8,7 @@ import { focusRing } from "@/lib/a11y";
 import { inputPrimary, inputField, textareaField } from "@/lib/field";
 import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
+import { CategoryIcon } from "./icons/category-icon";
 
 export function AddDetailSheet() {
   const { sheet, closeSheet } = useUi();
@@ -76,7 +77,7 @@ function DetailFlow({ personId, onClose }: { personId: string; onClose: () => vo
               s.id === sectionId ? "bg-ink text-cream" : "bg-cream-deep text-brown ring-1 ring-line/60"
             }`}
           >
-            <span>{s.emoji}</span>
+            <CategoryIcon id={s.id} size={14} />
             {s.label}
           </button>
         ))}

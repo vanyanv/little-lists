@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import type { Item } from "@/lib/types";
 import { ITEM_TYPE_META } from "@/lib/types";
@@ -17,11 +17,14 @@ export function Cover({
   badge,
   rounded = "rounded-xl",
   className = "",
+  sizes = "(max-width: 640px) 50vw, 25vw",
 }: {
   item: Item;
-  badge?: string;
+  badge?: ReactNode;
   rounded?: string;
   className?: string;
+  /** next/image sizes hint — pass a small value for thumbnails so we don't over-fetch */
+  sizes?: string;
 }) {
   const [errored, setErrored] = useState(false);
   const seed = item.seed || item.title;
@@ -41,12 +44,12 @@ export function Cover({
   }
 
   return (
-    <div className={`relative overflow-hidden ${ASPECT_CLASS[shape]} ${rounded} ${className}`}>
+    <div className={`relative overflow-hidden bg-cream-deep ${ASPECT_CLASS[shape]} ${rounded} ${className}`}>
       <Image
         src={item.imageUrl}
         alt={item.title}
         fill
-        sizes="(max-width: 640px) 50vw, 25vw"
+        sizes={sizes}
         className="object-cover"
         loading="lazy"
         onError={() => setErrored(true)}

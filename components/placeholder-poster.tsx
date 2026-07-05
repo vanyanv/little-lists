@@ -1,10 +1,11 @@
+import type { ReactNode } from "react";
 import { initialOf, posterGradient, posterInk } from "@/lib/visual";
 
 interface PlaceholderPosterProps {
   seed: string;
   title: string;
-  /** small accent shown in the corner (emoji) */
-  badge?: string;
+  /** small accent shown in the corner (emoji or glyph) */
+  badge?: ReactNode;
   aspect?: "poster" | "square" | "wide";
   rounded?: string;
   className?: string;

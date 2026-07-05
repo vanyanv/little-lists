@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
 import { ListsProvider, type StoreSeed } from "@/lib/store";
 import { AppShell } from "@/components/app-shell";
 import { ensureProfileForClerkUser } from "@/lib/server/profile";
@@ -20,17 +21,27 @@ const FALLBACK_PROFILE: Profile = {
   tags: [],
   featuredListIds: [],
   isPublic: false,
+  demoSeeded: false,
+  // don't flash the first-steps checklist while the real profile is unknown
+  checklistDismissed: true,
 };
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   // First protected-route access for a signed-in user creates their Profile.
   // Idempotent; guarded so a transient DB outage degrades to "profile not yet
-  // created" (retried next request) rather than taking down the app.
+  // created" (retried next request) rather than taking down the app — on
+  // outage needsOnboarding stays false: degrade into the app, never trap.
+  let needsOnboarding = false;
   try {
-    await ensureProfileForClerkUser();
+    const profileRow = await ensureProfileForClerkUser();
+    needsOnboarding = !!profileRow && !profileRow.onboardingCompleted;
   } catch (err) {
     console.error("ensureProfileForClerkUser failed; will retry next request", err);
   }
+
+  // redirect() throws NEXT_REDIRECT, so it must sit outside the try/catch.
+  // Onboarding is outside this (main) route group, so no redirect loop.
+  if (needsOnboarding) redirect("/app/onboarding");
 
   let seed: StoreSeed = { lists: [], people: [], profile: FALLBACK_PROFILE };
   try {

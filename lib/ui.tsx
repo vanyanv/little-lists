@@ -1,11 +1,12 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import type { ListTemplate } from "./types";
 
 export type SheetState =
   | { kind: "item"; listId?: string }
   | { kind: "detail"; personId: string }
-  | { kind: "list" }
+  | { kind: "list"; template?: ListTemplate }
   | { kind: "person" }
   | { kind: "edit-list"; listId: string }
   | { kind: "edit-person"; personId: string }
@@ -33,7 +34,7 @@ interface UiValue {
   sheet: SheetState;
   openItemSheet: (listId?: string) => void;
   openDetailSheet: (personId: string) => void;
-  openListSheet: () => void;
+  openListSheet: (template?: ListTemplate) => void;
   openPersonSheet: () => void;
   openEditList: (listId: string) => void;
   openEditPerson: (personId: string) => void;
@@ -61,7 +62,10 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
   const openDetailSheet = useCallback((personId: string) => {
     setSheet({ kind: "detail", personId });
   }, []);
-  const openListSheet = useCallback(() => setSheet({ kind: "list" }), []);
+  const openListSheet = useCallback(
+    (template?: ListTemplate) => setSheet({ kind: "list", template }),
+    []
+  );
   const openPersonSheet = useCallback(() => setSheet({ kind: "person" }), []);
   const closeSheet = useCallback(() => setSheet(null), []);
 

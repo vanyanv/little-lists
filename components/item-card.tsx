@@ -11,7 +11,8 @@ import { PosterCard } from "./poster-card";
 import { NoteCard } from "./note-card";
 import { CompactRow } from "./compact-row";
 import { StatusPill } from "./status-pill";
-import { SparkleBurst } from "./sparkle-burst";
+import { SaveSparkle } from "./icons/save-sparkle";
+import { LittleIcon } from "./icons/little-icon";
 import type { ViewMode } from "./view-toggle";
 
 const NOTE_EMOJI_CHOICES = ["✨", "🍴", "📍", "🎁", "🌷", "☕", "🍵", "🌿", "🏞️", "💌", "🐾", "🌙"];
@@ -131,7 +132,7 @@ function GridTile({ item }: { item: Item }) {
   return (
     <div className="overflow-hidden rounded-2xl bg-paper shadow-soft ring-1 ring-line/30">
       <div className="grid aspect-square place-items-center text-4xl" style={{ background: "var(--t-bg)" }}>
-        {item.emoji ?? "✨"}
+        {item.emoji ?? <LittleIcon name="sparkle" size={40} />}
       </div>
       <div className="p-2.5">
         <h3 className="line-clamp-2 font-display text-[0.95rem] font-semibold leading-tight text-ink">
@@ -171,7 +172,7 @@ export function ItemCard({ listId, item, view }: { listId: string; item: Item; v
 
   return (
     <div className="relative">
-      {sparkle && <SparkleBurst />}
+      {sparkle && <SaveSparkle />}
       <ExpandableCard
         className={chrome}
         summary={summary}

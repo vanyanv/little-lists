@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { tap } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
 import { Sticker, type StickerName } from "./sticker";
+import { StickerBadge } from "./icons/sticker-badge";
 
 interface DetailHeaderProps {
   emoji: string;
@@ -39,7 +40,7 @@ export function DetailHeader({ emoji, title, subtitle, sticker = "sparkle", menu
       </div>
 
       <div className="mt-5 flex items-end gap-3">
-        <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-paper text-3xl shadow-soft">{emoji}</span>
+        <StickerBadge emoji={emoji} size={64} />
         <div className="min-w-0 pb-0.5">
           <h1 className="font-display text-[1.65rem] font-semibold leading-[1.14] text-[var(--t-ink)]">{title}</h1>
           {subtitle && <p className="mt-1 text-[0.92rem] font-semibold text-brown">{subtitle}</p>}

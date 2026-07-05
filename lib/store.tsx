@@ -77,6 +77,7 @@ interface StoreValue {
   addPersonDetail: (personId: string, sectionId: string, draft: PersonDetailDraft) => Promise<void>;
   deletePersonDetail: (personId: string, sectionId: string, detailId: string) => void;
   setProfileTheme: (theme: ThemeColor) => void;
+  dismissChecklist: () => void;
   fireCelebration: (variant?: CelebrationVariant) => void;
   updateList: (listId: string, patch: Partial<Pick<List, "title" | "emoji" | "theme" | "template" | "defaultView">>) => void;
   deleteList: (listId: string) => void;
@@ -339,6 +340,13 @@ export function ListsProvider({
     );
   }, []);
 
+  const dismissChecklist = useCallback<StoreValue["dismissChecklist"]>(() => {
+    setProfile((p) => ({ ...p, checklistDismissed: true }));
+    void updateProfileAction({ checklistDismissed: true }).catch((err) =>
+      console.error("dismissChecklist failed", err)
+    );
+  }, []);
+
   const value = useMemo<StoreValue>(
     () => ({
       lists,
@@ -360,6 +368,7 @@ export function ListsProvider({
       deletePerson,
       updatePersonDetail,
       setProfileTheme,
+      dismissChecklist,
       fireCelebration,
     }),
     [
@@ -381,6 +390,7 @@ export function ListsProvider({
       deletePerson,
       updatePersonDetail,
       setProfileTheme,
+      dismissChecklist,
       fireCelebration,
     ]
   );

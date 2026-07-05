@@ -1,7 +1,9 @@
 import type { Item } from "@/lib/types";
 import { ITEM_TYPE_META } from "@/lib/types";
-import { PlaceholderPoster } from "./placeholder-poster";
+import { Cover } from "./cover";
 import { StatusPill } from "./status-pill";
+import { LittleIcon } from "./icons/little-icon";
+import { StickerBadge } from "./icons/sticker-badge";
 
 /** A soft, scannable row for thumb-scrolling a big list of movies or books. */
 export function CompactRow({ item }: { item: Item }) {
@@ -10,20 +12,15 @@ export function CompactRow({ item }: { item: Item }) {
     <div className="flex items-center gap-3 text-left">
       {isMedia ? (
         <div className="w-8 shrink-0">
-          <PlaceholderPoster
-            seed={item.seed || item.title}
-            title={item.title}
+          <Cover
+            item={item}
             rounded="rounded-md"
             className="shadow-soft ring-1 ring-line/50"
+            sizes="32px"
           />
         </div>
       ) : (
-        <span
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-xl"
-          style={{ background: "var(--t-bg)" }}
-        >
-          {item.emoji ?? "✨"}
-        </span>
+        <StickerBadge emoji={item.emoji} tone="wash" size={40} rounded="rounded-xl" />
       )}
 
       <div className="min-w-0 flex-1">
@@ -34,22 +31,24 @@ export function CompactRow({ item }: { item: Item }) {
           {item.rating ? (
             <span
               role="img"
-              className="shrink-0 text-[0.74rem] leading-none"
+              className="flex shrink-0 items-center gap-px leading-none"
               style={{ color: "var(--color-rating)" }}
               aria-label={`${item.rating} stars`}
             >
-              {"★".repeat(item.rating)}
+              {Array.from({ length: item.rating }, (_, i) => (
+                <LittleIcon key={i} name="star-tiny" size={11} />
+              ))}
             </span>
           ) : (
             item.status === "favorite" && (
-              <span role="img" className="shrink-0 text-[0.74rem] leading-none" aria-label="favorite">
-                💗
+              <span role="img" className="shrink-0 leading-none text-rosewood" aria-label="favorite">
+                <LittleIcon name="heart-tiny" size={11} />
               </span>
             )
           )}
           {item.note && (
-            <span role="img" className="shrink-0 text-[0.72rem] opacity-55" aria-label="has a note">
-              📝
+            <span role="img" className="shrink-0 text-brown opacity-55" aria-label="has a note">
+              <LittleIcon name="pencil" size={12} />
             </span>
           )}
         </div>

@@ -15,6 +15,9 @@ import { inputPrimary } from "@/lib/field";
 import { ViewToggle } from "./view-toggle";
 import { EmojiPicker } from "./emoji-picker";
 import { ThemeColorPicker } from "./theme-chip";
+import { CategoryIcon } from "./icons/category-icon";
+import { LittleIcon } from "./icons/little-icon";
+import { StickerBadge } from "./icons/sticker-badge";
 
 const TEMPLATE_ORDER: ListTemplate[] = [
   "custom", "movie", "book", "music", "food", "place", "gift", "date", "people",
@@ -57,9 +60,7 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
     <>
       {/* live preview */}
       <div className="mt-4 flex items-center gap-3 rounded-2xl p-3" style={{ background: "var(--t-bg)" }}>
-        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-paper text-2xl shadow-soft">
-          {emoji}
-        </span>
+        <StickerBadge emoji={emoji} size={48} rounded="rounded-xl" />
         <div className="min-w-0">
           <p className="truncate font-display text-[1.05rem] font-semibold text-[var(--t-ink)]">
             {name.trim() || "Your little world"}
@@ -137,14 +138,14 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={softSpring}
-                      className="absolute -right-1.5 -top-1.5 z-10 grid h-5 w-5 place-items-center rounded-full bg-ink text-[0.66rem] font-bold text-cream shadow-soft"
+                      className="absolute -right-1.5 -top-1.5 z-10 grid h-5 w-5 place-items-center rounded-full bg-ink text-cream shadow-soft"
                       aria-hidden
                     >
-                      ✓
+                      <LittleIcon name="check" size={10} />
                     </motion.span>
                   )}
-                  <span className={`grid h-8 w-8 place-items-center rounded-lg text-lg transition ${active ? "bg-paper shadow-soft" : "bg-paper/70"}`}>
-                    {meta.emoji}
+                  <span className={`grid h-8 w-8 place-items-center rounded-lg transition ${active ? "bg-paper shadow-soft" : "bg-paper/70"}`}>
+                    <CategoryIcon id={t} size={18} />
                   </span>
                   <span className="text-[0.74rem] font-bold leading-tight text-[var(--t-ink)]">{meta.label}</span>
                 </motion.button>

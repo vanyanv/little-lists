@@ -15,26 +15,34 @@ import { ListFormFields, type ListFormValue } from "./list-form-fields";
 
 export function CreateListSheet() {
   const { sheet, closeSheet } = useUi();
-  const open = sheet?.kind === "list";
+  const listSheet = sheet?.kind === "list" ? sheet : null;
 
   return (
-    <BottomSheet open={open} onClose={closeSheet} ariaLabel="Start a little list">
-      {open && <CreateListFlow onClose={closeSheet} />}
+    <BottomSheet open={!!listSheet} onClose={closeSheet} ariaLabel="Start a little list">
+      {listSheet && <CreateListFlow onClose={closeSheet} initialTemplate={listSheet.template} />}
     </BottomSheet>
   );
 }
 
-function CreateListFlow({ onClose }: { onClose: () => void }) {
+function CreateListFlow({
+  onClose,
+  initialTemplate,
+}: {
+  onClose: () => void;
+  /** pre-picks a template (e.g. from Home's starter chips); the form stays editable */
+  initialTemplate?: ListTemplate;
+}) {
   const { addList } = useStore();
   const { showToast } = useUi();
   const router = useRouter();
 
+  const startTemplate = initialTemplate ?? "custom";
   const [value, setValue] = useState<ListFormValue>({
     name: "",
-    template: "custom",
-    emoji: TEMPLATE_META.custom.emoji,
-    theme: TEMPLATE_META.custom.theme,
-    view: TEMPLATE_META.custom.defaultView,
+    template: startTemplate,
+    emoji: TEMPLATE_META[startTemplate].emoji,
+    theme: TEMPLATE_META[startTemplate].theme,
+    view: TEMPLATE_META[startTemplate].defaultView,
   });
   const [emojiTouched, setEmojiTouched] = useState(false);
   const [themeTouched, setThemeTouched] = useState(false);

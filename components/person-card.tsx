@@ -9,6 +9,8 @@ import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { focusRing } from "@/lib/a11y";
 import { OverflowMenu } from "./overflow-menu";
+import { CategoryIcon } from "./icons/category-icon";
+import { StickerBadge } from "./icons/sticker-badge";
 
 export function PersonCard({ person }: { person: Person }) {
   const chips = person.sections.filter((s) => s.entries.length > 0).slice(0, 5);
@@ -50,9 +52,7 @@ export function PersonCard({ person }: { person: Person }) {
           />
         </div>
         <div className="flex items-center gap-3.5 pr-10">
-          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-paper text-2xl shadow-soft">
-            {person.emoji}
-          </span>
+          <StickerBadge emoji={person.emoji} size={56} />
           <div className="min-w-0">
             <h3 className="font-display text-[1.2rem] font-semibold leading-tight text-[var(--t-ink)]">
               {person.name}
@@ -65,9 +65,9 @@ export function PersonCard({ person }: { person: Person }) {
           {chips.map((s) => (
             <span
               key={s.id}
-              className="rounded-pill bg-paper/70 px-2.5 py-1 text-[0.72rem] font-semibold text-[var(--t-ink)]"
+              className="inline-flex items-center gap-1 rounded-pill bg-paper/70 px-2.5 py-1 text-[0.72rem] font-semibold text-[var(--t-ink)]"
             >
-              {s.emoji} {s.label}
+              <CategoryIcon id={s.id} size={12} /> {s.label}
             </span>
           ))}
         </div>

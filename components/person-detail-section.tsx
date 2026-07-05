@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { PersonSection } from "@/lib/types";
 import { gentleSpring, softSpring } from "@/lib/motion";
 import { focusRingInset } from "@/lib/a11y";
+import { CategoryIcon } from "./icons/category-icon";
 
 /** A warm, bouncy accordion card for one remembered facet of a person. */
 export function PersonDetailSection({
@@ -33,8 +34,8 @@ export function PersonDetailSection({
         aria-expanded={open}
         className={`flex w-full items-center gap-3 px-4 py-3.5 text-left ${focusRingInset}`}
       >
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-lg" style={{ background: "var(--t-bg)" }}>
-          {section.emoji}
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style={{ background: "var(--t-bg)" }}>
+          <CategoryIcon id={section.id} size={18} />
         </span>
         <span className="flex-1 font-display text-[1.06rem] font-semibold text-ink">{section.label}</span>
         <span className="text-[0.78rem] font-bold text-brown-soft">{section.entries.length}</span>

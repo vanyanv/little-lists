@@ -1,5 +1,6 @@
 import type { Item, ItemType } from "@/lib/types";
 import { PlaceholderPoster } from "./placeholder-poster";
+import { LittleIcon } from "./icons/little-icon";
 
 const ROT = [-7, -1, 5, 10];
 
@@ -63,7 +64,7 @@ export function CardStack({
               zIndex: i,
             }}
           >
-            {item.emoji ?? "✨"}
+            {item.emoji ?? <LittleIcon name="sparkle" size={w * 0.42} />}
           </span>
         )
       )}

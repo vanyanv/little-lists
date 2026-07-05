@@ -1,7 +1,8 @@
 import type { Item } from "@/lib/types";
 import { ITEM_TYPE_META } from "@/lib/types";
-import { PlaceholderPoster } from "./placeholder-poster";
+import { Cover } from "./cover";
 import { StatusPill } from "./status-pill";
+import { StickerBadge } from "./icons/sticker-badge";
 
 /** Cozy note-style summary — a mini cover for media, a sticker tile for everything else. */
 export function NoteCard({ item }: { item: Item }) {
@@ -10,20 +11,15 @@ export function NoteCard({ item }: { item: Item }) {
     <div className="flex gap-3.5 text-left">
       {isMedia ? (
         <div className="w-12 shrink-0">
-          <PlaceholderPoster
-            seed={item.seed || item.title}
-            title={item.title}
+          <Cover
+            item={item}
             rounded="rounded-lg"
             className="shadow-soft ring-1 ring-line/50"
+            sizes="48px"
           />
         </div>
       ) : (
-        <div
-          className="grid h-14 w-14 shrink-0 place-items-center rounded-xl text-2xl"
-          style={{ background: "var(--t-bg)" }}
-        >
-          {item.emoji ?? "✨"}
-        </div>
+        <StickerBadge emoji={item.emoji} tone="wash" size={56} rounded="rounded-xl" />
       )}
       <div className="min-w-0 flex-1">
         <div className="flex items-start gap-1.5">

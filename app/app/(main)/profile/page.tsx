@@ -10,8 +10,9 @@ import { staggerContainer, riseItem } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
 import { ProfileHeader } from "@/components/profile-header";
 import { ListCard } from "@/components/list-card";
-import { PlaceholderPoster } from "@/components/placeholder-poster";
+import { Cover } from "@/components/cover";
 import { Button } from "@/components/button";
+import { LittleIcon } from "@/components/icons/little-icon";
 
 export default function ProfileScreen() {
   const { profile, lists } = useStore();
@@ -52,15 +53,15 @@ export default function ProfileScreen() {
               return (
                 <Link key={item.id} href={`/app/list/${listId}`} className={`w-[5.5rem] shrink-0 rounded-xl ${focusRing}`}>
                   {isPoster ? (
-                    <PlaceholderPoster
-                      seed={item.seed || item.title}
-                      title={item.title}
-                      badge="💗"
+                    <Cover
+                      item={item}
+                      badge={<LittleIcon name="heart-tiny" size={13} className="text-rosewood" />}
                       className="shadow-soft ring-1 ring-ink/5"
+                      sizes="88px"
                     />
                   ) : (
                     <div className="grid aspect-[2/3] place-items-center rounded-xl bg-cream-deep text-4xl shadow-soft ring-1 ring-line/60">
-                      {item.emoji ?? "✨"}
+                      {item.emoji ?? <LittleIcon name="sparkle" size={34} />}
                     </div>
                   )}
                   <p className="mt-1.5 line-clamp-2 text-center text-[0.76rem] font-semibold leading-tight text-ink">

@@ -1,33 +1,61 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { useUser } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
-import type { ItemType } from "@/lib/types";
+import type { ItemType, ListTemplate } from "@/lib/types";
+import { ONBOARDING_TOAST_KEY } from "@/lib/onboarding";
 import { staggerContainer, riseItem } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
 import { ListCard } from "@/components/list-card";
 import { Chip } from "@/components/chip";
 import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/button";
+import { GettingStartedCard } from "@/components/getting-started-card";
+import { DemoBanner } from "@/components/demo-banner";
+import { CategoryIcon } from "@/components/icons/category-icon";
+import { LittleIcon } from "@/components/icons/little-icon";
+import type { GlyphName } from "@/components/icons/glyphs";
 
-const CATEGORIES: { id: string; label: string; kinds: ItemType[] | null }[] = [
+const CATEGORIES: { id: string; label: string; glyph?: GlyphName; kinds: ItemType[] | null }[] = [
   { id: "all", label: "Everything", kinds: null },
-  { id: "watch", label: "🎬 To watch", kinds: ["movie"] },
-  { id: "read", label: "📚 To read", kinds: ["book"] },
-  { id: "taste", label: "🍜 To taste", kinds: ["food", "place"] },
-  { id: "things", label: "✨ Little things", kinds: ["custom"] },
+  { id: "watch", label: "To watch", glyph: "film", kinds: ["movie"] },
+  { id: "read", label: "To read", glyph: "book", kinds: ["book"] },
+  { id: "taste", label: "To taste", glyph: "ramen-bowl", kinds: ["food", "place"] },
+  { id: "things", label: "Little things", glyph: "sparkle", kinds: ["custom"] },
+];
+
+/** quick ways into the create-list sheet from the fresh-start empty state */
+const STARTER_CHIPS: { template: ListTemplate; label: string }[] = [
+  { template: "movie", label: "Movie list" },
+  { template: "book", label: "Book list" },
+  { template: "food", label: "Food list" },
+  { template: "gift", label: "Gift ideas" },
+  { template: "date", label: "Date ideas" },
+  { template: "custom", label: "Custom list" },
 ];
 
 export default function HomeScreen() {
   const { lists, profile } = useStore();
-  const { openListSheet } = useUi();
+  const { openListSheet, showToast } = useUi();
   const { user } = useUser();
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState("all");
   const reduce = useReducedMotion();
+
+  // onboarding sets this key just before its hard navigation here
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(ONBOARDING_TOAST_KEY)) {
+        sessionStorage.removeItem(ONBOARDING_TOAST_KEY);
+        showToast("Your first little worlds are ready ✨");
+      }
+    } catch {
+      // storage unavailable — skip the welcome toast
+    }
+  }, [showToast]);
 
   const hasLists = lists.length > 0;
 
@@ -58,11 +86,26 @@ export default function HomeScreen() {
         <EmptyState
           sticker="sparkle"
           title="No little worlds yet"
-          hint="Start your first list and watch your tiny archive begin ✨"
-          action={<Button onClick={openListSheet}>Start a little list</Button>}
+          hint="Start with a movie list, a food opinion, a gift idea, or something totally yours."
+          action={
+            <div className="flex flex-col items-center gap-4">
+              <Button onClick={() => openListSheet()}>Start a little list ✨</Button>
+              <div className="flex max-w-[19rem] flex-wrap justify-center gap-2">
+                {STARTER_CHIPS.map((c) => (
+                  <Chip key={c.template} variant="filter" onClick={() => openListSheet(c.template)}>
+                    <CategoryIcon id={c.template} size={14} />
+                    {c.label}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+          }
         />
       ) : (
         <>
+      <DemoBanner />
+      <GettingStartedCard />
+
       {/* search pill */}
       <div className="mt-4 flex items-center gap-2 rounded-pill bg-paper px-4 py-3 shadow-soft ring-1 ring-line/60">
         <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 text-brown-soft">
@@ -83,6 +126,7 @@ export default function HomeScreen() {
       <div className="no-scrollbar fade-x -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
         {CATEGORIES.map((c) => (
           <Chip key={c.id} variant="filter" active={cat === c.id} onClick={() => setCat(c.id)}>
+            {c.glyph && <LittleIcon name={c.glyph} size={14} />}
             {c.label}
           </Chip>
         ))}

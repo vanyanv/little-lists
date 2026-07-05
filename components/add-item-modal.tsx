@@ -22,6 +22,9 @@ import { BottomSheet } from "./bottom-sheet";
 import { SoftDotLoader } from "./soft-dot-loader";
 import { Cover } from "./cover";
 import { StatusPill } from "./status-pill";
+import { CategoryIcon } from "./icons/category-icon";
+import { LittleIcon } from "./icons/little-icon";
+import { StickerBadge } from "./icons/sticker-badge";
 
 const TYPES: ItemType[] = ["movie", "book", "food", "place", "custom"];
 const EMOJI_CHOICES = ["✨", "🍜", "🍵", "📍", "🎁", "🌷", "🍔", "☕", "🍄", "🌿", "🍷", "🎧", "💡", "🔖", "🧁", "🍿", "🎟️", "🌸"];
@@ -233,7 +236,7 @@ function AddItemFlow({
                         active ? "bg-ink text-cream shadow-soft" : "bg-cream-deep text-brown ring-1 ring-line/60"
                       }`}
                     >
-                      <span>{m.emoji}</span>
+                      <CategoryIcon id={t} size={15} />
                       {m.label}
                     </button>
                   );
@@ -282,10 +285,10 @@ function AddItemFlow({
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
                               transition={softSpring}
-                              className="mr-1 text-[1.1rem]"
+                              className="mr-1 text-ink"
                               aria-hidden
                             >
-                              ✓
+                              <LittleIcon name="check" size={15} />
                             </motion.span>
                           )}
                         </motion.button>
@@ -416,9 +419,7 @@ function DetailsStep(props: {
             />
           </div>
         ) : (
-          <span className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl text-4xl" style={{ background: "var(--t-bg)" }}>
-            {emoji}
-          </span>
+          <StickerBadge emoji={emoji} size={80} tone="wash" />
         )}
         <div className="min-w-0">
           <h2 className="font-display text-[1.35rem] font-semibold leading-tight text-ink">{title}</h2>
@@ -440,7 +441,7 @@ function DetailsStep(props: {
                   l.id === targetListId ? "bg-ink text-cream" : "bg-cream-deep text-brown ring-1 ring-line/60"
                 }`}
               >
-                <span>{l.emoji}</span>
+                <StickerBadge emoji={l.emoji} size={22} rounded="rounded-md" className="shadow-none" />
                 {l.title}
               </button>
             ))}

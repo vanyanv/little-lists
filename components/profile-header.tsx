@@ -8,6 +8,7 @@ import { themeClass } from "@/lib/visual";
 import { softSpring } from "@/lib/motion";
 import { ThemeColorPicker } from "./theme-chip";
 import { Sticker } from "./sticker";
+import { StickerBadge } from "./icons/sticker-badge";
 import { Button } from "./button";
 
 export function ProfileHeader() {
@@ -36,12 +37,7 @@ export function ProfileHeader() {
       <Sticker name="flower" size={70} className="pointer-events-none absolute -right-3 -top-3 opacity-25" rotate={-12} />
 
       <div className="flex items-center gap-4">
-        <motion.span
-          layout
-          className="grid h-20 w-20 shrink-0 place-items-center rounded-[var(--radius-2xl)] bg-paper text-4xl shadow-soft"
-        >
-          {profile.avatarEmoji}
-        </motion.span>
+        <StickerBadge emoji={profile.avatarEmoji} size={80} rounded="rounded-[var(--radius-2xl)]" />
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h1 className="font-display text-[1.8rem] font-semibold leading-none text-[var(--t-ink)]">
