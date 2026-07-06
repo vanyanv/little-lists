@@ -29,6 +29,7 @@ export type GlyphName =
   | "gift"
   | "tulip"
   | "pencil"
+  | "clapperboard"
   // functional glyphs — currentColor, inherit the surrounding text/pill color
   | "check"
   | "cross"
@@ -48,6 +49,22 @@ export const FUNCTIONAL_GLYPHS: ReadonlySet<GlyphName> = new Set([
 const STAR_PATH = "M12 2.5l2.5 5.6 6.1.6-4.6 4 1.4 6L12 19.4 6.6 22.7 8 16.7l-4.6-4 6.1-.6z";
 const HEART_PATH =
   "M12 21s-7.5-4.7-9.4-9.2C1.2 8.3 3.2 5.3 6.3 5.3c2 0 3.4 1.2 4.2 2.5.8-1.3 2.2-2.5 4.2-2.5 3.1 0 5.1 3 3.7 6.5C19.5 16.3 12 21 12 21z";
+
+/* clapperboard — lid is separate so AnimatedCategoryIcon can clap it */
+export const CLAPPER_LID = (
+  <g>
+    <rect x="3" y="4.4" width="18" height="4.4" rx="1.4" fill="oklch(0.7 0.065 300)" />
+    {[5.4, 9.6, 13.8, 18].map((x) => (
+      <path key={x} d={`M${x} 4.4l2.2 4.4h1.7l-2.2-4.4z`} fill="oklch(0.96 0.02 300)" opacity="0.85" />
+    ))}
+  </g>
+);
+export const CLAPPER_BODY = (
+  <g>
+    <rect x="3" y="9.4" width="18" height="11" rx="1.8" fill="oklch(0.84 0.058 300)" />
+    <rect x="6.2" y="13.2" width="11.6" height="1.7" rx="0.85" fill="oklch(0.96 0.02 300)" opacity="0.9" />
+  </g>
+);
 
 /* One flat pastel family. Soft outlines, no gradients, gentle shapes. */
 export const GLYPH_ART: Record<GlyphName, React.ReactNode> = {
@@ -183,6 +200,12 @@ export const GLYPH_ART: Record<GlyphName, React.ReactNode> = {
         d="M13.6 5.5l2.4-2.4c.6-.6 1.6-.6 2.2 0l2.7 2.7c.6.6.6 1.6 0 2.2l-2.4 2.4z"
         fill="oklch(0.84 0.07 16)"
       />
+    </g>
+  ),
+  clapperboard: (
+    <g>
+      {CLAPPER_BODY}
+      {CLAPPER_LID}
     </g>
   ),
 

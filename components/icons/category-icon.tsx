@@ -6,8 +6,8 @@ import { GlyphSvg, type GlyphName } from "./glyphs";
  * one flat record keeps them agreeing.
  */
 export const CATEGORY_GLYPH: Record<string, GlyphName> = {
-  movie: "film",
-  movies: "film",
+  movie: "clapperboard",
+  movies: "clapperboard",
   book: "book",
   books: "book",
   music: "headphones",

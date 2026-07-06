@@ -36,6 +36,12 @@ describe("CATEGORY_GLYPH", () => {
       expect(GLYPH_ART[glyph], `"${id}" → "${glyph}"`).toBeDefined();
     }
   });
+
+  it("movie renders the clapperboard, not the decorative film strip", () => {
+    expect(CATEGORY_GLYPH.movie).toBe("clapperboard");
+    expect(CATEGORY_GLYPH.movies).toBe("clapperboard");
+    expect(GLYPH_ART.clapperboard).toBeDefined();
+  });
 });
 
 describe("GLYPH_ART", () => {
