@@ -47,6 +47,12 @@ add-detail sections, onboarding starters) — never ambiently.
   same paths.
 - `useReducedMotion()` disables everything; display-only surfaces (home
   chips, person cards, section headers, status pills) stay static.
+- **The public landing page is the one marketing exception.** It may play
+  character moves on scroll-into-view and hover/tap (use-case cards), float
+  the hero sticker cluster on a slow loop, and borrow `SaveSparkle` for the
+  final CTA — the page's job is to demo the app's delight in a few seconds.
+  Inside the app the rules above still hold: no ambient moves, no loops
+  beyond the FAB's bob, sparkle only on real saves.
 
 ## Swapping in third-party assets later
 
