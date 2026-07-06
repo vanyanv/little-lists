@@ -5,3 +5,5 @@ export { StickerBadge } from "./sticker-badge";
 export { CategoryIcon, CATEGORY_GLYPH } from "./category-icon";
 export { AnimatedSticker } from "./animated-sticker";
 export { SaveSparkle } from "./save-sparkle";
+export { AnimatedCategoryIcon } from "./animated-category-icon";
+export { WHOLE_MOTION, PART_MOTION_GLYPHS, STICKER_POP } from "./glyph-motion";

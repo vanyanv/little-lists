@@ -2,6 +2,10 @@ import type { CSSProperties } from "react";
 import { GlyphSvg, type GlyphName } from "./glyphs";
 import { AnimatedSticker } from "./animated-sticker";
 
+/** die-cut sticker look — a paper-colored halo around the art */
+export const STICKER_HALO =
+  "drop-shadow(1.5px 0 0 var(--color-paper)) drop-shadow(-1.5px 0 0 var(--color-paper)) drop-shadow(0 1.5px 0 var(--color-paper)) drop-shadow(0 -1.5px 0 var(--color-paper))";
+
 interface LittleIconProps {
   name: GlyphName;
   size?: number;
@@ -39,15 +43,13 @@ export function LittleIcon({
 
   if (variant === "sticker") {
     // die-cut look: a paper-colored halo around the art, with a lazy tilt
-    const halo =
-      "drop-shadow(1.5px 0 0 var(--color-paper)) drop-shadow(-1.5px 0 0 var(--color-paper)) drop-shadow(0 1.5px 0 var(--color-paper)) drop-shadow(0 -1.5px 0 var(--color-paper))";
     return (
       <GlyphSvg
         name={name}
         size={size}
         rotate={rotate || -6}
         className={className}
-        style={{ filter: halo, ...style }}
+        style={{ filter: STICKER_HALO, ...style }}
       />
     );
   }
