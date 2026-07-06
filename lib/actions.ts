@@ -6,6 +6,7 @@ import { requireUserProfile } from "@/lib/server/profile";
 import { DB_SECTION_TO_ID, ID_TO_DB_SECTION } from "@/lib/people";
 import { mapItem, mapList, mapPerson, mapProfile, templateToDb } from "@/lib/server/serialize";
 import { DEMO_PERSON, STARTER_OPTIONS } from "@/lib/onboarding";
+import { pickDemoName } from "@/lib/demo-names";
 import {
   TEMPLATE_META,
   type Item,
@@ -407,7 +408,7 @@ export async function completeOnboardingAction(sel: OnboardingSelections): Promi
       await tx.person.create({
         data: {
           userId: clerkUserId,
-          name: DEMO_PERSON.name,
+          name: pickDemoName(),
           emoji: DEMO_PERSON.emoji,
           themeColor: DEMO_PERSON.theme,
           shortNote: DEMO_PERSON.note,

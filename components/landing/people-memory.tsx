@@ -9,6 +9,7 @@ import { AnimatedCategoryIcon } from "@/components/icons/animated-category-icon"
 import { CategoryIcon } from "@/components/icons/category-icon";
 import { WHOLE_MOTION } from "@/components/icons/glyph-motion";
 import { riseItem, staggerContainer } from "@/lib/motion";
+import { CyclingName } from "./cycling-name";
 
 export function PeopleMemory() {
   const reduce = useReducedMotion() ?? false;
@@ -49,7 +50,7 @@ export function PeopleMemory() {
               <AnimatedCategoryIcon id="people" variant="badge" size={64} play={inView} />
               <div>
                 <h3 className="font-display text-[1.45rem] font-semibold leading-tight text-[var(--t-ink)]">
-                  Little things about {PREVIEW_PERSON.name}
+                  Little things about <CyclingName />
                 </h3>
                 <p className="mt-0.5 text-[0.9rem] font-medium text-[var(--t-ink)]/90">{PREVIEW_PERSON.note}</p>
               </div>

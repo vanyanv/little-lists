@@ -3,6 +3,7 @@
 // to what the app actually renders. Never persisted, never fetched.
 
 import type { List, Person } from "./types";
+import { DEMO_NAMES } from "./demo-names";
 
 export const PREVIEW_MOVIES: List = {
   id: "preview-movies",
@@ -67,9 +68,11 @@ export const PREVIEW_GIFTS: List = {
 
 // Section ids double as CategoryIcon keys, exactly like the real person card —
 // so each little detail gets its drawn glyph (clapperboard, book, fork…).
+// The name is a placeholder: landing surfaces render <CyclingName /> instead,
+// rotating through DEMO_NAMES so the person stays generic.
 export const PREVIEW_PERSON: Person = {
   id: "preview-person",
-  name: "Maddie",
+  name: DEMO_NAMES[0],
   emoji: "🌼",
   theme: "butter",
   note: "someone you love to plan little things for",

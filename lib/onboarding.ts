@@ -118,9 +118,12 @@ export const ONBOARDING_TOAST_KEY = "ll:onboarding-toast";
 /** localStorage flag for the "starter ideas added" banner dismissal */
 export const DEMO_BANNER_DISMISSED_KEY = "ll:demo-banner-dismissed";
 
-/** The demo person, kept in step with the landing page's PREVIEW_PERSON. */
+/**
+ * The demo person, kept in step with the landing page's PREVIEW_PERSON.
+ * No fixed name: seeding picks one at random from DEMO_NAMES (lib/demo-names.ts),
+ * matching the landing page's cycling-name treatment.
+ */
 export const DEMO_PERSON = {
-  name: "Maddie",
   emoji: "🌼",
   theme: "butter",
   note: "someone you love to plan little things for",

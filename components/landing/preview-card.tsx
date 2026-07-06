@@ -6,6 +6,7 @@ import { Sticker } from "@/components/sticker";
 import { StickerBadge } from "@/components/icons/sticker-badge";
 import { CategoryIcon, CATEGORY_GLYPH } from "@/components/icons/category-icon";
 import { ViewIcon } from "@/components/view-toggle";
+import { CyclingName } from "./cycling-name";
 
 /* Presentational twins of ListCard / PersonCard for the marketing preview.
    They reproduce the real cards' look but drop the <Link>, store/ui context,
@@ -95,7 +96,7 @@ export function PreviewPersonCard({ person, maxChips = 5 }: { person: Person; ma
           <StickerBadge icon="flower" size={56} />
           <div className="min-w-0">
             <h3 className="font-display text-[1.2rem] font-semibold leading-tight text-[var(--t-ink)]">
-              Little things about {person.name}
+              Little things about <CyclingName />
             </h3>
             <p className="mt-0.5 line-clamp-1 text-[0.86rem] font-medium text-brown">{person.note}</p>
           </div>
