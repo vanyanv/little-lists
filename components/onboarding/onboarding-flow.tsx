@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Button } from "@/components/button";
 import { AnimatedSticker } from "@/components/icons/animated-sticker";
-import { CategoryIcon } from "@/components/icons/category-icon";
+import { AnimatedCategoryIcon } from "@/components/icons/animated-category-icon";
 import { SaveSparkle } from "@/components/icons/save-sparkle";
 import { completeOnboardingAction, skipOnboardingAction } from "@/lib/actions";
 import {
@@ -258,7 +258,7 @@ function StarterCard({
         selected ? "bg-[var(--t-bg)] ring-2 ring-[var(--t-edge)]" : "bg-paper ring-1 ring-line"
       }`}
     >
-      <CategoryIcon id={id} size={22} />
+      <AnimatedCategoryIcon id={id} size={22} play={selected} />
       <span className={`text-[0.88rem] font-bold leading-snug ${selected ? "text-[var(--t-ink)]" : "text-ink"}`}>
         {title}
       </span>

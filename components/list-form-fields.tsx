@@ -15,7 +15,7 @@ import { inputPrimary } from "@/lib/field";
 import { ViewToggle } from "./view-toggle";
 import { EmojiPicker } from "./emoji-picker";
 import { ThemeColorPicker } from "./theme-chip";
-import { CategoryIcon } from "./icons/category-icon";
+import { AnimatedCategoryIcon } from "./icons/animated-category-icon";
 import { LittleIcon } from "./icons/little-icon";
 import { StickerBadge } from "./icons/sticker-badge";
 
@@ -145,7 +145,7 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
                     </motion.span>
                   )}
                   <span className={`grid h-8 w-8 place-items-center rounded-lg transition ${active ? "bg-paper shadow-soft" : "bg-paper/70"}`}>
-                    <CategoryIcon id={t} size={18} />
+                    <AnimatedCategoryIcon id={t} size={18} play={active} />
                   </span>
                   <span className="text-[0.74rem] font-bold leading-tight text-[var(--t-ink)]">{meta.label}</span>
                 </motion.button>

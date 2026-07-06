@@ -8,7 +8,7 @@ import { focusRing } from "@/lib/a11y";
 import { inputPrimary, inputField, textareaField } from "@/lib/field";
 import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
-import { CategoryIcon } from "./icons/category-icon";
+import { AnimatedCategoryIcon } from "./icons/animated-category-icon";
 
 export function AddDetailSheet() {
   const { sheet, closeSheet } = useUi();
@@ -77,7 +77,7 @@ function DetailFlow({ personId, onClose }: { personId: string; onClose: () => vo
               s.id === sectionId ? "bg-ink text-cream" : "bg-cream-deep text-brown ring-1 ring-line/60"
             }`}
           >
-            <CategoryIcon id={s.id} size={14} />
+            <AnimatedCategoryIcon id={s.id} size={14} play={s.id === sectionId} />
             {s.label}
           </button>
         ))}

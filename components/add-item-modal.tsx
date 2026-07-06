@@ -22,7 +22,7 @@ import { BottomSheet } from "./bottom-sheet";
 import { SoftDotLoader } from "./soft-dot-loader";
 import { Cover } from "./cover";
 import { StatusPill } from "./status-pill";
-import { CategoryIcon } from "./icons/category-icon";
+import { AnimatedCategoryIcon } from "./icons/animated-category-icon";
 import { LittleIcon } from "./icons/little-icon";
 import { StickerBadge } from "./icons/sticker-badge";
 
@@ -236,7 +236,7 @@ function AddItemFlow({
                         active ? "bg-ink text-cream shadow-soft" : "bg-cream-deep text-brown ring-1 ring-line/60"
                       }`}
                     >
-                      <CategoryIcon id={t} size={15} />
+                      <AnimatedCategoryIcon id={t} size={15} play={active} />
                       {m.label}
                     </button>
                   );
