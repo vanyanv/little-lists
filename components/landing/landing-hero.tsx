@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
-import { softSpring, tap } from "@/lib/motion";
+import { softSpring, gentleSpring, tap, gentleFloat } from "@/lib/motion";
 import { focusRing, focusRingOnDark } from "@/lib/a11y";
+import { LittleIcon } from "@/components/icons/little-icon";
+import type { GlyphName } from "@/components/icons/glyphs";
 import { AppPreview } from "./app-preview";
 
 // Animate the CTAs as the app animates every tappable surface: a soft press.
@@ -19,8 +21,49 @@ function CheckMark() {
   );
 }
 
+/* The cozy sticker cluster around the phone: five die-cut glyphs scattered
+   like stickers half-peeled off the scrapbook page. Anchored to the preview
+   wrapper (never the copy column) so they can't collide with text at any
+   width. Each settles in with a stagger, then drifts almost imperceptibly. */
+const CLUSTER: {
+  name: GlyphName;
+  className: string;
+  size: number;
+  rotate: number;
+  delay: number;
+}[] = [
+  { name: "clapperboard", className: "-left-2 top-6 sm:-left-5", size: 34, rotate: -12, delay: 0.35 },
+  { name: "book", className: "-right-1 top-16 sm:-right-4", size: 32, rotate: 10, delay: 0.45 },
+  { name: "tulip", className: "-left-1 bottom-24 sm:-left-4", size: 30, rotate: 8, delay: 0.55 },
+  { name: "gift", className: "-right-2 bottom-10 sm:-right-5", size: 34, rotate: -9, delay: 0.5 },
+  { name: "sparkle", className: "right-6 -top-3", size: 26, rotate: 14, delay: 0.65 },
+];
+
+function HeroStickers({ reduce }: { reduce: boolean }) {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 z-10">
+      {CLUSTER.map((s, i) => (
+        <motion.span
+          key={s.name}
+          className={`absolute ${s.className}`}
+          initial={reduce ? false : { opacity: 0, scale: 0.6, y: 8 }}
+          animate={reduce ? undefined : { opacity: 1, scale: 1, y: 0 }}
+          transition={{ ...gentleSpring, delay: s.delay }}
+        >
+          <motion.span
+            className="inline-flex"
+            animate={reduce ? undefined : gentleFloat(i * 0.9)}
+          >
+            <LittleIcon name={s.name} variant="sticker" size={s.size} rotate={s.rotate} />
+          </motion.span>
+        </motion.span>
+      ))}
+    </div>
+  );
+}
+
 export function LandingHero() {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotion() ?? false;
   const rise = reduce
     ? {}
     : { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 } };
@@ -34,12 +77,14 @@ export function LandingHero() {
         <div className="absolute -right-32 top-0 h-[32rem] w-[32rem] rounded-full bg-sky/25 blur-[130px]" />
       </div>
 
-      <div className="relative mx-auto grid max-w-5xl items-center gap-9 py-8 md:grid-cols-2 md:gap-10 md:py-16">
+      {/* items-start on md: the five-card phone runs tall, so the copy anchors
+          to the top of the fold instead of drifting to the phone's midpoint */}
+      <div className="relative mx-auto grid max-w-5xl items-center gap-9 py-8 md:grid-cols-2 md:items-start md:gap-10 md:py-16">
         {/* copy */}
         <motion.div
           {...rise}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center md:text-left"
+          className="text-center md:pt-10 md:text-left"
         >
           <h1 className="font-display font-semibold leading-[1.06] text-ink" style={{ fontSize: "clamp(2.05rem, 7.5vw, 3.4rem)" }}>
             Make little lists for everything you love, hate, and want to remember.
@@ -79,13 +124,16 @@ export function LandingHero() {
           </p>
         </motion.div>
 
-        {/* phone preview */}
+        {/* phone preview, with the sticker cluster scattered around it */}
         <motion.div
           {...(reduce ? {} : { initial: { opacity: 0, y: 24, rotate: -1.5 }, animate: { opacity: 1, y: 0, rotate: 0 } })}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: reduce ? 0 : 0.12 }}
           className="px-2"
         >
-          <AppPreview />
+          <div className="relative mx-auto w-full max-w-[300px]">
+            <HeroStickers reduce={reduce} />
+            <AppPreview />
+          </div>
         </motion.div>
       </div>
     </section>

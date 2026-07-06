@@ -3,23 +3,16 @@ import { TEMPLATE_META } from "@/lib/types";
 import { listCountLabel, themeClass } from "@/lib/visual";
 import { CardStack } from "@/components/card-stack";
 import { Sticker } from "@/components/sticker";
+import { StickerBadge } from "@/components/icons/sticker-badge";
+import { CategoryIcon, CATEGORY_GLYPH } from "@/components/icons/category-icon";
 import { ViewIcon } from "@/components/view-toggle";
 
 /* Presentational twins of ListCard / PersonCard for the marketing preview.
    They reproduce the real cards' look but drop the <Link>, store/ui context,
    overflow menu, and hover motion, so they render with zero auth or data deps
-   inside the static landing page. Keep these in visual sync with the originals. */
-
-function EmojiTile({ emoji, size = 46 }: { emoji: string; size?: number }) {
-  return (
-    <span
-      className="grid shrink-0 place-items-center rounded-xl bg-paper shadow-soft"
-      style={{ width: size, height: size, fontSize: size * 0.5 }}
-    >
-      {emoji}
-    </span>
-  );
-}
+   inside the static landing page. Keep these in visual sync with the originals.
+   Faces use the drawn glyphs (StickerBadge without an emoji) so the preview
+   shows the house iconography, not whatever emoji the sample data carries. */
 
 function ListMeta({ list, size = "normal" }: { list: List; size?: "hero" | "normal" }) {
   const meta = TEMPLATE_META[list.template];
@@ -27,9 +20,10 @@ function ListMeta({ list, size = "normal" }: { list: List; size?: "hero" | "norm
   return (
     <div className={`flex items-center gap-1.5 ${size === "hero" ? "mt-2" : "mt-1.5"}`}>
       <span
-        className="rounded-pill px-2 py-0.5 text-[0.68rem] font-bold text-[var(--t-ink)]"
+        className="inline-flex items-center gap-1 rounded-pill px-2 py-0.5 text-[0.68rem] font-bold text-[var(--t-ink)]"
         style={{ background: "var(--t-wash)" }}
       >
+        <CategoryIcon id={list.template} size={11} />
         {meta.label}
       </span>
       <span className="text-[var(--t-ink)] opacity-70">
@@ -41,6 +35,7 @@ function ListMeta({ list, size = "normal" }: { list: List; size?: "hero" | "norm
 
 export function PreviewListCard({ list, variant = "normal" }: { list: List; variant?: "hero" | "normal" }) {
   const hero = variant === "hero";
+  const glyph = CATEGORY_GLYPH[list.template];
   return (
     <div className={`block rounded-2xl ${themeClass(list.theme)}`}>
       <div
@@ -57,7 +52,7 @@ export function PreviewListCard({ list, variant = "normal" }: { list: List; vari
         {hero ? (
           <div className="relative flex items-end justify-between gap-3 p-5">
             <div className="min-w-0 flex-1">
-              <EmojiTile emoji={list.emoji} size={52} />
+              <StickerBadge icon={glyph} size={52} rounded="rounded-xl" />
               <h3 className="mt-3 font-display text-[1.4rem] font-semibold leading-[1.12] text-[var(--t-ink)]">
                 {list.title}
               </h3>
@@ -71,7 +66,7 @@ export function PreviewListCard({ list, variant = "normal" }: { list: List; vari
         ) : (
           <div className="relative p-4">
             <div className="flex items-start justify-between gap-2">
-              <EmojiTile emoji={list.emoji} />
+              <StickerBadge icon={glyph} size={46} rounded="rounded-xl" />
               <div className="pt-0.5">
                 <CardStack items={list.items.slice(0, 3)} kind={list.kind} size="sm" />
               </div>
@@ -88,8 +83,8 @@ export function PreviewListCard({ list, variant = "normal" }: { list: List; vari
   );
 }
 
-export function PreviewPersonCard({ person }: { person: Person }) {
-  const chips = person.sections.filter((s) => s.entries.length > 0).slice(0, 5);
+export function PreviewPersonCard({ person, maxChips = 5 }: { person: Person; maxChips?: number }) {
+  const chips = person.sections.filter((s) => s.entries.length > 0).slice(0, maxChips);
   return (
     <div className={`block rounded-2xl ${themeClass(person.theme)}`}>
       <div
@@ -97,12 +92,10 @@ export function PreviewPersonCard({ person }: { person: Person }) {
         style={{ background: "var(--t-bg)" }}
       >
         <div className="flex items-center gap-3.5">
-          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-paper text-2xl shadow-soft">
-            {person.emoji}
-          </span>
+          <StickerBadge icon="flower" size={56} />
           <div className="min-w-0">
             <h3 className="font-display text-[1.2rem] font-semibold leading-tight text-[var(--t-ink)]">
-              {person.name}
+              Little things about {person.name}
             </h3>
             <p className="mt-0.5 line-clamp-1 text-[0.86rem] font-medium text-brown">{person.note}</p>
           </div>
@@ -111,9 +104,9 @@ export function PreviewPersonCard({ person }: { person: Person }) {
           {chips.map((s) => (
             <span
               key={s.id}
-              className="rounded-pill bg-paper/70 px-2.5 py-1 text-[0.72rem] font-semibold text-[var(--t-ink)]"
+              className="inline-flex items-center gap-1 rounded-pill bg-paper/70 px-2.5 py-1 text-[0.72rem] font-semibold text-[var(--t-ink)]"
             >
-              {s.emoji} {s.label}
+              <CategoryIcon id={s.id} size={11} /> {s.label}
             </span>
           ))}
         </div>

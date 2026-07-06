@@ -20,6 +20,21 @@ export const PREVIEW_MOVIES: List = {
   ],
 };
 
+export const PREVIEW_BOOKS: List = {
+  id: "preview-books",
+  title: "Books I Want to Read",
+  emoji: "📚",
+  theme: "lavender",
+  noun: "little stories waiting",
+  kind: "book",
+  template: "book",
+  items: [
+    { id: "b1", type: "book", title: "Piranesi", seed: "Piranesi", status: "want-to-read" },
+    { id: "b2", type: "book", title: "The House in the Cerulean Sea", seed: "Cerulean Sea", status: "reading" },
+    { id: "b3", type: "book", title: "Howl's Moving Castle", seed: "Howl's Moving Castle", status: "favorite" },
+  ],
+};
+
 export const PREVIEW_FOODS: List = {
   id: "preview-foods",
   title: "Foods I Hate",
@@ -50,17 +65,19 @@ export const PREVIEW_GIFTS: List = {
   ],
 };
 
+// Section ids double as CategoryIcon keys, exactly like the real person card —
+// so each little detail gets its drawn glyph (clapperboard, book, fork…).
 export const PREVIEW_PERSON: Person = {
   id: "preview-person",
-  name: "Sam",
+  name: "Maddie",
   emoji: "🌼",
   theme: "butter",
   note: "someone you love to plan little things for",
   sections: [
-    { id: "coffee", label: "oat milk latte", emoji: "☕", kind: "chips", entries: [{ id: "e1", title: "oat milk latte", tags: [] }] },
-    { id: "reading", label: "loves cozy mysteries", emoji: "📚", kind: "chips", entries: [{ id: "e2", title: "loves cozy mysteries", tags: [] }] },
-    { id: "allergy", label: "allergic to peanuts", emoji: "🥜", kind: "chips", entries: [{ id: "e3", title: "allergic to peanuts", tags: [] }] },
-    { id: "flowers", label: "favorite flower: tulips", emoji: "🌷", kind: "chips", entries: [{ id: "e4", title: "favorite flower: tulips", tags: [] }] },
-    { id: "dates", label: "always up for a hike", emoji: "🥾", kind: "chips", entries: [{ id: "e5", title: "always up for a hike", tags: [] }] },
+    { id: "movies", label: "loves horror movies", emoji: "🎬", kind: "chips", entries: [{ id: "e1", title: "loves horror movies", tags: [] }] },
+    { id: "books", label: "cozy books on rainy days", emoji: "📚", kind: "chips", entries: [{ id: "e2", title: "cozy books on rainy days", tags: [] }] },
+    { id: "food", label: "Puerto Rican food", emoji: "🍽️", kind: "chips", entries: [{ id: "e3", title: "Puerto Rican food", tags: [] }] },
+    { id: "dislikes", label: "no mushrooms, ever", emoji: "🍄", kind: "chips", entries: [{ id: "e4", title: "no mushrooms, ever", tags: [] }] },
+    { id: "dates", label: "wants to see Huntington Gardens", emoji: "🌷", kind: "chips", entries: [{ id: "e5", title: "wants to see Huntington Gardens", tags: [] }] },
   ],
 };

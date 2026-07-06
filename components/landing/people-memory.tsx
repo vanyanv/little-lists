@@ -1,9 +1,21 @@
+"use client";
+
+import { useRef } from "react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 import { PREVIEW_PERSON } from "@/lib/landing-data";
 import { themeClass } from "@/lib/visual";
 import { Sticker } from "@/components/sticker";
+import { AnimatedCategoryIcon } from "@/components/icons/animated-category-icon";
+import { CategoryIcon } from "@/components/icons/category-icon";
+import { WHOLE_MOTION } from "@/components/icons/glyph-motion";
+import { riseItem, staggerContainer } from "@/lib/motion";
 
 export function PeopleMemory() {
+  const reduce = useReducedMotion() ?? false;
+  const cardRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(cardRef, { once: true, amount: 0.45 });
   const details = PREVIEW_PERSON.sections;
+
   return (
     <section className="px-5 py-12">
       <div className="mx-auto grid max-w-4xl items-center gap-9 md:grid-cols-2">
@@ -15,18 +27,26 @@ export function PeopleMemory() {
             Remember the little things about people
           </h2>
           <p className="mx-auto mt-3 max-w-[32rem] text-[1rem] leading-relaxed text-brown md:mx-0">
-            The next time you plan a date or pick a gift, the little details are right where you left them. It's a warm way to care, not a contacts app.
+            Save someone&rsquo;s likes, dislikes, food preferences, gift ideas, date ideas, and the
+            tiny details you don&rsquo;t want to forget. It&rsquo;s a warm way to care, not a contacts app.
           </p>
         </div>
 
-        {/* sample person card */}
-        <div className={`mx-auto w-full max-w-sm rounded-[var(--radius-2xl)] ${themeClass(PREVIEW_PERSON.theme)}`}>
+        {/* sample person card — the flower gives one soft pulse as it comes into
+            view, reusing the registry's flower character move so the landing
+            pulse can never drift from the app's */}
+        <div ref={cardRef} className={`mx-auto w-full max-w-sm rounded-[var(--radius-2xl)] ${themeClass(PREVIEW_PERSON.theme)}`}>
           <div className="relative overflow-hidden rounded-[var(--radius-2xl)] p-6 shadow-lift ring-1 ring-line/40" style={{ background: "var(--t-bg)" }}>
-            <Sticker name="flower" size={56} rotate={-12} className="pointer-events-none absolute -right-3 -top-3 opacity-25" />
+            <motion.span
+              className="pointer-events-none absolute -right-3 -top-3 inline-flex"
+              initial={false}
+              animate={inView && !reduce ? WHOLE_MOTION.flower : undefined}
+              transition={{ duration: 0.6, ease: "easeInOut", delay: 0.3 }}
+            >
+              <Sticker name="flower" size={56} rotate={-12} className="opacity-25" />
+            </motion.span>
             <div className="flex items-center gap-3.5">
-              <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-paper text-3xl shadow-soft">
-                {PREVIEW_PERSON.emoji}
-              </span>
+              <AnimatedCategoryIcon id="people" variant="badge" size={64} play={inView} />
               <div>
                 <h3 className="font-display text-[1.45rem] font-semibold leading-tight text-[var(--t-ink)]">
                   Little things about {PREVIEW_PERSON.name}
@@ -35,17 +55,23 @@ export function PeopleMemory() {
               </div>
             </div>
 
-            <ul className="mt-5 flex flex-col gap-2">
+            <motion.ul
+              variants={reduce ? undefined : staggerContainer}
+              initial={reduce ? false : "hidden"}
+              animate={reduce || inView ? "show" : "hidden"}
+              className="mt-5 flex flex-col gap-2"
+            >
               {details.map((d) => (
-                <li
+                <motion.li
                   key={d.id}
+                  variants={reduce ? undefined : riseItem}
                   className="flex items-center gap-2.5 rounded-pill bg-paper/75 px-3.5 py-2 text-[0.92rem] font-semibold text-[var(--t-ink)]"
                 >
-                  <span className="text-[1.05rem]">{d.emoji}</span>
+                  <CategoryIcon id={d.id} size={16} />
                   {d.label}
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
           </div>
         </div>
       </div>

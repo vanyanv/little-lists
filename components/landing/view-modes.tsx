@@ -1,5 +1,9 @@
+"use client";
+
+import { motion, useReducedMotion } from "motion/react";
 import type { ViewMode } from "@/lib/types";
 import { ViewIcon } from "@/components/view-toggle";
+import { riseItem, staggerContainer, inViewOnce } from "@/lib/motion";
 
 /* The same little movie list, shown the three ways the app can render it, so the
    difference reads at a glance instead of being described with an abstract glyph.
@@ -13,9 +17,9 @@ const SAMPLE = [
 ] as const;
 
 const MODES: { mode: ViewMode; title: string; line: string }[] = [
-  { mode: "grid", title: "Grid", line: "Posters and covers, laid out like a little gallery." },
-  { mode: "list", title: "List", line: "Tidy rows for fast scanning when you just want to scroll." },
-  { mode: "cozy", title: "Cozy", line: "Room for notes and the little details on custom lists." },
+  { mode: "grid", title: "Grid", line: "For covers, posters, and pretty browsing." },
+  { mode: "list", title: "List", line: "For scrolling through a lot fast." },
+  { mode: "cozy", title: "Cozy", line: "For thoughts, gift ideas, food opinions, and custom lists." },
 ];
 
 function dot(theme: string) {
@@ -80,6 +84,7 @@ const PREVIEW: Record<ViewMode, () => React.ReactNode> = {
 };
 
 export function ViewModes() {
+  const reduce = useReducedMotion() ?? false;
   return (
     <section className="px-5 py-12">
       <div className="mx-auto grid max-w-4xl items-center gap-9 md:grid-cols-2">
@@ -93,13 +98,20 @@ export function ViewModes() {
           </p>
         </div>
 
-        {/* three mini-previews of the same list */}
-        <div className="flex flex-col gap-3">
+        {/* three mini-previews of the same list, settling in one after another */}
+        <motion.div
+          variants={reduce ? undefined : staggerContainer}
+          initial={reduce ? false : "hidden"}
+          whileInView={reduce ? undefined : "show"}
+          viewport={inViewOnce}
+          className="flex flex-col gap-3"
+        >
           {MODES.map((m) => {
             const Preview = PREVIEW[m.mode];
             return (
-              <div
+              <motion.div
                 key={m.mode}
+                variants={reduce ? undefined : riseItem}
                 className="flex items-center gap-3.5 rounded-2xl bg-cream-deep/50 p-3.5 ring-1 ring-line/40"
               >
                 <div className="w-[6.5rem] shrink-0">
@@ -112,10 +124,10 @@ export function ViewModes() {
                   </div>
                   <p className="mt-1 text-[0.85rem] leading-snug text-ink-soft">{m.line}</p>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -30,6 +30,7 @@ export type GlyphName =
   | "tulip"
   | "pencil"
   | "clapperboard"
+  | "lock"
   // functional glyphs — currentColor, inherit the surrounding text/pill color
   | "check"
   | "cross"
@@ -245,6 +246,20 @@ export const GLYPH_ART: Record<GlyphName, React.ReactNode> = {
     <g>
       {CLAPPER_BODY}
       {CLAPPER_LID}
+    </g>
+  ),
+  lock: (
+    <g>
+      <path
+        d="M8 10.2V7.6a4 4 0 0 1 8 0v2.6"
+        fill="none"
+        stroke="oklch(0.62 0.06 248)"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+      <rect x="5" y="9.8" width="14" height="10.4" rx="3.2" fill="oklch(0.86 0.045 248)" />
+      <circle cx="12" cy="14.4" r="1.5" fill="oklch(0.55 0.06 248)" />
+      <path d="M12 15.4v2.2" stroke="oklch(0.55 0.06 248)" strokeWidth="1.5" strokeLinecap="round" />
     </g>
   ),
 

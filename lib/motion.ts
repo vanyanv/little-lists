@@ -45,3 +45,14 @@ export const fadeSlide: Variants = {
   hidden: { opacity: 0, y: 10 },
   show: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] } },
 };
+
+// shared viewport config for scroll reveals — fire once, a bit before fully visible
+export const inViewOnce = { once: true, amount: 0.3 } as const;
+
+// a barely-there vertical drift for decorative hero stickers. Slow and small on
+// purpose; anything livelier fights the calm-by-default rule. Callers must
+// guard with useReducedMotion — JS loops aren't covered by the global CSS rule.
+export const gentleFloat = (delay = 0) => ({
+  y: [0, -5, 0],
+  transition: { duration: 6, repeat: Infinity, ease: "easeInOut" as const, delay },
+});

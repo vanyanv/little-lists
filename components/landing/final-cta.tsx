@@ -1,16 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { softSpring, tap } from "@/lib/motion";
 import { focusRingOnDark } from "@/lib/a11y";
 import { Sticker } from "@/components/sticker";
+import { SaveSparkle } from "@/components/icons/save-sparkle";
 
 // Same tactile press as every tappable surface in the app.
 const MotionLink = motion.create(Link);
 
 export function FinalCta() {
   const reduce = useReducedMotion();
+  // remount SaveSparkle per hover/tap so the little pop replays; 0 = not yet
+  const [burst, setBurst] = useState(0);
+  const pop = () => setBurst((n) => n + 1);
+
   return (
     <section className="px-5 pb-[calc(env(safe-area-inset-bottom)+4rem)] pt-6">
       <div className="relative mx-auto max-w-2xl overflow-hidden rounded-[var(--radius-2xl)] bg-ink px-6 py-14 text-center shadow-lift">
@@ -20,16 +26,22 @@ export function FinalCta() {
           Start with one little list
         </h2>
         <p className="mx-auto mt-3 max-w-[26rem] text-[1.02rem] leading-relaxed text-cream/80">
-          It only takes a few taps. Watch your tiny archive begin.
+          Make a movie list, a gift list, a food list, or something totally yours.
         </p>
-        <MotionLink
-          href="/sign-up"
-          whileTap={reduce ? undefined : tap}
-          transition={softSpring}
-          className={`mt-7 inline-flex items-center justify-center rounded-pill bg-cream px-8 py-4 text-[1.02rem] font-bold text-ink shadow-soft transition-colors hover:bg-paper ${focusRingOnDark}`}
-        >
-          Create my Little Lists
-        </MotionLink>
+        <div className="relative mt-7 inline-flex">
+          <MotionLink
+            href="/sign-up"
+            whileTap={reduce ? undefined : tap}
+            transition={softSpring}
+            onHoverStart={pop}
+            onTap={pop}
+            className={`inline-flex items-center justify-center rounded-pill bg-cream px-8 py-4 text-[1.02rem] font-bold text-ink shadow-soft transition-colors hover:bg-paper ${focusRingOnDark}`}
+          >
+            Create my Little Lists
+          </MotionLink>
+          {/* the app's save moment, borrowed for the one place the page celebrates */}
+          {burst > 0 && <SaveSparkle key={burst} />}
+        </div>
         <p className="mt-4 text-[0.85rem] font-semibold text-cream/75">Free to start, and private by default.</p>
         {/* PLACEHOLDER: when a real, verifiable testimonial or usage stat exists, add it here.
             Do not invent quotes or user counts. */}
