@@ -66,6 +66,62 @@ export const CLAPPER_BODY = (
   </g>
 );
 
+/* book — halves are separate so the book can open slightly */
+export const BOOK_LEFT = (
+  <path d="M4 5.2c2.6-1 5.4-1 8 0v14c-2.6-1-5.4-1-8 0z" fill="oklch(0.85 0.045 145)" />
+);
+export const BOOK_RIGHT = (
+  <path d="M20 5.2c-2.6-1-5.4-1-8 0v14c2.6-1 5.4-1 8 0z" fill="oklch(0.8 0.05 145)" />
+);
+export const BOOK_SPINE = <path d="M12 5.2v14" stroke="oklch(0.65 0.05 145)" strokeWidth="0.8" />;
+
+/* gift — bow is separate so it can pop */
+export const GIFT_BOX = (
+  <g>
+    <rect x="4.5" y="10.2" width="15" height="10.3" rx="1.6" fill="oklch(0.86 0.052 18)" />
+    <rect x="3.5" y="6.9" width="17" height="4.2" rx="1.4" fill="oklch(0.9 0.045 18)" />
+    <rect x="10.9" y="6.9" width="2.2" height="13.6" fill="oklch(0.97 0.015 18)" />
+  </g>
+);
+export const GIFT_BOW = (
+  <path
+    d="M12 6.6C10.8 4.1 7.9 3.2 7.3 4.8c-.6 1.5 1.6 2.3 4.7 1.8zM12 6.6c1.2-2.5 4.1-3.4 4.7-1.8.6 1.5-1.6 2.3-4.7 1.8z"
+    fill="oklch(0.8 0.07 18)"
+  />
+);
+
+/* tulip — bloom is separate so it can bloom from the stem */
+export const TULIP_STEM = (
+  <g>
+    <path d="M12 14.5v6" stroke="oklch(0.68 0.06 145)" strokeWidth="1.8" strokeLinecap="round" />
+    <path d="M11.6 19.4c-2.8.3-4.7-.8-5.7-2.9 2.7-.6 4.7.3 5.7 2.9z" fill="oklch(0.82 0.05 145)" />
+  </g>
+);
+export const TULIP_BLOOM = (
+  <path
+    d="M6.5 4.6l2.8 2.7L12 4.2l2.7 3.1 2.8-2.7v4.7c0 3.4-2.2 5.5-5.5 5.5s-5.5-2.1-5.5-5.5z"
+    fill="oklch(0.84 0.075 350)"
+  />
+);
+
+/* ramen — steam is separate so it can rise */
+export const RAMEN_STEAM = (
+  <path
+    d="M9.3 2.8c-.7 1 .7 1.7 0 2.7M14.7 2.8c-.7 1 .7 1.7 0 2.7"
+    fill="none"
+    stroke="oklch(0.8 0.04 248)"
+    strokeWidth="1.3"
+    strokeLinecap="round"
+  />
+);
+export const RAMEN_BODY = (
+  <g>
+    <path d="M3.5 10.5h17a8.5 8.5 0 0 1-17 0z" fill="oklch(0.84 0.05 248)" />
+    <path d="M6.2 14h11.6" stroke="oklch(0.96 0.015 248)" strokeWidth="1.4" strokeLinecap="round" />
+    <rect x="9" y="18.6" width="6" height="2" rx="1" fill="oklch(0.78 0.05 248)" />
+  </g>
+);
+
 /* One flat pastel family. Soft outlines, no gradients, gentle shapes. */
 export const GLYPH_ART: Record<GlyphName, React.ReactNode> = {
   flower: (
@@ -123,9 +179,9 @@ export const GLYPH_ART: Record<GlyphName, React.ReactNode> = {
   ),
   book: (
     <g>
-      <path d="M4 5.2c2.6-1 5.4-1 8 0v14c-2.6-1-5.4-1-8 0z" fill="oklch(0.85 0.045 145)" />
-      <path d="M20 5.2c-2.6-1-5.4-1-8 0v14c2.6-1 5.4-1 8 0z" fill="oklch(0.8 0.05 145)" />
-      <path d="M12 5.2v14" stroke="oklch(0.65 0.05 145)" strokeWidth="0.8" />
+      {BOOK_LEFT}
+      {BOOK_RIGHT}
+      {BOOK_SPINE}
     </g>
   ),
   leaf: (
@@ -159,37 +215,20 @@ export const GLYPH_ART: Record<GlyphName, React.ReactNode> = {
   ),
   "ramen-bowl": (
     <g>
-      <path
-        d="M9.3 2.8c-.7 1 .7 1.7 0 2.7M14.7 2.8c-.7 1 .7 1.7 0 2.7"
-        fill="none"
-        stroke="oklch(0.8 0.04 248)"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-      />
-      <path d="M3.5 10.5h17a8.5 8.5 0 0 1-17 0z" fill="oklch(0.84 0.05 248)" />
-      <path d="M6.2 14h11.6" stroke="oklch(0.96 0.015 248)" strokeWidth="1.4" strokeLinecap="round" />
-      <rect x="9" y="18.6" width="6" height="2" rx="1" fill="oklch(0.78 0.05 248)" />
+      {RAMEN_STEAM}
+      {RAMEN_BODY}
     </g>
   ),
   gift: (
     <g>
-      <rect x="4.5" y="10.2" width="15" height="10.3" rx="1.6" fill="oklch(0.86 0.052 18)" />
-      <rect x="3.5" y="6.9" width="17" height="4.2" rx="1.4" fill="oklch(0.9 0.045 18)" />
-      <rect x="10.9" y="6.9" width="2.2" height="13.6" fill="oklch(0.97 0.015 18)" />
-      <path
-        d="M12 6.6C10.8 4.1 7.9 3.2 7.3 4.8c-.6 1.5 1.6 2.3 4.7 1.8zM12 6.6c1.2-2.5 4.1-3.4 4.7-1.8.6 1.5-1.6 2.3-4.7 1.8z"
-        fill="oklch(0.8 0.07 18)"
-      />
+      {GIFT_BOX}
+      {GIFT_BOW}
     </g>
   ),
   tulip: (
     <g>
-      <path d="M12 14.5v6" stroke="oklch(0.68 0.06 145)" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M11.6 19.4c-2.8.3-4.7-.8-5.7-2.9 2.7-.6 4.7.3 5.7 2.9z" fill="oklch(0.82 0.05 145)" />
-      <path
-        d="M6.5 4.6l2.8 2.7L12 4.2l2.7 3.1 2.8-2.7v4.7c0 3.4-2.2 5.5-5.5 5.5s-5.5-2.1-5.5-5.5z"
-        fill="oklch(0.84 0.075 350)"
-      />
+      {TULIP_STEM}
+      {TULIP_BLOOM}
     </g>
   ),
   pencil: (
