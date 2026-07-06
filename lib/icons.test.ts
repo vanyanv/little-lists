@@ -4,6 +4,7 @@ import { FUNCTIONAL_GLYPHS, GLYPH_ART } from "@/components/icons/glyphs";
 import { ITEM_TYPE_META, TEMPLATE_META } from "./types";
 import { PERSON_SECTIONS } from "./people";
 import { PERSON_STARTER, STARTER_OPTIONS } from "./onboarding";
+import { PART_MOTION_GLYPHS, WHOLE_MOTION } from "@/components/icons/glyph-motion";
 
 describe("CATEGORY_GLYPH", () => {
   it("covers every item type", () => {
@@ -67,5 +68,31 @@ describe("CATEGORY_SIZE", () => {
     expect(resolveCategorySize("sm")).toBe(14);
     expect(resolveCategorySize("lg")).toBe(22);
     expect(resolveCategorySize(16)).toBe(16);
+  });
+});
+
+describe("glyph motion registry", () => {
+  const partSet = new Set<string>(PART_MOTION_GLYPHS);
+
+  it("part-motion glyphs exist in the art registry", () => {
+    for (const g of PART_MOTION_GLYPHS) {
+      expect(GLYPH_ART[g], `part glyph "${g}"`).toBeDefined();
+    }
+  });
+
+  it("whole-motion glyphs exist in the art registry and never overlap part motions", () => {
+    for (const g of Object.keys(WHOLE_MOTION)) {
+      expect(GLYPH_ART[g as keyof typeof GLYPH_ART], `whole glyph "${g}"`).toBeDefined();
+      expect(partSet.has(g), `"${g}" is in both registries`).toBe(false);
+    }
+  });
+
+  it("every spec'd category has a character move (not just the fallback pop)", () => {
+    const specced = ["movie", "book", "food", "place", "gift", "date", "people", "custom", "obsessions", "notes", "music"];
+    for (const id of specced) {
+      const g = CATEGORY_GLYPH[id];
+      const hasMove = partSet.has(g) || WHOLE_MOTION[g] !== undefined;
+      expect(hasMove, `category "${id}" (glyph "${g}")`).toBe(true);
+    }
   });
 });
