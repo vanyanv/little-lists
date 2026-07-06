@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { CATEGORY_GLYPH } from "@/components/icons/category-icon";
+import { CATEGORY_GLYPH, CATEGORY_SIZE, resolveCategorySize } from "@/components/icons/category-icon";
 import { FUNCTIONAL_GLYPHS, GLYPH_ART } from "@/components/icons/glyphs";
 import { ITEM_TYPE_META, TEMPLATE_META } from "./types";
 import { PERSON_SECTIONS } from "./people";
@@ -55,5 +55,17 @@ describe("GLYPH_ART", () => {
     for (const [id, meta] of Object.entries(TEMPLATE_META)) {
       expect(FUNCTIONAL_GLYPHS.has(meta.sticker), `template "${id}"`).toBe(false);
     }
+  });
+});
+
+describe("CATEGORY_SIZE", () => {
+  it("matches the design tokens", () => {
+    expect(CATEGORY_SIZE).toEqual({ sm: 14, md: 18, lg: 22 });
+  });
+
+  it("resolves tokens and passes numbers through", () => {
+    expect(resolveCategorySize("sm")).toBe(14);
+    expect(resolveCategorySize("lg")).toBe(22);
+    expect(resolveCategorySize(16)).toBe(16);
   });
 });
