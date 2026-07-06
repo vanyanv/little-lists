@@ -32,6 +32,22 @@ mapping points at art that doesn't exist.
   milestone celebrations only. Everything animated goes through
   `useReducedMotion`.
 
+## Motion rules
+
+Category glyphs get a single "character move" that plays once when a pick
+lands in an interactive picker (template picker, add-item type chips,
+add-detail sections, onboarding starters) — never ambiently.
+
+- Motion *data* lives in `components/icons/glyph-motion.ts` (plain data, no
+  motion imports, guarded by `lib/icons.test.ts`).
+- `AnimatedCategoryIcon` is the only renderer. Whole-icon moves wrap the
+  static `GlyphSvg`; sub-part moves (clapperboard lid, book halves, gift
+  bow, tulip bloom, ramen steam) re-render the glyph from the shape
+  constants exported by `glyphs.tsx`, so static and animated art share the
+  same paths.
+- `useReducedMotion()` disables everything; display-only surfaces (home
+  chips, person cards, section headers, status pills) stay static.
+
 ## Swapping in third-party assets later
 
 To move to Twemoji / Animated Noto Emoji SVGs or LottieFiles stickers:
@@ -43,6 +59,9 @@ To move to Twemoji / Animated Noto Emoji SVGs or LottieFiles stickers:
 3. Record the source + license in the attribution table below. Only use assets
    with a clear license (Twemoji graphics are CC-BY 4.0 → attribution required;
    Noto Emoji is OFL/Apache; check each Lottie file individually).
+- Animated vendor stickers (Lottie / Animated Noto) would replace
+  `glyph-motion.ts` and `AnimatedCategoryIcon`'s renderers — nothing else
+  consumes the motion layer.
 
 ## Third-party asset attribution
 
