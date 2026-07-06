@@ -28,9 +28,9 @@ mapping points at art that doesn't exist.
 - **Functional** glyphs (check, cross, circle, star-tiny, heart-tiny) use
   `currentColor` and inherit the surrounding text/pill color. They're listed in
   `FUNCTIONAL_GLYPHS` and must not be used as decoration.
-- Animation is rare by design: empty states, onboarding, the save moment, and
-  milestone celebrations only. Everything animated goes through
-  `useReducedMotion`.
+- Animation is rare by design: empty states, onboarding, the save moment,
+  milestone celebrations, and the picker character moves (see Motion rules).
+  Everything animated goes through `useReducedMotion`.
 
 ## Motion rules
 
@@ -59,9 +59,9 @@ To move to Twemoji / Animated Noto Emoji SVGs or LottieFiles stickers:
 3. Record the source + license in the attribution table below. Only use assets
    with a clear license (Twemoji graphics are CC-BY 4.0 → attribution required;
    Noto Emoji is OFL/Apache; check each Lottie file individually).
-- Animated vendor stickers (Lottie / Animated Noto) would replace
-  `glyph-motion.ts` and `AnimatedCategoryIcon`'s renderers — nothing else
-  consumes the motion layer.
+4. Animated vendor stickers (Lottie / Animated Noto) would replace
+   `glyph-motion.ts` and `AnimatedCategoryIcon`'s renderers — nothing else
+   consumes the motion layer.
 
 ## Third-party asset attribution
 
