@@ -362,7 +362,7 @@ export async function completeOnboardingAction(sel: OnboardingSelections): Promi
   const { clerkUserId } = await requireUserProfile();
 
   const chosen = STARTER_OPTIONS.filter((opt) => sel.starters.includes(opt.id));
-  // Sam comes along either way: picking the person card asks for them, and the
+  // The demo person comes along either way: picking the person card asks for them, and the
   // examples toggle includes them so the people feature isn't an empty mystery.
   const seedPerson = sel.includePerson || sel.seedExamples;
   const demoSeeded = sel.seedExamples || sel.includePerson;

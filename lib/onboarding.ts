@@ -120,23 +120,23 @@ export const DEMO_BANNER_DISMISSED_KEY = "ll:demo-banner-dismissed";
 
 /** The demo person, kept in step with the landing page's PREVIEW_PERSON. */
 export const DEMO_PERSON = {
-  name: "Sam",
+  name: "Maddie",
   emoji: "🌼",
   theme: "butter",
   note: "someone you love to plan little things for",
   /** sectionId matches PERSON_SECTIONS ids in lib/people.ts */
   details: [
-    { sectionId: "likes", title: "cozy mysteries" },
     { sectionId: "likes", title: "farmers markets" },
-    { sectionId: "dislikes", title: "cilantro" },
+    { sectionId: "likes", title: "rainy days" },
+    { sectionId: "dislikes", title: "mushrooms" },
     { sectionId: "dislikes", title: "crowded places" },
-    { sectionId: "food", title: "oat milk lattes" },
-    { sectionId: "movies", title: "Spirited Away" },
-    { sectionId: "movies", title: "Paddington" },
+    { sectionId: "food", title: "Puerto Rican food" },
+    { sectionId: "movies", title: "The Others" },
+    { sectionId: "movies", title: "Get Out" },
+    { sectionId: "books", title: "cozy mysteries" },
     { sectionId: "gifts", title: "ceramic mug" },
     { sectionId: "gifts", title: "knit scarf" },
-    { sectionId: "dates", title: "a little hike" },
-    { sectionId: "dates", title: "bookstore café" },
+    { sectionId: "dates", title: "Huntington Gardens" },
     { sectionId: "notes", title: "allergic to peanuts 🥜" },
   ],
 } as const;
