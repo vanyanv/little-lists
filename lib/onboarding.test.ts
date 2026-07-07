@@ -44,6 +44,7 @@ function list(items: List["items"]): List {
     noun: "little films saved",
     kind: "movie",
     template: "movie",
+    pinned: false,
     items,
   };
 }

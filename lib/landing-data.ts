@@ -13,6 +13,7 @@ export const PREVIEW_MOVIES: List = {
   noun: "little films saved",
   kind: "movie",
   template: "movie",
+  pinned: false,
   // first-party abstract cover art (public/posters/*) — drawn for this project,
   // so the preview can show real poster images without licensing anyone's key art
   items: [
@@ -33,6 +34,7 @@ export const PREVIEW_BOOKS: List = {
   noun: "little stories waiting",
   kind: "book",
   template: "book",
+  pinned: false,
   items: [
     { id: "b1", type: "book", title: "Piranesi", seed: "Piranesi", status: "want-to-read", imageUrl: "/posters/piranesi.svg" },
     { id: "b2", type: "book", title: "The House in the Cerulean Sea", seed: "Cerulean Sea", status: "reading", imageUrl: "/posters/cerulean-sea.svg" },
@@ -48,6 +50,7 @@ export const PREVIEW_FOODS: List = {
   noun: "little tastes noted",
   kind: "food",
   template: "food",
+  pinned: false,
   items: [
     { id: "f1", type: "food", title: "Cilantro", emoji: "🌿", status: "hate" },
     { id: "f2", type: "food", title: "Black licorice", emoji: "🍬", status: "hate" },
@@ -63,6 +66,7 @@ export const PREVIEW_GIFTS: List = {
   noun: "thoughtful little ideas",
   kind: "custom",
   template: "gift",
+  pinned: false,
   items: [
     { id: "g1", type: "custom", title: "Film camera", emoji: "📷", status: "idea" },
     { id: "g2", type: "custom", title: "Ceramic mug", emoji: "☕", status: "idea" },

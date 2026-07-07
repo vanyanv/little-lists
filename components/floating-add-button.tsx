@@ -47,15 +47,20 @@ export function FloatingAddButton() {
           transition={{ ...softSpring, delay: 0.15 }}
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.9 }}
-          className={`pointer-events-auto absolute bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-5 grid place-items-center rounded-full text-cream shadow-lift ${focusRingOnDark}`}
-          style={{ height: 60, width: 60, background: "var(--color-ink)" }}
+          className={`pointer-events-auto absolute bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-5 text-cream shadow-lift ${focusRingOnDark} ${
+            onHome
+              ? "flex items-center gap-2 rounded-pill px-5 text-[0.95rem] font-bold"
+              : "grid place-items-center rounded-full"
+          }`}
+          style={{ height: 60, ...(onHome ? {} : { width: 60 }), background: "var(--color-ink)" }}
         >
           <motion.span
             animate={reduce ? {} : { y: [0, -1.5, 0] }}
             transition={reduce ? {} : { duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-            className="text-[1.7rem] leading-none font-light"
+            className="flex items-center gap-2"
           >
-            +
+            <span className="text-[1.7rem] leading-none font-light">+</span>
+            {onHome && <span className="leading-none">Start a little list</span>}
           </motion.span>
         </motion.button>
       </div>

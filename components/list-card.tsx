@@ -36,7 +36,7 @@ function ListMeta({ list, size = "normal" }: { list: List; size?: "hero" | "norm
 
 export function ListCard({ list, variant = "normal" }: { list: List; variant?: "hero" | "normal" }) {
   const hero = variant === "hero";
-  const { deleteList } = useStore();
+  const { deleteList, setListPinned } = useStore();
   const { openEditList, openConfirm, showToast } = useUi();
 
   const menu = (
@@ -45,6 +45,13 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
         ariaLabel={`Options for ${list.title}`}
         stopPropagation
         items={[
+          {
+            label: list.pinned ? "Unpin" : "Pin to top",
+            onSelect: () => {
+              setListPinned(list.id, !list.pinned);
+              showToast(list.pinned ? "Unpinned" : "Pinned to the top ✨");
+            },
+          },
           { label: "Edit list", onSelect: () => openEditList(list.id) },
           {
             label: "Delete list",

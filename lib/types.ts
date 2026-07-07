@@ -156,6 +156,8 @@ export interface List {
   template: ListTemplate;
   /** the user's chosen browsing view; falls back to the template default */
   defaultView?: ViewMode;
+  /** pinned lists sort to the top of Home and take the hero slot */
+  pinned: boolean;
   items: Item[];
 }
 

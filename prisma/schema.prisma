@@ -71,6 +71,7 @@ model List {
   defaultViewMode ViewMode     @default(cozy)
   visibility      Visibility   @default(private)
   description     String?
+  pinned          Boolean      @default(false)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 

@@ -25,7 +25,8 @@ export async function getInitialData(): Promise<InitialData> {
   const [lists, people] = await Promise.all([
     prisma.list.findMany({
       where: { userId },
-      orderBy: { createdAt: "desc" },
+      // pinned worlds float to the top; everything else stays freshest-first
+      orderBy: [{ pinned: "desc" }, { updatedAt: "desc" }],
       include: { items: { orderBy: { createdAt: "desc" } } },
     }),
     prisma.person.findMany({

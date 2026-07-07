@@ -29,6 +29,7 @@ import {
   deleteListAction,
   deletePersonAction,
   deletePersonDetailAction,
+  setListPinnedAction,
   setListViewAction,
   updateItemAction,
   updateListAction,
@@ -94,6 +95,8 @@ interface StoreValue {
   clearExamples: () => void;
   fireCelebration: (variant?: CelebrationVariant) => void;
   updateList: (listId: string, patch: Partial<Pick<List, "title" | "emoji" | "theme" | "template" | "defaultView">>) => void;
+  /** pin a list to the top of Home (or unpin it) */
+  setListPinned: (listId: string, pinned: boolean) => void;
   deleteList: (listId: string) => void;
   updatePerson: (personId: string, patch: Partial<Pick<Person, "name" | "emoji" | "theme" | "note">>) => void;
   deletePerson: (personId: string) => void;
@@ -175,6 +178,14 @@ export function ListsProvider({
       template: patch.template,
       defaultView: patch.defaultView,
     }).catch((err) => console.error("updateList failed", err));
+  }, []);
+
+  const setListPinned = useCallback<StoreValue["setListPinned"]>((listId, pinned) => {
+    setLists((prev) => prev.map((l) => (l.id === listId ? { ...l, pinned } : l)));
+    if (isTempId(listId)) return; // not persisted yet; created already unpinned
+    void setListPinnedAction(listId, pinned).catch((err) =>
+      console.error("setListPinned failed", err)
+    );
   }, []);
 
   const deleteList = useCallback<StoreValue["deleteList"]>((listId) => {
@@ -382,6 +393,7 @@ export function ListsProvider({
       deleteItem,
       setListView,
       updateList,
+      setListPinned,
       deleteList,
       addPerson,
       addPersonDetail,
@@ -405,6 +417,7 @@ export function ListsProvider({
       deleteItem,
       setListView,
       updateList,
+      setListPinned,
       deleteList,
       addPerson,
       addPersonDetail,
@@ -455,6 +468,7 @@ function mapDraftList(id: string, input: CreateListInput): List {
     kind: meta.kind,
     template: input.template,
     defaultView: input.defaultView,
+    pinned: false,
     items: [],
   };
 }

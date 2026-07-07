@@ -72,6 +72,7 @@ export function mapList(row: DbList & { items?: DbItem[] }): List {
     kind: meta.kind,
     template,
     defaultView: row.defaultViewMode as ViewMode,
+    pinned: row.pinned,
     items,
   };
 }

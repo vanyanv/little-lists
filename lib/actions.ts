@@ -85,6 +85,16 @@ export async function updateListAction(listId: string, patch: UpdateListPatch): 
   return mapList(row);
 }
 
+export async function setListPinnedAction(listId: string, pinned: boolean): Promise<void> {
+  const { clerkUserId } = await requireUserProfile();
+  // updateMany scopes the write to the caller's own row — a direct POST for
+  // someone else's list matches nothing and changes nothing.
+  await prisma.list.updateMany({
+    where: { id: listId, userId: clerkUserId },
+    data: { pinned },
+  });
+}
+
 export async function deleteListAction(listId: string): Promise<void> {
   const { clerkUserId } = await requireUserProfile();
   // ListItem.list is onDelete: Cascade, so items go with it

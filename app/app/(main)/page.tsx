@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { useUser } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
-import type { ItemType, ListTemplate } from "@/lib/types";
+import { TEMPLATE_META, type ItemType, type ListTemplate } from "@/lib/types";
 import { ONBOARDING_TOAST_KEY } from "@/lib/onboarding";
 import { staggerContainer, riseItem } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
@@ -20,9 +20,10 @@ import { LittleIcon } from "@/components/icons/little-icon";
 import type { GlyphName } from "@/components/icons/glyphs";
 
 const CATEGORIES: { id: string; label: string; glyph?: GlyphName; kinds: ItemType[] | null }[] = [
-  { id: "all", label: "Everything", kinds: null },
+  { id: "all", label: "Everything", glyph: "sparkle", kinds: null },
   { id: "watch", label: "To watch", glyph: "film", kinds: ["movie"] },
   { id: "read", label: "To read", glyph: "book", kinds: ["book"] },
+  { id: "hear", label: "To hear", glyph: "headphones", kinds: ["music"] },
   { id: "taste", label: "To taste", glyph: "ramen-bowl", kinds: ["food", "place"] },
   { id: "things", label: "Little things", glyph: "sparkle", kinds: ["custom"] },
 ];
@@ -64,14 +65,24 @@ export default function HomeScreen() {
 
   const hasLists = lists.length > 0;
 
+  // A search or a non-"Everything" chip narrows the view; while that's on we
+  // drop the hero and show a uniform grid so the layout stops reshuffling.
+  const isFiltering = query.trim() !== "" || cat !== "all";
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const kinds = CATEGORIES.find((c) => c.id === cat)?.kinds;
-    return lists.filter((l) => {
+    const matched = lists.filter((l) => {
       const matchesCat = !kinds || kinds.includes(l.kind);
-      const matchesQuery = !q || l.title.toLowerCase().includes(q);
+      // match the title or the list's kind, e.g. "music" finds a "Music list"
+      const matchesQuery =
+        !q ||
+        l.title.toLowerCase().includes(q) ||
+        TEMPLATE_META[l.template].label.toLowerCase().includes(q);
       return matchesCat && matchesQuery;
     });
+    // pinned worlds float to the top; a stable sort keeps the rest freshest-first
+    return [...matched].sort((a, b) => Number(b.pinned) - Number(a.pinned));
   }, [lists, query, cat]);
 
   const [hero, ...rest] = filtered;
@@ -157,6 +168,19 @@ export default function HomeScreen() {
             )
           }
         />
+      ) : isFiltering ? (
+        <motion.div
+          variants={staggerContainer}
+          initial={reduce ? false : "hidden"}
+          animate="show"
+          className="mt-4 grid grid-cols-2 gap-3"
+        >
+          {filtered.map((l) => (
+            <motion.div key={l.id} variants={riseItem}>
+              <ListCard list={l} variant="normal" />
+            </motion.div>
+          ))}
+        </motion.div>
       ) : (
         <motion.div variants={staggerContainer} initial={reduce ? false : "hidden"} animate="show" className="mt-4 flex flex-col gap-3">
           {hero && (
