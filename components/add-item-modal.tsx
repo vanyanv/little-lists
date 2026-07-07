@@ -143,6 +143,7 @@ function AddItemFlow({
   }, [type, presetListId, lists]);
 
   const pickResult = (r: SearchHit) => {
+    if (searching) return; // stale hit from the superseded query — ignore
     setPicked(r.sourceId);
     setTitle(r.title);
     setSubtitle(r.subtitle);
@@ -276,6 +277,7 @@ function AddItemFlow({
                           type="button"
                           role="option"
                           aria-selected={chosen}
+                          tabIndex={searching ? -1 : undefined}
                           onClick={() => pickResult(r)}
                           whileTap={tap}
                           animate={{ scale: chosen ? 1.015 : 1 }}
