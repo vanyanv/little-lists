@@ -10,7 +10,7 @@ import { FinalCta } from "@/components/landing/final-cta";
 import { LandingFooter } from "@/components/landing/landing-footer";
 
 export const metadata: Metadata = {
-  title: "Little Lists — cozy little lists for everything you love",
+  title: "Little Lists · cozy little lists for everything you love",
   description:
     "Make little lists for everything you love, hate, and want to remember. Movies to watch, books to read, foods you avoid, gift ideas, date ideas, and tiny details about people, all in one cozy place.",
 };

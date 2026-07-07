@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { InfoPage, InfoSection } from "@/components/landing/info-page";
 
 export const metadata: Metadata = {
-  title: "Privacy — Little Lists",
+  title: "Privacy · Little Lists",
   description: "How Little Lists treats your little lists: private by default, never sold.",
 };
 

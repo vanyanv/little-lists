@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 import type { ViewMode } from "@/lib/types";
 import { ViewIcon } from "@/components/view-toggle";
@@ -7,19 +8,32 @@ import { riseItem, staggerContainer, inViewOnce } from "@/lib/motion";
 
 /* The same little movie list, shown the three ways the app can render it, so the
    difference reads at a glance instead of being described with an abstract glyph.
-   Presentational only — faux twins of the grid / list / cozy item views. */
+   Presentational only — faux twins of the grid / list / cozy item views. Uses the
+   same drawn poster art as the hero demo, not emoji, so it reads as the real app. */
 
 const SAMPLE = [
-  { emoji: "🎬", title: "Past Lives", theme: "blush" },
-  { emoji: "🍿", title: "Paddington", theme: "sage" },
-  { emoji: "🌀", title: "Spirited Away", theme: "butter" },
-  { emoji: "🎀", title: "Lady Bird", theme: "sky" },
+  { poster: "/posters/past-lives.svg", title: "Past Lives", theme: "blush" },
+  { poster: "/posters/paddington.svg", title: "Paddington", theme: "sage" },
+  { poster: "/posters/spirited-away.svg", title: "Spirited Away", theme: "butter" },
+  { poster: "/posters/lady-bird.svg", title: "Lady Bird", theme: "sky" },
 ] as const;
+
+/* Tiny poster thumbnail: a fixed square crop of the drawn art, sized per preview. */
+function MiniPoster({ src, title, size }: { src: string; title: string; size: number }) {
+  return (
+    <span
+      className="relative block shrink-0 overflow-hidden rounded-md"
+      style={{ width: size, height: size }}
+    >
+      <Image src={src} alt={title} fill sizes={`${size}px`} unoptimized className="object-cover" />
+    </span>
+  );
+}
 
 const MODES: { mode: ViewMode; title: string; line: string }[] = [
   { mode: "grid", title: "Grid", line: "For covers, posters, and pretty browsing." },
   { mode: "list", title: "List", line: "For scrolling through a lot fast." },
-  { mode: "cozy", title: "Cozy", line: "For thoughts, gift ideas, food opinions, and custom lists." },
+  { mode: "cozy", title: "Cozy", line: "For thoughts, opinions, and anything freeform." },
 ];
 
 function dot(theme: string) {
@@ -32,10 +46,10 @@ function GridPreview() {
       {SAMPLE.map((s) => (
         <div
           key={s.title}
-          className="grid aspect-square place-items-center rounded-lg text-lg shadow-soft"
+          className="aspect-square overflow-hidden rounded-lg shadow-soft"
           style={{ background: dot(s.theme) }}
         >
-          {s.emoji}
+          <Image src={s.poster} alt={s.title} width={80} height={80} sizes="80px" unoptimized className="h-full w-full object-cover" />
         </div>
       ))}
     </div>
@@ -47,9 +61,7 @@ function ListPreview() {
     <div className="flex flex-col gap-1.5">
       {SAMPLE.slice(0, 3).map((s) => (
         <div key={s.title} className="flex items-center gap-2 rounded-lg bg-paper px-2 py-1.5 shadow-soft">
-          <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md text-[0.7rem]" style={{ background: dot(s.theme) }}>
-            {s.emoji}
-          </span>
+          <MiniPoster src={s.poster} title={s.title} size={20} />
           <span className="truncate text-[0.72rem] font-semibold text-ink">{s.title}</span>
           <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: dot(s.theme) }} />
         </div>
@@ -64,7 +76,7 @@ function CozyPreview() {
       {SAMPLE.slice(0, 2).map((s) => (
         <div key={s.title} className="rounded-lg bg-paper p-2 shadow-soft">
           <div className="flex items-center gap-1.5">
-            <span className="text-[0.8rem]">{s.emoji}</span>
+            <MiniPoster src={s.poster} title={s.title} size={16} />
             <span className="text-[0.72rem] font-semibold text-ink">{s.title}</span>
           </div>
           <div className="mt-1.5 space-y-1">
@@ -94,7 +106,7 @@ export function ViewModes() {
             See it your way
           </h2>
           <p className="mx-auto mt-3 max-w-[32rem] text-[1rem] leading-relaxed text-brown md:mx-0">
-            Every list can be browsed three ways. Pick whatever feels right for what is inside, the same little world, rearranged to suit it.
+            Every list can be browsed three ways. Pick whatever feels right for what&rsquo;s inside. Same little world, just rearranged.
           </p>
         </div>
 

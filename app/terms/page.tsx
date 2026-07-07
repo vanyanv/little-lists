@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { InfoPage, InfoSection } from "@/components/landing/info-page";
 
 export const metadata: Metadata = {
-  title: "Terms — Little Lists",
+  title: "Terms · Little Lists",
   description: "The basics of using Little Lists, in plain language.",
 };
 

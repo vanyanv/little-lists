@@ -85,9 +85,9 @@ export function LandingHero({ movies, books }: { movies?: List; books?: List }) 
         <motion.div
           {...rise}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center md:pt-10 md:text-left"
+          className="min-w-0 text-center md:pt-10 md:text-left"
         >
-          <h1 className="font-display font-semibold leading-[1.06] text-ink" style={{ fontSize: "clamp(2.05rem, 7.5vw, 3.4rem)" }}>
+          <h1 className="font-display font-semibold leading-[1.06] text-ink" style={{ fontSize: "clamp(1.85rem, 7.5vw, 3.4rem)" }}>
             Make little lists for everything you love, hate, and want to remember.
           </h1>
 
@@ -110,7 +110,7 @@ export function LandingHero({ movies, books }: { movies?: List; books?: List }) 
               transition={softSpring}
               className={`inline-flex items-center justify-center rounded-pill bg-paper px-7 py-4 text-[1rem] font-bold text-brown ring-1 ring-line transition-colors hover:bg-cream-deep ${focusRing}`}
             >
-              See how it works
+              See what you can make
             </MotionLink>
           </div>
 
@@ -129,7 +129,7 @@ export function LandingHero({ movies, books }: { movies?: List; books?: List }) 
         <motion.div
           {...(reduce ? {} : { initial: { opacity: 0, y: 24, rotate: -1.5 }, animate: { opacity: 1, y: 0, rotate: 0 } })}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: reduce ? 0 : 0.12 }}
-          className="px-2"
+          className="min-w-0 px-2"
         >
           <div className="relative mx-auto w-full max-w-[300px]">
             <HeroStickers reduce={reduce} />

@@ -69,6 +69,9 @@ export function UseCases() {
           <p className="mx-auto mt-3 max-w-[32rem] text-[1rem] leading-relaxed text-brown">
             Whatever you want to keep track of, there&rsquo;s a cozy little corner for it.
           </p>
+          <p className="mx-auto mt-2 max-w-[32rem] text-[1rem] leading-relaxed text-brown">
+            Type a title and the poster appears. No pasting links.
+          </p>
         </header>
 
         <div className="mt-9 grid grid-cols-1 gap-3.5 sm:grid-cols-2">

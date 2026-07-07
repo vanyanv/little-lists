@@ -20,6 +20,8 @@ export const PREVIEW_MOVIES: List = {
     { id: "m2", type: "movie", title: "Paddington", seed: "Paddington", status: "want-to-watch", subtitle: "2014", imageUrl: "/posters/paddington.svg" },
     { id: "m3", type: "movie", title: "Spirited Away", seed: "Spirited Away", status: "favorite", subtitle: "2001", imageUrl: "/posters/spirited-away.svg" },
     { id: "m4", type: "movie", title: "Lady Bird", seed: "Lady Bird", status: "watched", subtitle: "2017", imageUrl: "/posters/lady-bird.svg" },
+    { id: "m5", type: "movie", title: "Amélie", seed: "Amélie", status: "favorite", subtitle: "2001" },
+    { id: "m6", type: "movie", title: "Little Women", seed: "Little Women", status: "want-to-watch", subtitle: "2019" },
   ],
 };
 

@@ -29,7 +29,7 @@ export function LandingHeader() {
             href="/sign-up"
             className={`rounded-pill bg-ink px-4 py-2 text-[0.9rem] font-bold text-cream shadow-soft transition-colors hover:bg-ink-soft ${focusRingOnDark}`}
           >
-            Start
+            Start free
           </Link>
         </nav>
       </div>

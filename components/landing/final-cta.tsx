@@ -37,7 +37,7 @@ export function FinalCta() {
             onTap={pop}
             className={`inline-flex items-center justify-center rounded-pill bg-cream px-8 py-4 text-[1.02rem] font-bold text-ink shadow-soft transition-colors hover:bg-paper ${focusRingOnDark}`}
           >
-            Create my Little Lists
+            Start your first little list
           </MotionLink>
           {/* the app's save moment, borrowed for the one place the page celebrates */}
           {burst > 0 && <SaveSparkle key={burst} />}

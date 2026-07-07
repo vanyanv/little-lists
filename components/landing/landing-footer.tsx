@@ -24,6 +24,10 @@ export function LandingFooter() {
           <a href="mailto:chris@chrisneddys.com" className={LINK}>Contact</a>
         </nav>
 
+        <p className="max-w-md text-[0.75rem] text-brown-soft">
+          Poster and cover art from TMDB and Open Library. This product uses the TMDB API but is not endorsed or certified by TMDB.
+        </p>
+
         <p className="text-[0.8rem] text-brown">Made with care, 2026. 🌸</p>
       </div>
     </footer>

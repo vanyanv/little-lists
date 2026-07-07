@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { PREVIEW_MOVIES, PREVIEW_BOOKS, PREVIEW_FOODS, PREVIEW_GIFTS, PREVIEW_PERSON } from "@/lib/landing-data";
 import type { List } from "@/lib/types";
-import { themeClass } from "@/lib/visual";
+import { themeClass, listCountLabel } from "@/lib/visual";
 import { PreviewListCard, PreviewPersonCard, PreviewPosterCard } from "./preview-card";
 
 /* A phone-shaped preview of the real app, built from the actual card
@@ -41,7 +41,7 @@ function MoviesDetailScreen({ movies }: { movies: List }) {
             <h3 className="font-display text-[1.12rem] font-semibold leading-tight text-ink">
               {movies.title}
             </h3>
-            <p className="mt-0.5 text-[0.7rem] font-bold text-brown">4 little films saved</p>
+            <p className="mt-0.5 text-[0.7rem] font-bold text-brown">{listCountLabel(movies)}</p>
           </div>
         </header>
 
@@ -137,7 +137,7 @@ export function AppPreview({
                 <span className="relative text-[0.6rem] font-bold tracking-wide">Lists</span>
               </span>
               <span className="flex flex-1 flex-col items-center gap-0.5 py-1 text-brown-soft">
-                <NavGlyph d="M9 8.5a3.2 3.2 0 1 0 0 .01M3.5 19c0-3 2.6-5 5.5-5s5.5 2 5.5 5" />
+                <NavGlyph d="M9 8.5a3.2 3.2 0 1 0 0 .01M3.5 19c0-3 2.6-5 5.5-5s5.5 2 5.5 5M16.6 7.6a2.4 2.4 0 1 0 0 .01M15 13.4c2.6-.4 5 1.3 5.4 3.8" />
                 <span className="text-[0.6rem] font-bold tracking-wide">People</span>
               </span>
               <span className="flex flex-1 flex-col items-center gap-0.5 py-1 text-brown-soft">
