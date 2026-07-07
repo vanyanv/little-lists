@@ -38,9 +38,11 @@ interface ListFormFieldsProps {
   onChange: (patch: Partial<ListFormValue>) => void;
   /** when a template is chosen, seed emoji/theme/view unless the user already touched them */
   onChooseTemplate: (t: ListTemplate) => void;
+  /** show the "how it lays out" view-mode section; the create sheet applies the template's default view silently */
+  showView?: boolean;
 }
 
-export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFieldsProps) {
+export function ListFormFields({ value, onChange, onChooseTemplate, showView = true }: ListFormFieldsProps) {
   const { name, template, emoji, theme, view } = value;
 
   const railRef = useRef<HTMLDivElement>(null);
@@ -153,6 +155,10 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
             })}
           </div>
         </div>
+
+        <p className="mt-2 min-h-[2.5em] text-[0.8rem] leading-snug text-brown-soft">
+          {TEMPLATE_META[template].descriptor}
+        </p>
       </div>
 
       {/* emoji */}
@@ -171,10 +177,12 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
       </div>
 
       {/* default view */}
-      <div className="mt-5 flex items-center justify-between">
-        <p className="text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">how you&apos;ll browse it</p>
-        <ViewToggle value={view} onChange={(v) => onChange({ view: v })} />
-      </div>
+      {showView && (
+        <div className="mt-5 flex items-center justify-between">
+          <p className="text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">how it lays out</p>
+          <ViewToggle value={view} onChange={(v) => onChange({ view: v })} />
+        </div>
+      )}
     </>
   );
 }

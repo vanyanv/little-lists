@@ -54,7 +54,7 @@ function EditListFlow({ listId, onClose }: { listId: string; onClose: () => void
       defaultView: value.view,
     });
     onClose();
-    showToast("Updated ✨");
+    showToast("All tucked in ✨");
   };
 
   return (

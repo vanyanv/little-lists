@@ -83,7 +83,7 @@ function CreateListFlow({
       router.push(`/app/list/${created.id}`);
     } catch {
       setSaving(false);
-      showToast("That didn't save — let's try again 🌿");
+      showToast("That didn't save. Let's try again 🌿");
     }
   };
 
@@ -94,7 +94,7 @@ function CreateListFlow({
       </h2>
       <p className="mt-1 text-[0.92rem] text-brown">Start with a template or make it totally yours.</p>
 
-      <ListFormFields value={value} onChange={patch} onChooseTemplate={chooseTemplate} />
+      <ListFormFields value={value} onChange={patch} onChooseTemplate={chooseTemplate} showView={false} />
 
       <p className="mt-5 text-center text-[0.82rem] text-brown-soft">You can always change this later.</p>
 

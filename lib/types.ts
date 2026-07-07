@@ -226,6 +226,8 @@ export interface TemplateMeta {
   kind: ItemType;
   /** default browsing view for a fresh list of this template */
   defaultView: ViewMode;
+  /** one-line description shown under the template rail when this template is picked */
+  descriptor: string;
   /** status/category set; first entry is the default */
   statuses: StatusId[];
   /** default cute noun for the count label */
@@ -252,6 +254,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     theme: "blush",
     kind: "movie",
     defaultView: "grid",
+    descriptor: "Search real films, collect the posters.",
     statuses: ["want-to-watch", "watched", "favorite", "not-for-me"],
     noun: "little films saved",
     nounSingular: "little film saved",
@@ -266,6 +269,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     theme: "sage",
     kind: "book",
     defaultView: "grid",
+    descriptor: "Search real books, keep the covers.",
     statuses: ["want-to-read", "reading", "finished", "dnf", "favorite"],
     noun: "cozy reads waiting",
     nounSingular: "cozy read waiting",
@@ -280,6 +284,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     theme: "lavender",
     kind: "music",
     defaultView: "grid",
+    descriptor: "Search albums and artists, save the art.",
     statuses: ["want-to-listen", "listened", "on-repeat", "favorite", "not-for-me"],
     noun: "tunes on repeat",
     nounSingular: "tune on repeat",
@@ -294,6 +299,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     theme: "clay",
     kind: "food",
     defaultView: "cozy",
+    descriptor: "Dishes, snacks, strong opinions.",
     statuses: ["love", "hate", "maybe", "never-again", "need-to-try"],
     noun: "little tastes noted",
     nounSingular: "little taste noted",
@@ -308,6 +314,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     theme: "sky",
     kind: "place",
     defaultView: "cozy",
+    descriptor: "Spots to wander into, near or far.",
     statuses: ["want-to-go", "been-there", "favorite", "not-again"],
     noun: "spots to wander",
     nounSingular: "spot to wander",
@@ -323,6 +330,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     theme: "blush",
     kind: "custom",
     defaultView: "cozy",
+    descriptor: "Ideas for someone, before you forget. Adds a who's-it-for.",
     statuses: ["idea", "bought", "maybe", "favorite"],
     noun: "thoughtful little ideas",
     nounSingular: "thoughtful little idea",
@@ -338,6 +346,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     theme: "lavender",
     kind: "custom",
     defaultView: "cozy",
+    descriptor: "Little plans worth looking forward to.",
     statuses: ["want-to-do", "planned", "done", "favorite"],
     noun: "sweet little plans",
     nounSingular: "sweet little plan",
@@ -353,6 +362,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     theme: "butter",
     kind: "custom",
     defaultView: "cozy",
+    descriptor: "The details that make someone feel seen.",
     statuses: ["cat-likes", "cat-dislikes", "cat-food", "cat-movies", "cat-gifts", "cat-dates", "cat-notes"],
     noun: "little details remembered",
     nounSingular: "little detail remembered",
@@ -367,6 +377,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     theme: "lavender",
     kind: "custom",
     defaultView: "cozy",
+    descriptor: "Any shape you like. Start from a blank page.",
     statuses: ["love", "maybe", "favorite", "need-to-try"],
     noun: "little things",
     nounSingular: "little thing",
