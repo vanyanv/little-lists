@@ -88,10 +88,12 @@ export function PersonDetailSection({
                     </motion.span>
                   ))}
                   {onAdd && (
+                    // py-2.5 matches the 40px entry chips; before:-inset-y-0.5 stretches the
+                    // hit area to 44px while staying clear of the 6px wrap gap (2+2 ≤ 6)
                     <button
                       type="button"
                       onClick={onAdd}
-                      className={`inline-flex items-center gap-1 rounded-pill border border-dashed border-line px-3 py-1.5 text-[0.85rem] font-semibold text-brown-soft transition-colors hover:border-brown-soft/60 hover:text-ink ${focusRingInset}`}
+                      className={`relative inline-flex items-center gap-1 rounded-pill border border-dashed border-line px-3 py-2.5 text-[0.85rem] font-semibold text-brown-soft transition-colors before:absolute before:inset-x-0 before:-inset-y-0.5 before:content-[''] hover:border-brown-soft/60 hover:text-ink ${focusRingInset}`}
                     >
                       <span aria-hidden className="text-base leading-none">+</span> add
                     </button>
@@ -127,10 +129,11 @@ export function PersonDetailSection({
                   ))}
                   {onAdd && (
                     <li>
+                      {/* ~40px row; before:-inset-y-0.5 reaches 44px inside the 8px list gap */}
                       <button
                         type="button"
                         onClick={onAdd}
-                        className={`flex w-full items-center gap-1 rounded-xl border border-dashed border-line px-3.5 py-2.5 text-left text-[0.88rem] font-semibold text-brown-soft transition-colors hover:border-brown-soft/60 hover:text-ink ${focusRingInset}`}
+                        className={`relative flex w-full items-center gap-1 rounded-xl border border-dashed border-line px-3.5 py-2.5 text-left text-[0.88rem] font-semibold text-brown-soft transition-colors before:absolute before:inset-x-0 before:-inset-y-0.5 before:content-[''] hover:border-brown-soft/60 hover:text-ink ${focusRingInset}`}
                       >
                         <span aria-hidden className="text-base leading-none">+</span> add
                       </button>

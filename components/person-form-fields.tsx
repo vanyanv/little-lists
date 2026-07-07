@@ -117,10 +117,12 @@ export function PersonFormFields({ value, onChange }: PersonFormFieldsProps) {
         <div className="mb-2 flex items-baseline justify-between gap-2">
           <p className="text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">their day (optional) 🎂</p>
           {hasDay && (
+            // py-2 + before:-inset-y-1.5 makes a ~45px target that stops short of the
+            // month/day row 8px below (6 ≤ 8); nothing interactive sits beside it
             <button
               type="button"
               onClick={clearDay}
-              className={`rounded-pill px-2 py-0.5 text-[0.72rem] font-bold text-brown-soft transition-colors hover:text-ink ${focusRing}`}
+              className={`relative rounded-pill px-2 py-2 text-[0.72rem] font-bold text-brown-soft transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 before:content-[''] hover:text-ink ${focusRing}`}
             >
               no day
             </button>

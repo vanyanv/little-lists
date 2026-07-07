@@ -48,7 +48,10 @@ export function PersonDayNudge() {
   };
 
   return (
-    <div className="mt-4 flex items-center justify-between gap-2 rounded-2xl bg-paper py-2.5 pl-4 pr-2 shadow-soft ring-1 ring-line">
+    <div
+      role="status"
+      className="mt-4 flex items-center justify-between gap-2 rounded-2xl bg-paper py-2.5 pl-4 pr-2 shadow-soft ring-1 ring-line"
+    >
       <Link
         href={`/app/person/${person.id}`}
         className={`min-w-0 flex-1 rounded-lg text-[0.85rem] leading-snug text-brown ${focusRing}`}
