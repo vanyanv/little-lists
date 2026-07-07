@@ -56,14 +56,14 @@ export function PersonDetailSection({
             transition={bodySpring}
             className="overflow-hidden"
           >
-            <div className="px-4 pb-4">
+            <div className="px-4 pb-4 pt-1">
               {section.kind === "chips" ? (
                 <div className="flex flex-wrap gap-1.5">
                   {section.entries.map((e) => (
                     <motion.span
                       key={e.id}
                       layout
-                      className="group inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-[0.85rem] font-semibold text-[var(--t-ink)]"
+                      className="group inline-flex items-center gap-2 rounded-pill px-3 py-1.5 text-[0.85rem] font-semibold text-[var(--t-ink)]"
                       style={{ background: "var(--t-bg)" }}
                     >
                       <button

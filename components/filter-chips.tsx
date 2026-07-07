@@ -32,6 +32,7 @@ export function FilterChips({ options, active, onChange }: FilterChipsProps) {
             onClick={() => onChange(opt.id)}
             whileTap={tap}
             aria-pressed={isActive}
+            aria-label={`${opt.label}, ${opt.count}`}
             className={`relative flex min-h-11 shrink-0 items-center gap-1.5 rounded-pill px-4 text-[0.82rem] font-bold leading-none ${focusRing}`}
             style={{
               color: isActive ? "var(--color-cream)" : "var(--color-brown)",
@@ -50,7 +51,7 @@ export function FilterChips({ options, active, onChange }: FilterChipsProps) {
             <span className={`relative ${dim ? "opacity-45" : ""}`}>{opt.label}</span>
             <span
               aria-hidden="true"
-              className={`relative grid h-4 min-w-4 place-items-center rounded-full px-1 text-[0.7rem] ${
+              className={`relative grid h-4 min-w-4 place-items-center rounded-full px-1 text-[0.75rem] ${
                 dim ? "opacity-45" : ""
               }`}
               style={{

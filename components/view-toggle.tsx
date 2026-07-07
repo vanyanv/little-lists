@@ -60,7 +60,7 @@ export function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v:
   const reduce = useReducedMotion();
 
   return (
-    <div className="inline-flex items-center gap-0.5 rounded-pill bg-paper p-0.5 shadow-soft ring-1 ring-line/60">
+    <div className="inline-flex items-center gap-2 rounded-pill bg-paper p-0.5 shadow-soft ring-1 ring-line/60">
       {MODES.map((m) => {
         const active = m.id === value;
         return (
@@ -72,7 +72,7 @@ export function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v:
             aria-pressed={active}
             aria-label={`${m.label} view`}
             title={`${m.label} view`}
-            className={`relative grid h-8 w-8 place-items-center rounded-full before:absolute before:-inset-1.5 before:content-[''] ${focusRing}`}
+            className={`relative grid h-9 w-9 place-items-center rounded-full before:absolute before:-inset-1 before:content-[''] ${focusRing}`}
             style={{ color: active ? "var(--color-cream)" : "var(--color-brown)" }}
           >
             {active && (
