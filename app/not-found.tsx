@@ -1,11 +1,10 @@
 import { Button } from "@/components/button";
+import { AnimatedSticker } from "@/components/icons/animated-sticker";
 
 export default function NotFound() {
   return (
     <main className="paper-grain relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-cream px-8 text-center">
-      <p className="font-display text-[3.5rem] leading-none" aria-hidden>
-        🍃
-      </p>
+      <AnimatedSticker name="leaf" size={64} className="mb-2" />
       <h1 className="mt-4 font-display text-[1.6rem] font-semibold leading-tight text-ink">
         This little corner wandered off
       </h1>

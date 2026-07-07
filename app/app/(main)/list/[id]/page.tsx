@@ -15,6 +15,7 @@ import { ViewToggle, type ViewMode } from "@/components/view-toggle";
 import { EmptyState } from "@/components/empty-state";
 import { OverflowMenu } from "@/components/overflow-menu";
 import { Button } from "@/components/button";
+import { SoftDotLoader } from "@/components/soft-dot-loader";
 import { filterItemsByStatus } from "@/lib/store-helpers";
 
 /** the list's saved view, falling back to its template default */
@@ -92,7 +93,11 @@ export default function ListDetailScreen() {
   // saved lists load from localStorage after mount — wait for that before
   // deciding a list is truly missing, so a direct URL visit doesn't flash 404
   if (!list && !hydrated) {
-    return <div className="min-h-dvh" aria-hidden />;
+    return (
+      <div className="flex min-h-dvh items-center justify-center">
+        <SoftDotLoader label="opening this little world" />
+      </div>
+    );
   }
 
   if (!list) {

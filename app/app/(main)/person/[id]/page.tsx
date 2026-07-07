@@ -11,19 +11,31 @@ import { PersonDetailSection } from "@/components/person-detail-section";
 import { EmptyState } from "@/components/empty-state";
 import { OverflowMenu } from "@/components/overflow-menu";
 import { Button } from "@/components/button";
+import { SoftDotLoader } from "@/components/soft-dot-loader";
 
 export default function PersonDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const person = usePerson(id);
-  const { deletePersonDetail, deletePerson } = useStore();
+  const { hydrated, deletePersonDetail, deletePerson } = useStore();
   const { openDetailSheet, openEditPerson, openConfirm, showToast, openEditDetail } = useUi();
   const router = useRouter();
   const reduce = useReducedMotion();
 
+  // saved people load from localStorage after mount — wait for that before
+  // deciding a person is truly missing, so a direct URL visit doesn't flash 404
+  if (!person && !hydrated) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center">
+        <SoftDotLoader label="opening this little world" />
+      </div>
+    );
+  }
+
   if (!person) {
     return (
       <div className="px-6 pt-32 text-center">
-        <h1 className="font-display text-[1.4rem] font-semibold text-ink">We can&apos;t find that person</h1>
+        <h1 className="font-display text-[1.4rem] font-semibold text-ink">Hmm, we can&apos;t find that person</h1>
+        <p className="mt-2 text-brown">They may have wandered off.</p>
         <Button href="/app/people" size="sm" className="mt-6">
           Back to your people
         </Button>
