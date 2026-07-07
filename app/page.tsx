@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getLandingLists } from "@/lib/landing-art";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { LandingHero } from "@/components/landing/landing-hero";
 import { UseCases } from "@/components/landing/use-cases";
@@ -14,12 +15,16 @@ export const metadata: Metadata = {
     "Make little lists for everything you love, hate, and want to remember. Movies to watch, books to read, foods you avoid, gift ideas, date ideas, and tiny details about people, all in one cozy place.",
 };
 
-export default function LandingPage() {
+// refresh the preview's real poster/cover art daily
+export const revalidate = 86400;
+
+export default async function LandingPage() {
+  const { movies, books } = await getLandingLists();
   return (
     <>
       <LandingHeader />
       <main className="paper-grain relative min-h-dvh overflow-x-hidden bg-cream">
-        <LandingHero />
+        <LandingHero movies={movies} books={books} />
         <UseCases />
         <ViewModes />
         <PeopleMemory />

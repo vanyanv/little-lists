@@ -6,6 +6,7 @@ import { softSpring, gentleSpring, tap, gentleFloat } from "@/lib/motion";
 import { focusRing, focusRingOnDark } from "@/lib/a11y";
 import { LittleIcon } from "@/components/icons/little-icon";
 import type { GlyphName } from "@/components/icons/glyphs";
+import type { List } from "@/lib/types";
 import { AppPreview } from "./app-preview";
 
 // Animate the CTAs as the app animates every tappable surface: a soft press.
@@ -62,7 +63,7 @@ function HeroStickers({ reduce }: { reduce: boolean }) {
   );
 }
 
-export function LandingHero() {
+export function LandingHero({ movies, books }: { movies?: List; books?: List }) {
   const reduce = useReducedMotion() ?? false;
   const rise = reduce
     ? {}
@@ -132,7 +133,7 @@ export function LandingHero() {
         >
           <div className="relative mx-auto w-full max-w-[300px]">
             <HeroStickers reduce={reduce} />
-            <AppPreview />
+            <AppPreview movies={movies} books={books} />
           </div>
         </motion.div>
       </div>

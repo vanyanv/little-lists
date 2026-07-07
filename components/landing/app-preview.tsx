@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { PREVIEW_MOVIES, PREVIEW_BOOKS, PREVIEW_FOODS, PREVIEW_GIFTS, PREVIEW_PERSON } from "@/lib/landing-data";
+import type { List } from "@/lib/types";
 import { themeClass } from "@/lib/visual";
 import { PreviewListCard, PreviewPersonCard, PreviewPosterCard } from "./preview-card";
 
@@ -26,9 +27,9 @@ function NavGlyph({ d, fill = false }: { d: string; fill?: boolean }) {
   );
 }
 
-function MoviesDetailScreen() {
+function MoviesDetailScreen({ movies }: { movies: List }) {
   return (
-    <div className={themeClass(PREVIEW_MOVIES.theme)} style={{ height: "100%" }}>
+    <div className={themeClass(movies.theme)} style={{ height: "100%" }}>
       <div className="h-full px-3.5 pb-[4.75rem] pt-7" style={{ background: "var(--t-bg)" }}>
         <header className="flex items-center gap-2.5 px-1">
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-paper shadow-soft">
@@ -38,7 +39,7 @@ function MoviesDetailScreen() {
           </span>
           <div className="min-w-0">
             <h3 className="font-display text-[1.12rem] font-semibold leading-tight text-ink">
-              {PREVIEW_MOVIES.title}
+              {movies.title}
             </h3>
             <p className="mt-0.5 text-[0.7rem] font-bold text-brown">4 little films saved</p>
           </div>
@@ -51,7 +52,7 @@ function MoviesDetailScreen() {
         </div>
 
         <div className="mt-3.5 grid grid-cols-2 gap-2.5 px-1">
-          {PREVIEW_MOVIES.items.map((item) => (
+          {movies.items.map((item) => (
             <PreviewPosterCard key={item.id} item={item} />
           ))}
         </div>
@@ -60,7 +61,14 @@ function MoviesDetailScreen() {
   );
 }
 
-export function AppPreview() {
+export function AppPreview({
+  movies = PREVIEW_MOVIES,
+  books = PREVIEW_BOOKS,
+}: {
+  /** preview lists with live artwork from the search APIs; bundled art otherwise */
+  movies?: List;
+  books?: List;
+}) {
   const reduce = useReducedMotion() ?? false;
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: 0.35 });
@@ -95,9 +103,9 @@ export function AppPreview() {
             </header>
 
             <div className="mt-4 flex flex-col gap-2.5">
-              <PreviewListCard list={PREVIEW_MOVIES} variant="hero" />
+              <PreviewListCard list={movies} variant="hero" />
               <div className="grid grid-cols-2 gap-2.5">
-                <PreviewListCard list={PREVIEW_BOOKS} />
+                <PreviewListCard list={books} />
                 <PreviewListCard list={PREVIEW_FOODS} />
               </div>
               <PreviewListCard list={PREVIEW_GIFTS} />
@@ -112,7 +120,7 @@ export function AppPreview() {
             animate={{ x: reduce || !inMovies ? "100%" : "0%" }}
             transition={reduce ? { duration: 0 } : push}
           >
-            <MoviesDetailScreen />
+            <MoviesDetailScreen movies={movies} />
           </motion.div>
 
           {/* floating add button */}
