@@ -8,7 +8,7 @@ import { listCountLabel, themeClass } from "@/lib/visual";
 import { hover, softSpring, tap } from "@/lib/motion";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
-import { focusRing } from "@/lib/a11y";
+import { focusRingStretched } from "@/lib/a11y";
 import { CardStack } from "./card-stack";
 import { Sticker } from "./sticker";
 import { StickerBadge } from "./icons/sticker-badge";
@@ -67,55 +67,61 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
   );
 
   return (
-    <Link href={`/app/list/${list.id}`} className={`block rounded-2xl ${themeClass(list.theme)} ${focusRing}`}>
-      <motion.div
-        layout
-        initial={hero ? { rotate: -1 } : false}
-        whileHover={{ ...hover, rotate: 0 }}
-        whileTap={tap}
-        transition={softSpring}
-        className="relative overflow-hidden rounded-2xl shadow-soft ring-1 ring-line/30"
-        style={{ background: "var(--t-bg)" }}
-      >
-        {menu}
-        {/* faint corner sticker, tucked like scrapbook tape */}
-        <Sticker
-          name={TEMPLATE_META[list.template].sticker}
-          size={hero ? 64 : 44}
-          className="pointer-events-none absolute -right-3 -top-2 opacity-25"
-          rotate={12}
-        />
+    <motion.div
+      layout
+      initial={hero ? { rotate: -1 } : false}
+      whileHover={{ ...hover, rotate: 0 }}
+      whileTap={tap}
+      transition={softSpring}
+      className={`relative overflow-hidden rounded-2xl shadow-soft ring-1 ring-line/30 ${themeClass(list.theme)}`}
+      style={{ background: "var(--t-bg)" }}
+    >
+      {/* faint corner sticker, tucked like scrapbook tape */}
+      <Sticker
+        name={TEMPLATE_META[list.template].sticker}
+        size={hero ? 64 : 44}
+        className="pointer-events-none absolute -right-3 -top-2 opacity-25"
+        rotate={12}
+      />
 
-        {hero ? (
-          <div className="relative flex items-end justify-between gap-3 p-5">
-            <div className="min-w-0 flex-1">
-              <StickerBadge emoji={list.emoji} size={52} rounded="rounded-xl" />
-              <h2 className="mt-3 font-display text-[1.4rem] font-semibold leading-[1.12] text-[var(--t-ink)]">
+      {hero ? (
+        <div className="relative flex items-end justify-between gap-3 p-5">
+          <div className="min-w-0 flex-1">
+            <StickerBadge emoji={list.emoji} size={52} rounded="rounded-xl" />
+            <h2 className="mt-3 font-display text-[1.4rem] font-semibold leading-[1.12] text-[var(--t-ink)]">
+              {/* stretched link: covers the whole card via ::after, so the ⋯ menu
+                  (a sibling, not a descendant) stays valid, separately-focusable HTML */}
+              <Link href={`/app/list/${list.id}`} className={focusRingStretched}>
                 {list.title}
-              </h2>
-              <p className="mt-1 text-[0.9rem] font-semibold text-brown">{listCountLabel(list)}</p>
-              <ListMeta list={list} size="hero" />
-            </div>
-            <div className="shrink-0 pb-1">
-              <CardStack items={list.items} kind={list.kind} size="lg" />
-            </div>
-          </div>
-        ) : (
-          <div className="relative p-4">
-            <div className="flex items-start justify-between gap-2">
-              <StickerBadge emoji={list.emoji} size={46} rounded="rounded-xl" />
-              <div className="pt-0.5">
-                <CardStack items={list.items.slice(0, 3)} kind={list.kind} size="sm" />
-              </div>
-            </div>
-            <h2 className="mt-3 font-display text-[1.12rem] font-semibold leading-tight text-[var(--t-ink)]">
-              {list.title}
+              </Link>
             </h2>
-            <p className="mt-0.5 text-[0.82rem] font-semibold text-brown">{listCountLabel(list)}</p>
-            <ListMeta list={list} />
+            <p className="mt-1 text-[0.9rem] font-semibold text-brown">{listCountLabel(list)}</p>
+            <ListMeta list={list} size="hero" />
           </div>
-        )}
-      </motion.div>
-    </Link>
+          <div className="shrink-0 pb-1">
+            <CardStack items={list.items} kind={list.kind} size="lg" />
+          </div>
+        </div>
+      ) : (
+        <div className="relative p-4">
+          <div className="flex items-start justify-between gap-2">
+            <StickerBadge emoji={list.emoji} size={46} rounded="rounded-xl" />
+            <div className="pt-0.5">
+              <CardStack items={list.items.slice(0, 3)} kind={list.kind} size="sm" />
+            </div>
+          </div>
+          <h2 className="mt-3 font-display text-[1.12rem] font-semibold leading-tight text-[var(--t-ink)]">
+            <Link href={`/app/list/${list.id}`} className={focusRingStretched}>
+              {list.title}
+            </Link>
+          </h2>
+          <p className="mt-0.5 text-[0.82rem] font-semibold text-brown">{listCountLabel(list)}</p>
+          <ListMeta list={list} />
+        </div>
+      )}
+      {/* menu renders after the link in source order, so keyboard/SR users reach the
+          card link before its menu button (a11y, not a layout-affecting z-20 overlay) */}
+      {menu}
+    </motion.div>
   );
 }

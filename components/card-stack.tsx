@@ -27,7 +27,7 @@ export function CardStack({
         className="grid place-items-center rounded-xl border border-dashed border-[var(--t-edge)] text-[var(--t-ink)]"
         style={{ width: w, height: kind === "movie" || kind === "book" ? w * 1.5 : w, opacity: 0.7 }}
       >
-        <span className="text-lg">＋</span>
+        <span className="text-lg" aria-hidden="true">＋</span>
       </div>
     );
   }
