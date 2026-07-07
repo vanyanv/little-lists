@@ -45,3 +45,6 @@ next-env.d.ts
 
 # saved Clerk session for authenticated screenshots (see scripts/screenshots.mjs)
 /.auth
+
+# playwright-mcp browser session artifacts
+/.playwright-mcp
