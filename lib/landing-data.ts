@@ -13,11 +13,13 @@ export const PREVIEW_MOVIES: List = {
   noun: "little films saved",
   kind: "movie",
   template: "movie",
+  // first-party abstract cover art (public/posters/*) — drawn for this project,
+  // so the preview can show real poster images without licensing anyone's key art
   items: [
-    { id: "m1", type: "movie", title: "Past Lives", seed: "Past Lives", status: "want-to-watch" },
-    { id: "m2", type: "movie", title: "Paddington", seed: "Paddington", status: "want-to-watch" },
-    { id: "m3", type: "movie", title: "Spirited Away", seed: "Spirited Away", status: "favorite" },
-    { id: "m4", type: "movie", title: "Lady Bird", seed: "Lady Bird", status: "watched" },
+    { id: "m1", type: "movie", title: "Past Lives", seed: "Past Lives", status: "want-to-watch", subtitle: "2023", imageUrl: "/posters/past-lives.svg" },
+    { id: "m2", type: "movie", title: "Paddington", seed: "Paddington", status: "want-to-watch", subtitle: "2014", imageUrl: "/posters/paddington.svg" },
+    { id: "m3", type: "movie", title: "Spirited Away", seed: "Spirited Away", status: "favorite", subtitle: "2001", imageUrl: "/posters/spirited-away.svg" },
+    { id: "m4", type: "movie", title: "Lady Bird", seed: "Lady Bird", status: "watched", subtitle: "2017", imageUrl: "/posters/lady-bird.svg" },
   ],
 };
 
@@ -30,9 +32,9 @@ export const PREVIEW_BOOKS: List = {
   kind: "book",
   template: "book",
   items: [
-    { id: "b1", type: "book", title: "Piranesi", seed: "Piranesi", status: "want-to-read" },
-    { id: "b2", type: "book", title: "The House in the Cerulean Sea", seed: "Cerulean Sea", status: "reading" },
-    { id: "b3", type: "book", title: "Howl's Moving Castle", seed: "Howl's Moving Castle", status: "favorite" },
+    { id: "b1", type: "book", title: "Piranesi", seed: "Piranesi", status: "want-to-read", imageUrl: "/posters/piranesi.svg" },
+    { id: "b2", type: "book", title: "The House in the Cerulean Sea", seed: "Cerulean Sea", status: "reading", imageUrl: "/posters/cerulean-sea.svg" },
+    { id: "b3", type: "book", title: "Howl's Moving Castle", seed: "Howl's Moving Castle", status: "favorite", imageUrl: "/posters/howls-castle.svg" },
   ],
 };
 

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
+  <!-- rose-haired girl against a warm sacramento sky -->
+  <rect width="200" height="300" fill="oklch(0.9 0.045 40)"/>
+  <circle cx="100" cy="150" r="58" fill="oklch(0.62 0.12 20)"/>
+  <circle cx="100" cy="142" r="42" fill="oklch(0.87 0.05 60)"/>
+  <path d="M58 142a42 42 0 0 1 84 0c0-14-8-34-42-34s-42 20-42 34z" fill="oklch(0.62 0.12 20)"/>
+  <circle cx="86" cy="146" r="3.5" fill="oklch(0.3 0.03 60)"/>
+  <circle cx="114" cy="146" r="3.5" fill="oklch(0.3 0.03 60)"/>
+  <path d="M92 162q8 6 16 0" stroke="oklch(0.45 0.06 30)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <g stroke="oklch(0.72 0.08 40)" stroke-width="3" stroke-linecap="round" opacity="0.85">
+    <path d="M24 246q14-10 28 0t28 0"/>
+    <path d="M120 246q14-10 28 0t28 0"/>
+  </g>
+  <g fill="oklch(0.62 0.12 20)">
+    <ellipse cx="152" cy="64" rx="8" ry="5" transform="rotate(-18 152 64)"/>
+    <ellipse cx="163" cy="58" rx="8" ry="5" transform="rotate(22 163 58)"/>
+    <circle cx="157" cy="62" r="2.4" fill="oklch(0.3 0.03 60)"/>
+  </g>
+</svg>

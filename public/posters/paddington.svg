@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
+  <!-- a small bear in a blue duffle coat and red hat, marmalade at his feet -->
+  <rect width="200" height="300" fill="oklch(0.88 0.06 60)"/>
+  <circle cx="100" cy="86" r="34" fill="oklch(0.68 0.06 60)"/>
+  <circle cx="82" cy="60" r="10" fill="oklch(0.68 0.06 60)"/>
+  <circle cx="118" cy="60" r="10" fill="oklch(0.68 0.06 60)"/>
+  <path d="M62 66a42 42 0 0 1 76 0l4-18a46 46 0 0 0-84 0z" fill="oklch(0.6 0.13 25)"/>
+  <rect x="58" y="52" width="84" height="10" rx="5" fill="oklch(0.6 0.13 25)"/>
+  <circle cx="88" cy="88" r="3.5" fill="oklch(0.3 0.03 60)"/>
+  <circle cx="112" cy="88" r="3.5" fill="oklch(0.3 0.03 60)"/>
+  <ellipse cx="100" cy="100" rx="9" ry="7" fill="oklch(0.82 0.05 60)"/>
+  <circle cx="100" cy="97" r="3" fill="oklch(0.3 0.03 60)"/>
+  <rect x="56" y="126" width="88" height="106" rx="18" fill="oklch(0.62 0.08 248)"/>
+  <g stroke="oklch(0.42 0.06 248)" stroke-width="4" stroke-linecap="round">
+    <line x1="82" y1="152" x2="118" y2="152"/>
+    <line x1="82" y1="178" x2="118" y2="178"/>
+    <line x1="82" y1="204" x2="118" y2="204"/>
+  </g>
+  <circle cx="152" cy="252" r="16" fill="oklch(0.78 0.11 60)"/>
+  <rect x="142" y="232" width="20" height="8" rx="3" fill="oklch(0.9 0.03 75)"/>
+</svg>

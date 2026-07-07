@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
+  <!-- a red gate across pale water, one small traveler -->
+  <defs>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="oklch(0.9 0.04 220)"/>
+      <stop offset="1" stop-color="oklch(0.78 0.06 230)"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="300" fill="url(#sea)"/>
+  <ellipse cx="46" cy="52" rx="26" ry="10" fill="oklch(0.97 0.01 220)" opacity="0.9"/>
+  <ellipse cx="150" cy="80" rx="32" ry="12" fill="oklch(0.97 0.01 220)" opacity="0.75"/>
+  <g fill="oklch(0.55 0.15 28)">
+    <rect x="52" y="96" width="12" height="120" rx="3"/>
+    <rect x="136" y="96" width="12" height="120" rx="3"/>
+    <rect x="36" y="84" width="128" height="12" rx="6"/>
+    <rect x="46" y="104" width="108" height="8" rx="4"/>
+  </g>
+  <g stroke="oklch(0.95 0.015 230)" stroke-width="3" stroke-linecap="round" opacity="0.8">
+    <line x1="16" y1="238" x2="70" y2="238"/>
+    <line x1="96" y1="252" x2="168" y2="252"/>
+    <line x1="34" y1="268" x2="92" y2="268"/>
+  </g>
+  <circle cx="100" cy="204" r="6" fill="oklch(0.4 0.05 230)"/>
+  <rect x="94" y="209" width="12" height="18" rx="6" fill="oklch(0.4 0.05 230)"/>
+</svg>

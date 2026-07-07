@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
+  <!-- a little house on a cliff over a cerulean sea -->
+  <defs>
+    <linearGradient id="cs" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="oklch(0.92 0.035 230)"/>
+      <stop offset="1" stop-color="oklch(0.8 0.07 235)"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="300" fill="url(#cs)"/>
+  <circle cx="150" cy="58" r="22" fill="oklch(0.94 0.055 95)"/>
+  <path d="M0 300V210l34-16 30 10 22-14v110z" fill="oklch(0.68 0.06 145)"/>
+  <g>
+    <rect x="34" y="152" width="34" height="30" rx="3" fill="oklch(0.9 0.03 75)"/>
+    <path d="M30 154l21-16 21 16z" fill="oklch(0.6 0.12 25)"/>
+    <rect x="46" y="164" width="10" height="18" rx="2" fill="oklch(0.5 0.07 248)"/>
+  </g>
+  <g stroke="oklch(0.95 0.015 230)" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.85">
+    <path d="M96 236q12-8 24 0t24 0 24 0 24 0"/>
+    <path d="M84 262q12-8 24 0t24 0 24 0 24 0"/>
+    <path d="M104 286q12-8 24 0t24 0 24 0"/>
+  </g>
+</svg>

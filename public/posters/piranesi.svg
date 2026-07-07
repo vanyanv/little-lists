@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
+  <!-- endless sage halls, a quiet statue, the tide coming in -->
+  <rect width="200" height="300" fill="oklch(0.92 0.03 145)"/>
+  <g fill="none" stroke="oklch(0.62 0.055 145)" stroke-width="5">
+    <path d="M30 236V120a70 70 0 0 1 140 0v116"/>
+    <path d="M56 236V132a44 44 0 0 1 88 0v104"/>
+    <path d="M82 236V144a18 18 0 0 1 36 0v92"/>
+  </g>
+  <g fill="oklch(0.55 0.05 145)">
+    <circle cx="100" cy="186" r="7"/>
+    <rect x="92" y="192" width="16" height="26" rx="7"/>
+    <rect x="86" y="218" width="28" height="8" rx="3"/>
+  </g>
+  <g stroke="oklch(0.72 0.05 220)" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.85">
+    <path d="M12 256q12-8 24 0t24 0 24 0 24 0 24 0 24 0 24 0"/>
+    <path d="M0 274q12-8 24 0t24 0 24 0 24 0 24 0 24 0 24 0 24 0"/>
+  </g>
+</svg>

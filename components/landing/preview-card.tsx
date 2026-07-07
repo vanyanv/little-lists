@@ -1,7 +1,9 @@
-import type { List, Person } from "@/lib/types";
+import type { Item, List, Person } from "@/lib/types";
 import { TEMPLATE_META } from "@/lib/types";
 import { listCountLabel, themeClass } from "@/lib/visual";
 import { CardStack } from "@/components/card-stack";
+import { Cover } from "@/components/cover";
+import { StatusPill } from "@/components/status-pill";
 import { Sticker } from "@/components/sticker";
 import { StickerBadge } from "@/components/icons/sticker-badge";
 import { CategoryIcon, CATEGORY_GLYPH } from "@/components/icons/category-icon";
@@ -77,6 +79,25 @@ export function PreviewListCard({ list, variant = "normal" }: { list: List; vari
             </h3>
             <p className="mt-0.5 text-[0.82rem] font-semibold text-brown">{listCountLabel(list)}</p>
             <ListMeta list={list} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Mini twin of PosterCard for the phone preview's list-detail screen. */
+export function PreviewPosterCard({ item }: { item: Item }) {
+  return (
+    <div className="text-left">
+      <Cover item={item} sizes="130px" className="shadow-soft ring-1 ring-line/50" />
+      <div className="mt-1.5 px-0.5">
+        <h4 className="line-clamp-1 font-display text-[0.84rem] font-semibold leading-tight text-ink">
+          {item.title}
+        </h4>
+        {item.status && (
+          <div className="mt-1">
+            <StatusPill status={item.status} />
           </div>
         )}
       </div>
