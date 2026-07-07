@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { useUser } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import { themeClass } from "@/lib/visual";
@@ -9,23 +8,10 @@ import { softSpring } from "@/lib/motion";
 import { ThemeColorPicker } from "./theme-chip";
 import { Sticker } from "./sticker";
 import { StickerBadge } from "./icons/sticker-badge";
-import { Button } from "./button";
 
 export function ProfileHeader() {
-  const { profile, setProfileTheme, fireCelebration } = useStore();
+  const { profile, setProfileTheme } = useStore();
   const { user } = useUser();
-  const [shared, setShared] = useState(false);
-
-  const share = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.origin);
-    } catch {
-      window.prompt("Copy your little world", window.location.origin);
-    }
-    fireCelebration("balloons");
-    setShared(true);
-    setTimeout(() => setShared(false), 2200);
-  };
 
   return (
     <motion.div
@@ -44,7 +30,9 @@ export function ProfileHeader() {
               {user?.firstName ?? profile.name}
             </h1>
           </div>
-          <p className="mt-1 text-[0.9rem] font-semibold text-brown">{profile.handle}</p>
+          {profile.handle && (
+            <p className="mt-1 text-[0.9rem] font-semibold text-brown">{profile.handle}</p>
+          )}
           <span className="mt-2 inline-flex items-center gap-1.5 rounded-pill bg-paper/70 px-2.5 py-1 text-[0.75rem] font-bold text-[var(--t-ink)]">
             <span className="h-1.5 w-1.5 rounded-full bg-current" />
             {profile.isPublic ? "Public little world" : "Just for me"}
@@ -52,44 +40,10 @@ export function ProfileHeader() {
         </div>
       </div>
 
-      <p className="mt-4 text-[1.02rem] leading-relaxed text-ink-soft">
-        <span className="font-display italic">“{profile.bio}”</span>
-      </p>
-
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {profile.tags.map((t) => (
-          <span
-            key={t}
-            className="rounded-pill bg-paper/70 px-3 py-1.5 text-[0.78rem] font-semibold text-[var(--t-ink)]"
-          >
-            {t}
-          </span>
-        ))}
-      </div>
-
-      <div className="mt-5 flex items-center gap-3">
-        <Button size="sm" onClick={share} className="flex-1">
-          Share your little world
-        </Button>
-      </div>
-
       <div className="mt-5">
         <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">your theme color</p>
         <ThemeColorPicker value={profile.theme} onChange={setProfileTheme} />
       </div>
-
-      <AnimatePresence>
-        {shared && (
-          <motion.p
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 6 }}
-            className="mt-3 text-center text-[0.86rem] font-semibold text-[var(--t-ink)]"
-          >
-            copied your little world ✨
-          </motion.p>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }

@@ -2,29 +2,17 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "motion/react";
 import { SignOutButton } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import { ITEM_TYPE_META } from "@/lib/types";
-import { staggerContainer, riseItem } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
 import { ProfileHeader } from "@/components/profile-header";
-import { ListCard } from "@/components/list-card";
 import { Cover } from "@/components/cover";
 import { Button } from "@/components/button";
 import { LittleIcon } from "@/components/icons/little-icon";
 
 export default function ProfileScreen() {
-  const { profile, lists } = useStore();
-  const reduce = useReducedMotion();
-
-  const featured = useMemo(() => {
-    if (profile.featuredListIds.length) {
-      return profile.featuredListIds.map((id) => lists.find((l) => l.id === id)).filter(Boolean);
-    }
-    // no explicit favorites yet — feature the most recent little worlds
-    return lists.slice(0, 3);
-  }, [profile.featuredListIds, lists]);
+  const { lists } = useStore();
 
   const loved = useMemo(() => {
     const out: { listId: string; item: (typeof lists)[number]["items"][number] }[] = [];
@@ -38,7 +26,7 @@ export default function ProfileScreen() {
 
   return (
     <div className="px-4 pt-[calc(env(safe-area-inset-top)+1.25rem)]">
-      <p className="px-1 text-[0.92rem] font-bold text-brown">Your taste profile 🌙</p>
+      <p className="px-1 text-[0.92rem] font-bold text-brown">Your little corner 🌙</p>
       <div className="mt-3">
         <ProfileHeader />
       </div>
@@ -73,27 +61,6 @@ export default function ProfileScreen() {
           </div>
         </section>
       )}
-
-      {/* featured lists */}
-      <section className="mt-8">
-        <h2 className="px-1 font-display text-[1.3rem] font-semibold text-ink">Featured little worlds</h2>
-        <p className="px-1 text-[0.88rem] text-brown">the ones that feel most like you.</p>
-        <motion.div
-          variants={staggerContainer}
-          initial={reduce ? false : "hidden"}
-          animate="show"
-          className="mt-3 grid grid-cols-2 gap-3"
-        >
-          {featured.map(
-            (l) =>
-              l && (
-                <motion.div key={l.id} variants={riseItem}>
-                  <ListCard list={l} variant="normal" />
-                </motion.div>
-              )
-          )}
-        </motion.div>
-      </section>
 
       <div className="mt-10 mb-4 flex justify-center">
         <SignOutButton>

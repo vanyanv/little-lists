@@ -106,15 +106,12 @@ export function mapPerson(row: DbPerson & { details?: DbPersonDetail[] }): Perso
 
 /* ── profile ─────────────────────────────────────────────────────────── */
 
-const FALLBACK_BIO =
-  "movies I keep meaning to watch, food opinions, and tiny details I don't want to forget.";
-
 export function mapProfile(row: DbProfile): Profile {
   return {
-    name: row.displayName?.trim() || "Vardan",
-    handle: row.handle?.trim() || "@vardan",
+    name: row.displayName?.trim() || "friend",
+    handle: row.handle?.trim() || "",
     avatarEmoji: "🌙",
-    bio: row.bio?.trim() || FALLBACK_BIO,
+    bio: row.bio?.trim() || "",
     theme: (row.themeColor as ThemeColor) ?? "blush",
     tags: [],
     featuredListIds: [],
