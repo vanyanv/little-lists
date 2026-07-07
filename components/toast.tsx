@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useUi } from "@/lib/ui";
 import { softSpring } from "@/lib/motion";
@@ -9,6 +9,10 @@ import { focusRingOnDark } from "@/lib/a11y";
 /** A tiny, warm confirmation that floats just above the bottom nav. */
 export function Toast() {
   const { toast, dismissToast } = useUi();
+  // The toast id whose action already fired. The exiting toast stays pointer-interactive
+  // during the AnimatePresence exit (~0.5s) with a frozen onClick closure, so this shared
+  // ref is what guarantees onAction runs at most once per toast instance.
+  const firedActionFor = useRef<number | null>(null);
 
   useEffect(() => {
     if (!toast) return;
@@ -34,6 +38,8 @@ export function Toast() {
                 <button
                   type="button"
                   onClick={() => {
+                    if (firedActionFor.current === toast.id) return;
+                    firedActionFor.current = toast.id;
                     toast.action?.onAction();
                     dismissToast();
                   }}
