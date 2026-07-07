@@ -29,7 +29,7 @@ export function Toast() {
               key={toast.id}
               initial={{ opacity: 0, y: 16, scale: 0.94 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.96 }}
+              exit={{ opacity: 0, y: 10, scale: 0.96, pointerEvents: "none" }}
               transition={softSpring}
               className="pointer-events-auto absolute inset-x-0 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] mx-auto flex w-fit max-w-[88%] items-center gap-2 rounded-pill bg-ink px-4 py-3 text-cream shadow-lift"
             >
