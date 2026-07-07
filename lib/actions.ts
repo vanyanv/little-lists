@@ -197,6 +197,8 @@ export interface CreatePersonInput {
   emoji: string;
   theme: ThemeColor;
   note?: string;
+  /** an optional "MM-DD" day worth remembering */
+  specialDay?: string;
 }
 
 export async function createPersonAction(input: CreatePersonInput): Promise<Person> {
@@ -208,6 +210,7 @@ export async function createPersonAction(input: CreatePersonInput): Promise<Pers
       emoji: input.emoji,
       themeColor: input.theme,
       shortNote: input.note ?? null,
+      specialDay: input.specialDay ?? null,
     },
     include: { details: true },
   });
@@ -263,6 +266,8 @@ export interface UpdatePersonPatch {
   emoji?: string;
   theme?: ThemeColor;
   note?: string;
+  /** "MM-DD", or "" to clear the day */
+  specialDay?: string;
 }
 
 export async function updatePersonAction(personId: string, patch: UpdatePersonPatch): Promise<Person | null> {
@@ -280,6 +285,7 @@ export async function updatePersonAction(personId: string, patch: UpdatePersonPa
       ...(patch.emoji !== undefined ? { emoji: patch.emoji } : {}),
       ...(patch.theme !== undefined ? { themeColor: patch.theme } : {}),
       ...(patch.note !== undefined ? { shortNote: patch.note || null } : {}),
+      ...(patch.specialDay !== undefined ? { specialDay: patch.specialDay || null } : {}),
     },
     include: { details: true },
   });

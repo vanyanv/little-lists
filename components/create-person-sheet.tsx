@@ -30,6 +30,7 @@ function CreatePersonFlow({ onClose }: { onClose: () => void }) {
     emoji: "🌷",
     theme: "blush",
     note: "",
+    specialDay: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -48,13 +49,14 @@ function CreatePersonFlow({ onClose }: { onClose: () => void }) {
         emoji: value.emoji,
         theme: value.theme,
         note: value.note.trim() || undefined,
+        specialDay: value.specialDay || undefined,
       });
       onClose();
       showToast("A new little world of details ✨");
       router.push(`/app/person/${created.id}`);
     } catch {
       setSaving(false);
-      showToast("That didn't save — let's try again 🌿");
+      showToast("That didn't save. Let's try again 🌿");
     }
   };
 

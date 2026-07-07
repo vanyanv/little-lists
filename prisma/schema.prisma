@@ -111,6 +111,8 @@ model Person {
   emoji      String
   shortNote  String?
   themeColor String?
+  /** an optional day worth remembering, stored as "MM-DD" (no year, by design) */
+  specialDay String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

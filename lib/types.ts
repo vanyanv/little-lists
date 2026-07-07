@@ -185,6 +185,8 @@ export interface Person {
   emoji: string;
   theme: ThemeColor;
   note: string;
+  /** an optional day worth remembering, stored as "MM-DD" (no year) */
+  specialDay?: string;
   sections: PersonSection[];
 }
 

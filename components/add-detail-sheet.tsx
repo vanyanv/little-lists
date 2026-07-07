@@ -5,7 +5,7 @@ import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
 import { focusRing } from "@/lib/a11y";
-import { inputPrimary, inputField, textareaField } from "@/lib/field";
+import { inputPrimary, textareaField } from "@/lib/field";
 import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
 import { AnimatedCategoryIcon } from "./icons/animated-category-icon";
@@ -14,22 +14,37 @@ export function AddDetailSheet() {
   const { sheet, closeSheet } = useUi();
   const open = sheet?.kind === "detail";
   const personId = open ? sheet.personId : undefined;
+  const presetSectionId = open ? sheet.sectionId : undefined;
 
   return (
     <BottomSheet open={open} onClose={closeSheet} ariaLabel="Add a little detail">
-      {open && personId && <DetailFlow key={personId} personId={personId} onClose={closeSheet} />}
+      {open && personId && (
+        <DetailFlow
+          key={`${personId}:${presetSectionId ?? ""}`}
+          personId={personId}
+          presetSectionId={presetSectionId}
+          onClose={closeSheet}
+        />
+      )}
     </BottomSheet>
   );
 }
 
-function DetailFlow({ personId, onClose }: { personId: string; onClose: () => void }) {
+function DetailFlow({
+  personId,
+  presetSectionId,
+  onClose,
+}: {
+  personId: string;
+  presetSectionId?: string;
+  onClose: () => void;
+}) {
   const { people, addPersonDetail } = useStore();
   const { showToast } = useUi();
   const person = people.find((p) => p.id === personId);
-  const [sectionId, setSectionId] = useState(person?.sections[0]?.id ?? "");
+  const [sectionId, setSectionId] = useState(presetSectionId ?? person?.sections[0]?.id ?? "");
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
-  const [tags, setTags] = useState("");
   const [saving, setSaving] = useState(false);
 
   if (!person) return null;
@@ -43,16 +58,12 @@ function DetailFlow({ personId, onClose }: { personId: string; onClose: () => vo
       await addPersonDetail(person.id, sectionId, {
         title: title.trim(),
         note: note.trim() || undefined,
-        tags: tags
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean),
       });
       onClose();
       showToast("Saved this little detail ✨");
     } catch {
       setSaving(false);
-      showToast("That didn't save — let's try again 🌿");
+      showToast("That didn't save. Let's try again 🌿");
     }
   };
 
@@ -103,18 +114,11 @@ function DetailFlow({ personId, onClose }: { personId: string; onClose: () => vo
         className={textareaField}
       />
 
-      <label htmlFor="add-detail-tags" className="mb-2 mt-5 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">tags (optional)</label>
-      <input
-        id="add-detail-tags"
-        value={tags}
-        onChange={(e) => setTags(e.target.value)}
-        placeholder="comma, separated, little, labels"
-        className={inputField}
-      />
-
       <Button block size="lg" onClick={save} disabled={!canSave} className="mt-6">
         {saving ? "Saving…" : "Keep it in their little world"}
       </Button>
+
+      <p className="mt-3 text-center text-[0.78rem] text-brown-soft">Only you can see this.</p>
     </div>
   );
 }

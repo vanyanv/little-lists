@@ -12,10 +12,12 @@ export function PersonDetailSection({
   section,
   onDelete,
   onEdit,
+  onAdd,
 }: {
   section: PersonSection;
   onDelete?: (detailId: string) => void;
   onEdit?: (detailId: string) => void;
+  onAdd?: () => void;
 }) {
   const [open, setOpen] = useState(true);
   const reduce = useReducedMotion();
@@ -85,6 +87,15 @@ export function PersonDetailSection({
                       )}
                     </motion.span>
                   ))}
+                  {onAdd && (
+                    <button
+                      type="button"
+                      onClick={onAdd}
+                      className={`inline-flex items-center gap-1 rounded-pill border border-dashed border-line px-3 py-1.5 text-[0.85rem] font-semibold text-brown-soft transition-colors hover:border-brown-soft/60 hover:text-ink ${focusRingInset}`}
+                    >
+                      <span aria-hidden className="text-base leading-none">+</span> add
+                    </button>
+                  )}
                 </div>
               ) : (
                 <ul className="flex flex-col gap-2">
@@ -114,6 +125,17 @@ export function PersonDetailSection({
                       )}
                     </motion.li>
                   ))}
+                  {onAdd && (
+                    <li>
+                      <button
+                        type="button"
+                        onClick={onAdd}
+                        className={`flex w-full items-center gap-1 rounded-xl border border-dashed border-line px-3.5 py-2.5 text-left text-[0.88rem] font-semibold text-brown-soft transition-colors hover:border-brown-soft/60 hover:text-ink ${focusRingInset}`}
+                      >
+                        <span aria-hidden className="text-base leading-none">+</span> add
+                      </button>
+                    </li>
+                  )}
                 </ul>
               )}
             </div>

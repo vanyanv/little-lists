@@ -98,7 +98,7 @@ interface StoreValue {
   /** pin a list to the top of Home (or unpin it) */
   setListPinned: (listId: string, pinned: boolean) => void;
   deleteList: (listId: string) => void;
-  updatePerson: (personId: string, patch: Partial<Pick<Person, "name" | "emoji" | "theme" | "note">>) => void;
+  updatePerson: (personId: string, patch: Partial<Pick<Person, "name" | "emoji" | "theme" | "note" | "specialDay">>) => void;
   deletePerson: (personId: string) => void;
   updatePersonDetail: (
     personId: string,
@@ -327,6 +327,7 @@ export function ListsProvider({
       emoji: patch.emoji,
       theme: patch.theme,
       note: patch.note,
+      specialDay: patch.specialDay,
     }).catch((err) => console.error("updatePerson failed", err));
   }, []);
 
@@ -480,6 +481,7 @@ function mapDraftPerson(id: string, input: CreatePersonInput): Person {
     emoji: input.emoji,
     theme: input.theme,
     note: input.note ?? "",
+    specialDay: input.specialDay,
     sections: PERSON_SECTIONS.map((s) => ({
       id: s.id,
       label: s.label,

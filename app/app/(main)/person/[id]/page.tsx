@@ -12,6 +12,15 @@ import { EmptyState } from "@/components/empty-state";
 import { OverflowMenu } from "@/components/overflow-menu";
 import { Button } from "@/components/button";
 import { SoftDotLoader } from "@/components/soft-dot-loader";
+import { AnimatedCategoryIcon } from "@/components/icons/animated-category-icon";
+import { focusRing } from "@/lib/a11y";
+
+// starter prompts for an empty person — each opens the add sheet on its section
+const STARTER_PROMPTS: { sectionId: string; label: string }[] = [
+  { sectionId: "food", label: "What do they always order? 🍴" },
+  { sectionId: "gifts", label: "A gift idea before you forget 🎁" },
+  { sectionId: "movies", label: "Something they said they'd love to watch 🎬" },
+];
 
 export default function PersonDetailScreen() {
   const { id } = useParams<{ id: string }>();
@@ -56,12 +65,12 @@ export default function PersonDetailScreen() {
           onSelect: () =>
             openConfirm({
               title: "Remove this person?",
-              body: "This will delete them and every little detail you saved.",
+              body: "This clears their page and every little detail you kept.",
               confirmLabel: "Delete person",
               tone: "danger",
               onConfirm: () => {
                 deletePerson(person.id);
-                showToast("Removed from your little world");
+                showToast("Gone, along with their little details");
                 router.replace("/app/people");
               },
             }),
@@ -81,12 +90,29 @@ export default function PersonDetailScreen() {
       />
 
       {filledSections.length === 0 ? (
-        <EmptyState
-          sticker="heart"
-          title="No little details yet"
-          hint="Save the first one and start a cozy archive of what makes them, them."
-          action={<Button onClick={() => openDetailSheet(person.id)}>Add a little detail</Button>}
-        />
+        <div>
+          <EmptyState
+            sticker="heart"
+            title="No little details yet"
+            hint="Save the first one and start a cozy archive of what makes them, them."
+            action={<Button onClick={() => openDetailSheet(person.id)}>Add a little detail</Button>}
+          />
+          <div className="mx-auto mt-2 flex max-w-[22rem] flex-col gap-2 px-6 pb-6">
+            <p className="text-center text-[0.8rem] font-semibold text-brown-soft">or start with a little prompt</p>
+            {STARTER_PROMPTS.map((prompt) => (
+              <button
+                key={prompt.sectionId}
+                type="button"
+                onClick={() => openDetailSheet(person.id, prompt.sectionId)}
+                className={`flex w-full items-center gap-2.5 rounded-2xl bg-paper px-4 py-3 text-left text-[0.92rem] font-semibold text-ink shadow-soft ring-1 ring-line/40 transition-colors hover:bg-cream-deep ${focusRing}`}
+              >
+                <AnimatedCategoryIcon id={prompt.sectionId} size={18} play={false} />
+                <span className="flex-1">{prompt.label}</span>
+                <span aria-hidden className="text-brown-soft">+</span>
+              </button>
+            ))}
+          </div>
+        </div>
       ) : (
         <motion.div
           variants={staggerContainer}
@@ -98,6 +124,7 @@ export default function PersonDetailScreen() {
             <motion.div key={s.id} variants={riseItem}>
               <PersonDetailSection
                 section={s}
+                onAdd={() => openDetailSheet(person.id, s.id)}
                 onEdit={(detailId) => openEditDetail(person.id, s.id, detailId)}
                 onDelete={(detailId) =>
                   openConfirm({

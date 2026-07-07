@@ -30,6 +30,7 @@ function EditPersonFlow({ personId, onClose }: { personId: string; onClose: () =
     emoji: person?.emoji ?? "🌷",
     theme: person?.theme ?? "blush",
     note: person?.note ?? "",
+    specialDay: person?.specialDay ?? "",
   }));
 
   if (!person) return null;
@@ -44,6 +45,7 @@ function EditPersonFlow({ personId, onClose }: { personId: string; onClose: () =
       emoji: value.emoji,
       theme: value.theme,
       note: value.note.trim() || undefined,
+      specialDay: value.specialDay,
     });
     onClose();
     showToast("Updated ✨");

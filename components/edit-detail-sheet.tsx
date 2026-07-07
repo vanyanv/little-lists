@@ -5,9 +5,10 @@ import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
 import { focusRing } from "@/lib/a11y";
-import { inputPrimary, inputField, textareaField } from "@/lib/field";
+import { inputPrimary, textareaField } from "@/lib/field";
 import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
+import { AnimatedCategoryIcon } from "./icons/animated-category-icon";
 
 export function EditDetailSheet() {
   const { sheet, closeSheet } = useUi();
@@ -47,7 +48,6 @@ function EditDetailFlow({
   const [toSectionId, setToSectionId] = useState(sectionId);
   const [title, setTitle] = useState(entry?.title ?? "");
   const [note, setNote] = useState(entry?.note ?? "");
-  const [tags, setTags] = useState((entry?.tags ?? []).join(", "));
 
   if (!person || !entry) return null;
 
@@ -55,10 +55,11 @@ function EditDetailFlow({
 
   const save = () => {
     if (!canSave) return;
+    // tags are intentionally omitted — the field is gone, but existing tags on
+    // the row (including any seeded ones) must stay put, not be wiped.
     updatePersonDetail(person.id, sectionId, detailId, {
       title: title.trim(),
       note: note.trim() || undefined,
-      tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
       toSectionId: toSectionId !== sectionId ? toSectionId : undefined,
     });
     onClose();
@@ -82,7 +83,7 @@ function EditDetailFlow({
               s.id === toSectionId ? "bg-ink text-cream" : "bg-cream-deep text-brown ring-1 ring-line/60"
             }`}
           >
-            <span>{s.emoji}</span>
+            <AnimatedCategoryIcon id={s.id} size={14} play={s.id === toSectionId} />
             {s.label}
           </button>
         ))}
@@ -94,7 +95,7 @@ function EditDetailFlow({
         autoFocus
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="What's this little detail?"
+        placeholder="loves matcha, allergic to cilantro, birthday in March…"
         className={inputPrimary}
       />
 
@@ -104,17 +105,8 @@ function EditDetailFlow({
         value={note}
         onChange={(e) => setNote(e.target.value)}
         rows={2}
-        placeholder="Why it matters…"
+        placeholder="why it matters, the little context behind it…"
         className={textareaField}
-      />
-
-      <label htmlFor="edit-detail-tags" className="mb-2 mt-5 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">tags (optional)</label>
-      <input
-        id="edit-detail-tags"
-        value={tags}
-        onChange={(e) => setTags(e.target.value)}
-        placeholder="comma, separated, little, labels"
-        className={inputField}
       />
 
       <Button block size="lg" onClick={save} disabled={!canSave} className="mt-6">

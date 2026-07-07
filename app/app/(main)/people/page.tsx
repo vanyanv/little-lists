@@ -5,6 +5,7 @@ import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { staggerContainer, riseItem } from "@/lib/motion";
 import { PersonCard } from "@/components/person-card";
+import { PersonDayNudge } from "@/components/person-day-nudge";
 import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/button";
 
@@ -24,6 +25,8 @@ export default function PeopleScreen() {
           A cozy archive of what makes them, them. Just for you.
         </p>
       </header>
+
+      <PersonDayNudge />
 
       {people.length === 0 ? (
         <EmptyState

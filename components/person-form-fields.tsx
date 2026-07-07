@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import type { ThemeColor } from "@/lib/types";
 import { inputPrimary, inputField } from "@/lib/field";
+import { focusRing } from "@/lib/a11y";
+import { MONTHS, daysInMonth, formatSpecialDay, parseSpecialDay } from "@/lib/special-day";
 import { EmojiPicker } from "./emoji-picker";
 import { ThemeColorPicker } from "./theme-chip";
 
@@ -12,6 +15,8 @@ export interface PersonFormValue {
   emoji: string;
   theme: ThemeColor;
   note: string;
+  /** an optional "MM-DD" day worth remembering; "" means none */
+  specialDay: string;
 }
 
 interface PersonFormFieldsProps {
@@ -21,6 +26,51 @@ interface PersonFormFieldsProps {
 
 export function PersonFormFields({ value, onChange }: PersonFormFieldsProps) {
   const { name, emoji, theme, note } = value;
+
+  // month/day are edited locally so a half-filled control (month chosen, no day
+  // yet) doesn't churn the serialized value; we emit "MM-DD" only once both land.
+  const initial = parseSpecialDay(value.specialDay);
+  const [month, setMonth] = useState<string>(initial ? String(initial.month) : "");
+  const [day, setDay] = useState<string>(initial ? String(initial.day) : "");
+
+  const emit = (m: string, d: string) => {
+    const mNum = Number(m);
+    const dNum = Number(d);
+    if (m && d && mNum >= 1 && mNum <= 12 && dNum >= 1) {
+      onChange({ specialDay: formatSpecialDay(mNum, dNum) });
+    } else {
+      onChange({ specialDay: "" });
+    }
+  };
+
+  const onMonth = (m: string) => {
+    // clamp a leftover day (e.g. 31 → Feb) so the control stays coherent
+    let d = day;
+    if (m && d && Number(d) > daysInMonth(Number(m))) {
+      d = String(daysInMonth(Number(m)));
+      setDay(d);
+    }
+    setMonth(m);
+    emit(m, d);
+  };
+
+  const onDay = (raw: string) => {
+    const digits = raw.replace(/\D/g, "").slice(0, 2);
+    let d = digits;
+    if (month && d && Number(d) > daysInMonth(Number(month))) {
+      d = String(daysInMonth(Number(month)));
+    }
+    setDay(d);
+    emit(month, d);
+  };
+
+  const clearDay = () => {
+    setMonth("");
+    setDay("");
+    onChange({ specialDay: "" });
+  };
+
+  const hasDay = month !== "" || day !== "";
 
   return (
     <>
@@ -45,7 +95,7 @@ export function PersonFormFields({ value, onChange }: PersonFormFieldsProps) {
           autoFocus
           value={name}
           onChange={(e) => onChange({ name: e.target.value })}
-          placeholder="Mom, best friend, a partner…"
+          placeholder="Maddie, Mom, Sam from work…"
           className={inputPrimary}
         />
       </label>
@@ -61,6 +111,44 @@ export function PersonFormFields({ value, onChange }: PersonFormFieldsProps) {
           <span className="text-[0.72rem] font-bold lowercase tracking-tight text-[var(--t-ink)]">{theme}</span>
         </div>
         <ThemeColorPicker value={theme} onChange={(c) => onChange({ theme: c })} />
+      </div>
+
+      <div className="mt-5">
+        <div className="mb-2 flex items-baseline justify-between gap-2">
+          <p className="text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">their day (optional) 🎂</p>
+          {hasDay && (
+            <button
+              type="button"
+              onClick={clearDay}
+              className={`rounded-pill px-2 py-0.5 text-[0.72rem] font-bold text-brown-soft transition-colors hover:text-ink ${focusRing}`}
+            >
+              no day
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <select
+            aria-label="Month"
+            value={month}
+            onChange={(e) => onMonth(e.target.value)}
+            className={`${inputField} flex-1`}
+          >
+            <option value="">month</option>
+            {MONTHS.map((label, i) => (
+              <option key={label} value={String(i + 1)}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <input
+            aria-label="Day"
+            inputMode="numeric"
+            value={day}
+            onChange={(e) => onDay(e.target.value)}
+            placeholder="day"
+            className={`${inputField} w-20 text-center`}
+          />
+        </div>
       </div>
 
       <label className="mt-5 block">

@@ -101,6 +101,7 @@ export function mapPerson(row: DbPerson & { details?: DbPersonDetail[] }): Perso
     emoji: row.emoji,
     theme: (row.themeColor as ThemeColor) ?? "blush",
     note: row.shortNote ?? "",
+    specialDay: row.specialDay ?? undefined,
     sections,
   };
 }

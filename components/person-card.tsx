@@ -64,12 +64,12 @@ export function PersonCard({ person }: { person: Person }) {
               onSelect: () =>
                 openConfirm({
                   title: "Remove this person?",
-                  body: "This will delete them and every little detail you saved.",
+                  body: "This clears their page and every little detail you kept.",
                   confirmLabel: "Delete person",
                   tone: "danger",
                   onConfirm: () => {
                     deletePerson(person.id);
-                    showToast("Removed from your little world");
+                    showToast("Gone, along with their little details");
                   },
                 }),
             },

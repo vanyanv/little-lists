@@ -5,7 +5,7 @@ import type { ListTemplate } from "./types";
 
 export type SheetState =
   | { kind: "item"; listId?: string }
-  | { kind: "detail"; personId: string }
+  | { kind: "detail"; personId: string; sectionId?: string }
   | { kind: "list"; template?: ListTemplate }
   | { kind: "person" }
   | { kind: "edit-list"; listId: string }
@@ -43,7 +43,7 @@ export interface ToastSignal {
 interface UiValue {
   sheet: SheetState;
   openItemSheet: (listId?: string) => void;
-  openDetailSheet: (personId: string) => void;
+  openDetailSheet: (personId: string, sectionId?: string) => void;
   openListSheet: (template?: ListTemplate) => void;
   openPersonSheet: () => void;
   openEditList: (listId: string) => void;
@@ -69,8 +69,8 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
   const openItemSheet = useCallback((listId?: string) => {
     setSheet({ kind: "item", listId });
   }, []);
-  const openDetailSheet = useCallback((personId: string) => {
-    setSheet({ kind: "detail", personId });
+  const openDetailSheet = useCallback((personId: string, sectionId?: string) => {
+    setSheet({ kind: "detail", personId, sectionId });
   }, []);
   const openListSheet = useCallback(
     (template?: ListTemplate) => setSheet({ kind: "list", template }),
