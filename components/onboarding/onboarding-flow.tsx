@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Button } from "@/components/button";
 import { AnimatedSticker } from "@/components/icons/animated-sticker";
@@ -10,6 +10,7 @@ import { completeOnboardingAction, skipOnboardingAction } from "@/lib/actions";
 import {
   MAX_STARTERS,
   MIN_STARTERS,
+  ONBOARDING_STATE_KEY,
   ONBOARDING_TOAST_KEY,
   PERSON_STARTER,
   STARTER_OPTIONS,
@@ -37,8 +38,61 @@ export function OnboardingFlow() {
   const [error, setError] = useState(false);
   // bumps when a fifth pick is attempted, wiggling the "plenty to start" hint
   const [maxNudge, setMaxNudge] = useState(0);
+  // gate persistence until we've restored, so the first render doesn't overwrite saved picks
+  const [restored, setRestored] = useState(false);
 
   const count = picked.length + (includePerson ? 1 : 0);
+
+  // Restore an in-progress flow after a refresh. This reads a browser-only store
+  // (sessionStorage), so it can only run post-mount — hydrating client state from
+  // an external store is a legitimate effect, hence the scoped rule disable.
+  // Never restore into "ready": that's the post-completion screen, and completion
+  // clears this key anyway.
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
+    try {
+      const raw = sessionStorage.getItem(ONBOARDING_STATE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as {
+          step?: Step;
+          picked?: string[];
+          includePerson?: boolean;
+          seedExamples?: boolean;
+        };
+        if (saved.step === "welcome" || saved.step === "pick") setStep(saved.step);
+        if (Array.isArray(saved.picked)) {
+          setPicked(saved.picked.filter((id) => typeof id === "string"));
+        }
+        if (typeof saved.includePerson === "boolean") setIncludePerson(saved.includePerson);
+        if (typeof saved.seedExamples === "boolean") setSeedExamples(saved.seedExamples);
+      }
+    } catch {
+      // malformed or unavailable storage — just start the flow fresh
+    }
+    setRestored(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, []);
+
+  // Persist picks so a mid-flow refresh doesn't lose them.
+  useEffect(() => {
+    if (!restored || step === "ready") return;
+    try {
+      sessionStorage.setItem(
+        ONBOARDING_STATE_KEY,
+        JSON.stringify({ step, picked, includePerson, seedExamples })
+      );
+    } catch {
+      // storage unavailable — persistence is a nicety, keep going
+    }
+  }, [restored, step, picked, includePerson, seedExamples]);
+
+  function clearSavedState() {
+    try {
+      sessionStorage.removeItem(ONBOARDING_STATE_KEY);
+    } catch {
+      // nothing to clean up if storage is unavailable
+    }
+  }
 
   function toggleStarter(id: string) {
     const isPerson = id === PERSON_STARTER.id;
@@ -56,6 +110,7 @@ export function OnboardingFlow() {
     setError(false);
     try {
       await completeOnboardingAction({ starters: picked, includePerson, seedExamples });
+      clearSavedState();
       setStep("ready");
     } catch (err) {
       console.error("completeOnboardingAction failed", err);
@@ -70,6 +125,7 @@ export function OnboardingFlow() {
     setError(false);
     try {
       await skipOnboardingAction();
+      clearSavedState();
       window.location.assign("/app");
     } catch (err) {
       console.error("skipOnboardingAction failed", err);
@@ -93,6 +149,14 @@ export function OnboardingFlow() {
     </Button>
   );
 
+  // Hoisted so a failed action is visible on whichever step it happened on
+  // (skipping can fail from the welcome step too, not just submitting from pick).
+  const errorAlert = error ? (
+    <p className="mt-3 text-center text-[0.85rem] text-rosewood" role="alert">
+      Something went sideways. Mind trying again?
+    </p>
+  ) : null;
+
   return (
     <div className="flex min-h-dvh flex-col px-6 pt-[calc(env(safe-area-inset-top)+3rem)] pb-[calc(env(safe-area-inset-bottom)+2.5rem)]">
       <AnimatePresence mode="wait">
@@ -114,7 +178,7 @@ export function OnboardingFlow() {
               to remember.
             </p>
             <p className="mt-4 max-w-[18rem] text-[0.85rem] leading-relaxed text-brown-soft">
-              Everything here is private by default — this little world is just yours 🌙
+              Everything here is private by default. This little world is just yours 🌙
             </p>
             <div className="mt-8 flex w-full max-w-[17rem] flex-col items-center gap-2">
               <Button size="lg" block onClick={() => setStep("pick")}>
@@ -122,6 +186,7 @@ export function OnboardingFlow() {
               </Button>
               {skipButton}
             </div>
+            {errorAlert}
           </motion.section>
         )}
 
@@ -138,7 +203,7 @@ export function OnboardingFlow() {
               What do you want to keep track of?
             </h1>
             <p className="mt-2 text-[0.92rem] leading-relaxed text-brown">
-              Pick a few little lists to start with — two to four feels just right.
+              Pick a few little lists to start with. One to four feels just right.
             </p>
 
             <motion.div
@@ -176,17 +241,13 @@ export function OnboardingFlow() {
               {count >= MAX_STARTERS
                 ? "Four little worlds is plenty to start 🌱"
                 : count < MIN_STARTERS
-                  ? `Pick at least ${MIN_STARTERS} to begin`
+                  ? "Pick one or more to begin"
                   : ""}
             </motion.p>
 
             <ExamplesToggle on={seedExamples} onToggle={() => setSeedExamples((v) => !v)} />
 
-            {error && (
-              <p className="mt-3 text-center text-[0.85rem] text-rosewood" role="alert">
-                Something went sideways — mind trying again?
-              </p>
-            )}
+            {errorAlert}
 
             <div className="mt-5 flex flex-col items-center gap-2">
               <Button size="lg" block disabled={pending || count < MIN_STARTERS} onClick={submit}>
@@ -218,7 +279,7 @@ export function OnboardingFlow() {
             </p>
             <div className="mt-8 w-full max-w-[17rem]">
               <Button size="lg" block onClick={finish}>
-                Take me to my little worlds 🌷
+                Take me to my <span className="whitespace-nowrap">little worlds 🌷</span>
               </Button>
             </div>
           </motion.section>

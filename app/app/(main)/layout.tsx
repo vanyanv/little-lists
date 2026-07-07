@@ -10,13 +10,14 @@ import type { Profile } from "@/lib/types";
 // whole segment is rendered per-request rather than prerendered at build time.
 export const dynamic = "force-dynamic";
 
-// Shown only if the DB is briefly unreachable and no profile row resolves yet;
-// the app stays usable and a reload picks up the real profile.
+// Shown only if the DB is briefly unreachable and a resolved profile is missing
+// a field; neutral so it never leaks a real-looking identity. A reload picks up
+// the real profile.
 const FALLBACK_PROFILE: Profile = {
-  name: "Vardan",
-  handle: "@vardan",
+  name: "friend",
+  handle: "",
   avatarEmoji: "🌙",
-  bio: "movies I keep meaning to watch, food opinions, and tiny details I don't want to forget.",
+  bio: "",
   theme: "blush",
   tags: [],
   featuredListIds: [],
@@ -28,20 +29,23 @@ const FALLBACK_PROFILE: Profile = {
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   // First protected-route access for a signed-in user creates their Profile.
-  // Idempotent; guarded so a transient DB outage degrades to "profile not yet
-  // created" (retried next request) rather than taking down the app — on
-  // outage needsOnboarding stays false: degrade into the app, never trap.
-  let needsOnboarding = false;
+  // Idempotent; guarded so a transient DB outage degrades rather than taking
+  // down the app.
+  let hasProfile = false;
+  let onboardingCompleted = false;
   try {
     const profileRow = await ensureProfileForClerkUser();
-    needsOnboarding = !!profileRow && !profileRow.onboardingCompleted;
+    hasProfile = !!profileRow;
+    onboardingCompleted = !!profileRow?.onboardingCompleted;
   } catch (err) {
     console.error("ensureProfileForClerkUser failed; will retry next request", err);
   }
 
   // redirect() throws NEXT_REDIRECT, so it must sit outside the try/catch.
-  // Onboarding is outside this (main) route group, so no redirect loop.
-  if (needsOnboarding) redirect("/app/onboarding");
+  // Onboarding is outside this (main) route group, so no redirect loop. A fresh
+  // signup with no row yet (or an ensure that failed) lands in onboarding rather
+  // than home wearing a placeholder identity.
+  if (!hasProfile || !onboardingCompleted) redirect("/app/onboarding");
 
   let seed: StoreSeed = { lists: [], people: [], profile: FALLBACK_PROFILE };
   try {

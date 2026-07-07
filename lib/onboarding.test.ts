@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { STARTER_OPTIONS, DEMO_PERSON, deriveChecklist } from "./onboarding";
+import { STARTER_OPTIONS, DEMO_PERSON, deriveChecklist, MIN_STARTERS } from "./onboarding";
 import { TEMPLATE_META } from "./types";
 import { PERSON_SECTIONS } from "./people";
 import type { List, Person } from "./types";
@@ -78,5 +78,33 @@ describe("deriveChecklist", () => {
     expect(
       deriveChecklist([], [person([{ id: "e1", title: "matcha", tags: [] }])]).map((c) => c.done)
     ).toEqual([false, false, true]);
+  });
+
+  it("does not count example-tagged items toward the first-item step", () => {
+    const seeded = list([{ id: "i1", type: "movie", title: "Coraline", tags: ["example"] }]);
+    // list exists (done), but its only item is a seeded example (not done)
+    expect(deriveChecklist([seeded], []).map((c) => c.done)).toEqual([true, false, false]);
+  });
+
+  it("counts a real item alongside example items", () => {
+    const mixed = list([
+      { id: "i1", type: "movie", title: "Coraline", tags: ["example"] },
+      { id: "i2", type: "movie", title: "Past Lives" },
+    ]);
+    expect(deriveChecklist([mixed], []).map((c) => c.done)).toEqual([true, true, false]);
+  });
+
+  it("does not count example-tagged person entries toward the detail step", () => {
+    expect(
+      deriveChecklist([], [person([{ id: "e1", title: "farmers markets", tags: ["example"] }])]).map(
+        (c) => c.done
+      )
+    ).toEqual([false, false, false]);
+  });
+});
+
+describe("MIN_STARTERS", () => {
+  it("lets a user begin with a single pick", () => {
+    expect(MIN_STARTERS).toBe(1);
   });
 });

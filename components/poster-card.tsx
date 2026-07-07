@@ -1,5 +1,7 @@
 import type { Item } from "@/lib/types";
+import { isExample } from "@/lib/onboarding";
 import { Cover } from "./cover";
+import { ExampleChip } from "./chip";
 import { StatusPill } from "./status-pill";
 import { LittleIcon } from "./icons/little-icon";
 
@@ -30,9 +32,10 @@ export function PosterCard({ item }: { item: Item }) {
         {item.subtitle && (
           <p className="mt-0.5 text-[0.8rem] font-medium text-brown">{item.subtitle}</p>
         )}
-        {item.status && (
-          <div className="mt-1.5">
-            <StatusPill status={item.status} />
+        {(item.status || isExample(item.tags)) && (
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            {item.status && <StatusPill status={item.status} />}
+            {isExample(item.tags) && <ExampleChip />}
           </div>
         )}
       </div>

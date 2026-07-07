@@ -24,7 +24,7 @@ const serverSnapshot = () => true;
  * label, so that's fine.
  */
 export function DemoBanner() {
-  const { profile } = useStore();
+  const { profile, clearExamples } = useStore();
   const dismissed = useSyncExternalStore(subscribe, readDismissed, serverSnapshot);
   const [hidden, setHidden] = useState(false);
 
@@ -39,21 +39,35 @@ export function DemoBanner() {
     }
   };
 
+  const clearAndDismiss = () => {
+    clearExamples();
+    dismiss();
+  };
+
   return (
     <div className="mt-4 flex items-center justify-between gap-2 rounded-2xl bg-paper py-2.5 pl-4 pr-2 shadow-soft ring-1 ring-line">
       <p className="text-[0.85rem] leading-snug text-brown">
-        Starter ideas added — make them yours or delete them anytime 🌿
+        We tucked in a few starter ideas. Make them yours, or clear them anytime 🌿
       </p>
-      <button
-        type="button"
-        onClick={dismiss}
-        aria-label="Dismiss"
-        className={`relative grid h-8 w-8 shrink-0 place-items-center rounded-full text-brown-soft transition-colors before:absolute before:-inset-1.5 before:content-[''] hover:bg-cream-deep ${focusRing}`}
-      >
-        <svg aria-hidden width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        </svg>
-      </button>
+      <div className="flex shrink-0 items-center gap-0.5">
+        <button
+          type="button"
+          onClick={clearAndDismiss}
+          className={`relative rounded-pill px-2.5 py-1.5 text-[0.8rem] font-semibold text-brown-soft transition-colors hover:bg-cream-deep hover:text-ink ${focusRing}`}
+        >
+          Clear examples
+        </button>
+        <button
+          type="button"
+          onClick={dismiss}
+          aria-label="Dismiss"
+          className={`relative grid h-8 w-8 shrink-0 place-items-center rounded-full text-brown-soft transition-colors before:absolute before:-inset-1.5 before:content-[''] hover:bg-cream-deep ${focusRing}`}
+        >
+          <svg aria-hidden width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }

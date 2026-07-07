@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserProfile } from "@/lib/server/profile";
 import { DB_SECTION_TO_ID, ID_TO_DB_SECTION } from "@/lib/people";
 import { mapItem, mapList, mapPerson, mapProfile, templateToDb } from "@/lib/server/serialize";
-import { DEMO_PERSON, STARTER_OPTIONS } from "@/lib/onboarding";
+import { DEMO_PERSON, EXAMPLE_TAG, STARTER_OPTIONS } from "@/lib/onboarding";
 import { pickDemoName } from "@/lib/demo-names";
 import {
   TEMPLATE_META,
@@ -363,9 +363,9 @@ export async function completeOnboardingAction(sel: OnboardingSelections): Promi
   const { clerkUserId } = await requireUserProfile();
 
   const chosen = STARTER_OPTIONS.filter((opt) => sel.starters.includes(opt.id));
-  // The demo person comes along either way: picking the person card asks for them, and the
-  // examples toggle includes them so the people feature isn't an empty mystery.
-  const seedPerson = sel.includePerson || sel.seedExamples;
+  // The demo person only shows up when the person card is actually picked — no
+  // surprise stranger just because someone wanted a few example list items.
+  const seedPerson = sel.includePerson;
   const demoSeeded = sel.seedExamples || sel.includePerson;
 
   await prisma.$transaction(async (tx) => {
@@ -395,6 +395,8 @@ export async function completeOnboardingAction(sel: OnboardingSelections): Promi
                     title: item.title,
                     status: item.status,
                     emoji: item.emoji ?? null,
+                    // labeled so the UI can mark them and "Clear examples" can find them
+                    tags: [EXAMPLE_TAG],
                     metadata: { type: meta.kind } satisfies Prisma.InputJsonObject,
                   })),
                 },
@@ -417,11 +419,24 @@ export async function completeOnboardingAction(sel: OnboardingSelections): Promi
               userId: clerkUserId,
               section: ID_TO_DB_SECTION[d.sectionId],
               title: d.title,
+              // seeded, so the first-steps checklist still nudges a real detail
+              tags: [EXAMPLE_TAG],
             })),
           },
         },
       });
     }
+  });
+}
+
+/**
+ * Remove the seeded example list items for the current user. Scoped to their
+ * own rows and to the example tag, so real content is never touched.
+ */
+export async function clearExamplesAction(): Promise<void> {
+  const { clerkUserId } = await requireUserProfile();
+  await prisma.listItem.deleteMany({
+    where: { userId: clerkUserId, tags: { has: EXAMPLE_TAG } },
   });
 }
 

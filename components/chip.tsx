@@ -64,3 +64,17 @@ export function Chip({
     </motion.button>
   );
 }
+
+/**
+ * A quiet marker for onboarding-seeded rows, so example content reads as a
+ * gentle suggestion rather than something you added yourself.
+ */
+export function ExampleChip({ className = "" }: { className?: string }) {
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center rounded-pill bg-cream-deep px-2 py-0.5 text-[0.68rem] font-semibold leading-none text-brown-soft ${className}`}
+    >
+      example
+    </span>
+  );
+}

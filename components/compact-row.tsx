@@ -1,6 +1,8 @@
 import type { Item } from "@/lib/types";
 import { ITEM_TYPE_META } from "@/lib/types";
+import { isExample } from "@/lib/onboarding";
 import { Cover } from "./cover";
+import { ExampleChip } from "./chip";
 import { StatusPill } from "./status-pill";
 import { LittleIcon } from "./icons/little-icon";
 import { StickerBadge } from "./icons/sticker-badge";
@@ -51,6 +53,7 @@ export function CompactRow({ item }: { item: Item }) {
               <LittleIcon name="pencil" size={12} />
             </span>
           )}
+          {isExample(item.tags) && <ExampleChip />}
         </div>
         {item.subtitle && (
           <p className="mt-0.5 truncate text-[0.82rem] font-semibold text-brown-soft">{item.subtitle}</p>

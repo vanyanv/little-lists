@@ -45,6 +45,11 @@ export default function HomeScreen() {
   const [cat, setCat] = useState("all");
   const reduce = useReducedMotion();
 
+  // Prefer the Clerk first name, then a real display name; never greet with the
+  // neutral "friend" placeholder — "there" is warmer than a stand-in identity.
+  const realName = user?.firstName?.trim() || (profile.name !== "friend" ? profile.name : "");
+  const greetingName = realName || "there";
+
   // onboarding sets this key just before its hard navigation here
   useEffect(() => {
     try {
@@ -75,7 +80,7 @@ export default function HomeScreen() {
     <div className="px-4 pt-[calc(env(safe-area-inset-top)+1.25rem)]">
       {/* greeting */}
       <header className="px-1">
-        <p className="text-[0.92rem] font-bold text-brown">Hi {user?.firstName ?? profile.name} ✨</p>
+        <p className="text-[0.92rem] font-bold text-brown">Hi {greetingName} ✨</p>
         <h1 className="mt-1 font-display text-[2.3rem] font-semibold leading-none text-ink">
           Your little worlds
         </h1>

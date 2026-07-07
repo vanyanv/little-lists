@@ -109,11 +109,22 @@ export const PERSON_STARTER = {
   emoji: "🌼",
 } as const;
 
-export const MIN_STARTERS = 2;
+export const MIN_STARTERS = 1;
 export const MAX_STARTERS = 4;
+
+/** tag stamped on every onboarding-seeded row so it can be labeled and cleared */
+export const EXAMPLE_TAG = "example";
+
+/** true when a row carries the seeded-example tag */
+export function isExample(tags?: string[] | null): boolean {
+  return !!tags?.includes(EXAMPLE_TAG);
+}
 
 /** sessionStorage handoff: onboarding sets it, Home reads-and-clears to toast */
 export const ONBOARDING_TOAST_KEY = "ll:onboarding-toast";
+
+/** sessionStorage: in-progress onboarding picks, so a refresh doesn't lose them */
+export const ONBOARDING_STATE_KEY = "ll:onboarding-state";
 
 /** localStorage flag for the "starter ideas added" banner dismissal */
 export const DEMO_BANNER_DISMISSED_KEY = "ll:demo-banner-dismissed";
@@ -163,13 +174,14 @@ export function deriveChecklist(lists: List[], people: Person[]): ChecklistItem[
     },
     {
       id: "first-item",
+      // seeded examples don't count — the point is to add something of your own
       label: "Add your first little thing",
-      done: lists.some((l) => l.items.length > 0),
+      done: lists.some((l) => l.items.some((i) => !isExample(i.tags))),
     },
     {
       id: "first-person-detail",
       label: "Save a little detail about someone",
-      done: people.some((p) => p.sections.some((s) => s.entries.length > 0)),
+      done: people.some((p) => p.sections.some((s) => s.entries.some((e) => !isExample(e.tags)))),
     },
   ];
 }

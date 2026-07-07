@@ -1,12 +1,16 @@
 import type { Item } from "@/lib/types";
 import { ITEM_TYPE_META } from "@/lib/types";
+import { EXAMPLE_TAG, isExample } from "@/lib/onboarding";
 import { Cover } from "./cover";
+import { ExampleChip } from "./chip";
 import { StatusPill } from "./status-pill";
 import { StickerBadge } from "./icons/sticker-badge";
 
 /** Cozy note-style summary — a mini cover for media, a sticker tile for everything else. */
 export function NoteCard({ item }: { item: Item }) {
   const isMedia = ITEM_TYPE_META[item.type].aspect !== "note";
+  // the seeded-example tag gets its own soft chip, so keep it out of the #hashtags
+  const visibleTags = item.tags?.filter((t) => t !== EXAMPLE_TAG) ?? [];
   return (
     <div className="flex gap-3.5 text-left">
       {isMedia ? (
@@ -31,12 +35,17 @@ export function NoteCard({ item }: { item: Item }) {
         {item.subtitle && (
           <p className="mt-0.5 text-[0.82rem] font-semibold text-brown-soft">{item.subtitle}</p>
         )}
+        {isExample(item.tags) && (
+          <div className="mt-1.5">
+            <ExampleChip />
+          </div>
+        )}
         {item.note && (
           <p className="mt-1 line-clamp-2 text-[0.88rem] leading-relaxed text-brown">{item.note}</p>
         )}
-        {item.tags && item.tags.length > 0 && (
+        {visibleTags.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {item.tags.map((t) => (
+            {visibleTags.map((t) => (
               <span
                 key={t}
                 className="rounded-pill px-2.5 py-1 text-[0.75rem] font-semibold text-[var(--t-ink)]"

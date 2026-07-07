@@ -1,6 +1,6 @@
 import "server-only";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import type { Profile } from "@prisma/client";
+import { Prisma, type Profile } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -22,11 +22,23 @@ export async function ensureProfileForClerkUser(): Promise<Profile | null> {
   const displayName =
     user?.firstName?.trim() || user?.username?.trim() || "friend";
 
-  return prisma.profile.upsert({
-    where: { clerkUserId: userId },
-    update: {},
-    create: { clerkUserId: userId, displayName },
-  });
+  try {
+    return await prisma.profile.upsert({
+      where: { clerkUserId: userId },
+      update: {},
+      create: { clerkUserId: userId, displayName },
+    });
+  } catch (err) {
+    // A concurrent first request (a fresh signup fires several at once) can slip
+    // a row in between our read above and this write — the unique clerkUserId
+    // then trips P2002. Recover in-request by returning the row they created,
+    // rather than failing and flashing a fallback identity.
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      const raced = await prisma.profile.findUnique({ where: { clerkUserId: userId } });
+      if (raced) return raced;
+    }
+    throw err;
+  }
 }
 
 /** The current Clerk user's Profile, or null. Never writes. */

@@ -18,7 +18,9 @@ import {
   type ViewMode,
 } from "./types";
 import { PERSON_SECTIONS } from "./people";
+import { isExample } from "./onboarding";
 import {
+  clearExamplesAction,
   createItemAction,
   createListAction,
   createPersonAction,
@@ -78,6 +80,8 @@ interface StoreValue {
   deletePersonDetail: (personId: string, sectionId: string, detailId: string) => void;
   setProfileTheme: (theme: ThemeColor) => void;
   dismissChecklist: () => void;
+  /** drop the onboarding-seeded example items from every list */
+  clearExamples: () => void;
   fireCelebration: (variant?: CelebrationVariant) => void;
   updateList: (listId: string, patch: Partial<Pick<List, "title" | "emoji" | "theme" | "template" | "defaultView">>) => void;
   deleteList: (listId: string) => void;
@@ -347,6 +351,13 @@ export function ListsProvider({
     );
   }, []);
 
+  const clearExamples = useCallback<StoreValue["clearExamples"]>(() => {
+    setLists((prev) =>
+      prev.map((l) => ({ ...l, items: l.items.filter((i) => !isExample(i.tags)) }))
+    );
+    void clearExamplesAction().catch((err) => console.error("clearExamples failed", err));
+  }, []);
+
   const value = useMemo<StoreValue>(
     () => ({
       lists,
@@ -369,6 +380,7 @@ export function ListsProvider({
       updatePersonDetail,
       setProfileTheme,
       dismissChecklist,
+      clearExamples,
       fireCelebration,
     }),
     [
@@ -391,6 +403,7 @@ export function ListsProvider({
       updatePersonDetail,
       setProfileTheme,
       dismissChecklist,
+      clearExamples,
       fireCelebration,
     ]
   );

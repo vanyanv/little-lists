@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import type { Item } from "@/lib/types";
 import { ITEM_TYPE_META, STATUSES_FOR } from "@/lib/types";
+import { isExample } from "@/lib/onboarding";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { focusRing } from "@/lib/a11y";
+import { ExampleChip } from "./chip";
 import { ExpandableCard } from "./expandable-card";
 import { PosterCard } from "./poster-card";
 import { NoteCard } from "./note-card";
@@ -141,6 +143,11 @@ function GridTile({ item }: { item: Item }) {
         {item.status && (
           <div className="mt-1.5">
             <StatusPill status={item.status} />
+          </div>
+        )}
+        {isExample(item.tags) && (
+          <div className="mt-1.5">
+            <ExampleChip />
           </div>
         )}
       </div>
