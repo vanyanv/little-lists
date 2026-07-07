@@ -1,5 +1,5 @@
 import type { Item, ItemType } from "@/lib/types";
-import { PlaceholderPoster } from "./placeholder-poster";
+import { Cover } from "./cover";
 import { LittleIcon } from "./icons/little-icon";
 
 const ROT = [-7, -1, 5, 10];
@@ -16,14 +16,16 @@ export function CardStack({
 }) {
   const max = size === "lg" ? 3 : 4;
   const shown = items.slice(0, max);
-  const isPoster = kind === "movie" || kind === "book";
+  // movies/books stack 2:3 covers, music stacks square album art — all through
+  // Cover, so real artwork shows when an item has it (placeholder otherwise)
+  const isPoster = kind === "movie" || kind === "book" || kind === "music";
   const w = size === "lg" ? 52 : size === "sm" ? 38 : 46;
 
   if (shown.length === 0) {
     return (
       <div
         className="grid place-items-center rounded-xl border border-dashed border-[var(--t-edge)] text-[var(--t-ink)]"
-        style={{ width: w, height: isPoster ? w * 1.5 : w, opacity: 0.7 }}
+        style={{ width: w, height: kind === "movie" || kind === "book" ? w * 1.5 : w, opacity: 0.7 }}
       >
         <span className="text-lg">＋</span>
       </div>
@@ -44,9 +46,9 @@ export function CardStack({
               zIndex: i,
             }}
           >
-            <PlaceholderPoster
-              seed={item.seed || item.title}
-              title={item.title}
+            <Cover
+              item={item}
+              sizes={`${w}px`}
               className="shadow-soft ring-2 ring-paper"
               rounded="rounded-lg"
             />

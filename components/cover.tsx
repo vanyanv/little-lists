@@ -52,6 +52,9 @@ export function Cover({
         sizes={sizes}
         className="object-cover"
         loading="lazy"
+        // local first-party .svg art (the landing preview covers) skips the
+        // optimizer, which refuses SVG by default
+        unoptimized={item.imageUrl.endsWith(".svg")}
         onError={() => setErrored(true)}
       />
       <span className={`pointer-events-none absolute inset-0 ${rounded} ring-1 ring-inset ring-line/40`} />
