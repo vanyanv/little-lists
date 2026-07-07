@@ -4,6 +4,32 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { clerkAppearance } from "@/lib/clerkAppearance";
 
+// Warm overrides for Clerk's stock copy. This is a partial LocalizationResource:
+// Clerk merges it over its built-in English defaults, so every key we don't
+// list here (including all error strings) keeps Clerk's default wording.
+const clerkLocalization = {
+  signUp: {
+    start: {
+      title: "Make yourself at home",
+      subtitle: "A name, an email, and you're in.",
+    },
+    emailCode: {
+      subtitle: "We sent a little code to your email",
+    },
+  },
+  signIn: {
+    start: {
+      title: "Welcome back",
+      subtitle: "Your little worlds are waiting.",
+    },
+  },
+  formFieldInputPlaceholder__username: "a name you like",
+  formFieldInputPlaceholder__emailAddress: "you@somewhere.com",
+  // Sign-up's password field reads a distinct key from sign-in's.
+  formFieldInputPlaceholder__password: "something only you know",
+  formFieldInputPlaceholder__signUpPassword: "something only you know",
+};
+
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
@@ -36,7 +62,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider appearance={clerkAppearance}>
+    <ClerkProvider appearance={clerkAppearance} localization={clerkLocalization}>
       <html
         lang="en"
         className={`${fraunces.variable} ${nunito.variable} h-full`}
