@@ -5,7 +5,7 @@ import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
 import { focusRing } from "@/lib/a11y";
-import { inputPrimary, textareaField } from "@/lib/field";
+import { inputPrimary, textareaField, sheetTitleSm } from "@/lib/field";
 import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
 import { AnimatedCategoryIcon } from "./icons/animated-category-icon";
@@ -69,7 +69,7 @@ function DetailFlow({
 
   return (
     <div className={`pt-1 ${themeClass(person.theme)}`}>
-      <h2 className="font-display text-[1.45rem] font-semibold text-ink">
+      <h2 className={sheetTitleSm}>
         Add a little detail
       </h2>
       <p className="mt-1 text-[0.92rem] text-brown">

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
+import { sheetTitle } from "@/lib/field";
 import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
 import { PersonFormFields, type PersonFormValue } from "./person-form-fields";
@@ -62,7 +63,7 @@ function CreatePersonFlow({ onClose }: { onClose: () => void }) {
 
   return (
     <div className={`pt-1 ${themeClass(value.theme)}`}>
-      <h2 className="font-display text-[1.5rem] font-semibold leading-tight text-ink">
+      <h2 className={sheetTitle}>
         Who would you like to remember?
       </h2>
       <p className="mt-1 text-[0.92rem] text-brown">A cozy little place for the details that make them, them.</p>

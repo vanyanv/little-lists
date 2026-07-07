@@ -1,6 +1,7 @@
 "use client";
 
 import { useUi } from "@/lib/ui";
+import { sheetTitleSm } from "@/lib/field";
 import { BottomSheet } from "./bottom-sheet";
 import { Button } from "./button";
 
@@ -12,7 +13,7 @@ export function ConfirmSheet() {
     <BottomSheet open={confirm !== null} onClose={closeConfirm} ariaLabel={confirm?.title}>
       {confirm && (
         <div className="pt-1">
-          <h2 className="font-display text-[1.4rem] font-semibold leading-tight text-ink">
+          <h2 className={sheetTitleSm}>
             {confirm.title}
           </h2>
           <p className="mt-2 text-[0.95rem] leading-relaxed text-brown">{confirm.body}</p>

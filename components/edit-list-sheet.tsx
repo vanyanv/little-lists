@@ -5,6 +5,7 @@ import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { TEMPLATE_META, type ListTemplate } from "@/lib/types";
 import { themeClass } from "@/lib/visual";
+import { sheetTitle } from "@/lib/field";
 import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
 import { ListFormFields, type ListFormValue } from "./list-form-fields";
@@ -59,7 +60,7 @@ function EditListFlow({ listId, onClose }: { listId: string; onClose: () => void
 
   return (
     <div className={`pt-1 ${themeClass(value.theme)}`}>
-      <h2 className="font-display text-[1.5rem] font-semibold leading-tight text-ink">Edit this little list</h2>
+      <h2 className={sheetTitle}>Edit this little list</h2>
       <p className="mt-1 text-[0.92rem] text-brown">Tweak the name, vibe, or how you browse it.</p>
 
       <ListFormFields value={value} onChange={patch} onChooseTemplate={chooseTemplate} />

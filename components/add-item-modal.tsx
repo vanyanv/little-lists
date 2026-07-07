@@ -16,7 +16,7 @@ import type { SearchHit } from "@/lib/search/types";
 import { themeClass } from "@/lib/visual";
 import { staggerContainer, riseItem, softSpring, tap } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
-import { inputPrimary, inputField, textareaField } from "@/lib/field";
+import { inputPrimary, inputField, textareaField, sheetTitle, sheetTitleSm } from "@/lib/field";
 import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
 import { SoftDotLoader } from "./soft-dot-loader";
@@ -208,7 +208,7 @@ function AddItemFlow({
             exit={{ opacity: 0, x: -12 }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="font-display text-[1.5rem] font-semibold leading-tight text-ink">
+            <h2 className={sheetTitle}>
               {presetList ? tmeta.addHeading(presetList.title) : "What little thing are we saving?"}
             </h2>
             <p className="mt-1 text-[0.92rem] text-brown">
@@ -457,7 +457,7 @@ function DetailsStep(props: {
           <StickerBadge emoji={emoji} size={80} tone="wash" />
         )}
         <div className="min-w-0">
-          <h2 className="font-display text-[1.35rem] font-semibold leading-tight text-ink">{title}</h2>
+          <h2 className={sheetTitleSm}>{title}</h2>
           {subtitle && <p className="mt-0.5 text-[0.9rem] font-semibold text-brown">{subtitle}</p>}
         </div>
       </div>

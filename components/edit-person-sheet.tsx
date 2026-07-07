@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
+import { sheetTitle } from "@/lib/field";
 import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
 import { PersonFormFields, type PersonFormValue } from "./person-form-fields";
@@ -53,7 +54,7 @@ function EditPersonFlow({ personId, onClose }: { personId: string; onClose: () =
 
   return (
     <div className={`pt-1 ${themeClass(value.theme)}`}>
-      <h2 className="font-display text-[1.5rem] font-semibold leading-tight text-ink">Edit their little world</h2>
+      <h2 className={sheetTitle}>Edit their little world</h2>
       <p className="mt-1 text-[0.92rem] text-brown">Update their name, vibe, or note.</p>
 
       <PersonFormFields value={value} onChange={patch} />

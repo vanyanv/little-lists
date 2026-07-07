@@ -9,6 +9,7 @@ import {
   type ListTemplate,
 } from "@/lib/types";
 import { themeClass } from "@/lib/visual";
+import { sheetTitle } from "@/lib/field";
 import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
 import { ListFormFields, type ListFormValue } from "./list-form-fields";
@@ -89,7 +90,7 @@ function CreateListFlow({
 
   return (
     <div className={`pt-1 ${themeClass(value.theme)}`}>
-      <h2 className="font-display text-[1.5rem] font-semibold leading-tight text-ink">
+      <h2 className={sheetTitle}>
         What little list are we starting?
       </h2>
       <p className="mt-1 text-[0.92rem] text-brown">Start with a template or make it totally yours.</p>

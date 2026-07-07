@@ -11,3 +11,8 @@ export const inputPrimary = `${fieldBase} bg-cream-deep/50 px-4 py-3.5 text-[1.0
 export const inputField = `${fieldBase} bg-cream-deep/40 px-4 py-3 text-[0.95rem]`;
 /** a multi-line secondary field */
 export const textareaField = `${inputField} resize-none`;
+
+/** a main sheet's heading (create/edit list, add item) — 1.5rem */
+export const sheetTitle = "font-display text-[1.5rem] font-semibold leading-tight text-ink";
+/** a secondary sheet's heading (add/edit detail, confirm, nested step) — 1.35rem */
+export const sheetTitleSm = "font-display text-[1.35rem] font-semibold leading-tight text-ink";

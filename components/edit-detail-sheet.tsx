@@ -5,7 +5,7 @@ import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
 import { focusRing } from "@/lib/a11y";
-import { inputPrimary, textareaField } from "@/lib/field";
+import { inputPrimary, textareaField, sheetTitleSm } from "@/lib/field";
 import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
 import { AnimatedCategoryIcon } from "./icons/animated-category-icon";
@@ -68,7 +68,7 @@ function EditDetailFlow({
 
   return (
     <div className={`pt-1 ${themeClass(person.theme)}`}>
-      <h2 className="font-display text-[1.45rem] font-semibold text-ink">Update this little thing</h2>
+      <h2 className={sheetTitleSm}>Update this little thing</h2>
       <p className="mt-1 text-[0.92rem] text-brown">Edit it, or move it to another little corner.</p>
 
       <p className="mb-2 mt-5 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">where does it live?</p>
