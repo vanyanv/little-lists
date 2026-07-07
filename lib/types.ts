@@ -84,7 +84,7 @@ export const STATUS_META: Record<StatusId, { label: string; tone: StatusTone }> 
   "want-to-read": { label: "Want to read", tone: "neutral" },
   reading: { label: "Reading", tone: "good" },
   finished: { label: "Finished", tone: "good" },
-  dnf: { label: "DNF", tone: "bad" },
+  dnf: { label: "Didn't finish", tone: "bad" },
   "want-to-listen": { label: "Want to listen", tone: "neutral" },
   listened: { label: "Listened", tone: "good" },
   "on-repeat": { label: "On repeat", tone: "love" },
@@ -119,7 +119,7 @@ export const STATUSES_FOR: Record<ItemType, StatusId[]> = {
   movie: ["want-to-watch", "watched", "favorite", "not-for-me"],
   book: ["want-to-read", "reading", "finished", "favorite", "dnf"],
   music: ["want-to-listen", "listened", "on-repeat", "favorite", "not-for-me"],
-  food: ["hate", "never-again", "not-for-me"],
+  food: ["love", "hate", "maybe", "never-again", "need-to-try"],
   place: ["need-to-try", "favorite", "love", "maybe"],
   custom: ["love", "maybe", "favorite", "need-to-try"],
 };

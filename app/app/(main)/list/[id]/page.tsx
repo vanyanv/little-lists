@@ -180,7 +180,7 @@ export default function ListDetailScreen() {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={reduce ? softSpring : { ...softSpring, delay: Math.min(i, 8) * 0.04 }}
                 >
-                  <ItemCard listId={list.id} item={item} view={view} />
+                  <ItemCard listId={list.id} item={item} view={view} statuses={statusesForList(list)} />
                 </motion.div>
               ))}
             </motion.div>

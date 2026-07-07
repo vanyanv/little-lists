@@ -72,7 +72,17 @@ interface StoreValue {
   celebration: CelebrationSignal | null;
   addList: (input: CreateListInput) => Promise<List>;
   addItem: (listId: string, item: CreateItemInput) => Promise<Item | null>;
-  updateItem: (listId: string, itemId: string, patch: Partial<Item>) => void;
+  /**
+   * Optimistically patch an item. By default the change is also persisted to
+   * the server; pass `{ persist: false }` to update local state only (used by
+   * the editor to debounce text edits — it flushes a single trailing write).
+   */
+  updateItem: (
+    listId: string,
+    itemId: string,
+    patch: Partial<Item>,
+    opts?: { persist?: boolean }
+  ) => void;
   deleteItem: (listId: string, itemId: string) => void;
   setListView: (listId: string, view: ViewMode) => void;
   addPerson: (input: CreatePersonInput) => Promise<Person>;
@@ -212,7 +222,7 @@ export function ListsProvider({
     }
   }, []);
 
-  const updateItem = useCallback<StoreValue["updateItem"]>((listId, itemId, patch) => {
+  const updateItem = useCallback<StoreValue["updateItem"]>((listId, itemId, patch, opts) => {
     setLists((prev) =>
       prev.map((l) =>
         l.id === listId
@@ -221,6 +231,7 @@ export function ListsProvider({
       )
     );
     if (isTempId(itemId)) return; // will be persisted with its values on creation
+    if (opts?.persist === false) return; // local-only; a trailing write flushes later
     void updateItemAction(itemId, {
       title: patch.title,
       subtitle: patch.subtitle,
