@@ -49,7 +49,8 @@ export function FilterChips({ options, active, onChange }: FilterChipsProps) {
             )}
             <span className={`relative ${dim ? "opacity-45" : ""}`}>{opt.label}</span>
             <span
-              className={`relative grid h-4 min-w-4 place-items-center rounded-full px-1 text-[0.66rem] ${
+              aria-hidden="true"
+              className={`relative grid h-4 min-w-4 place-items-center rounded-full px-1 text-[0.7rem] ${
                 dim ? "opacity-45" : ""
               }`}
               style={{

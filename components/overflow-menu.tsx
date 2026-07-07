@@ -127,7 +127,7 @@ export function OverflowMenu({ items, ariaLabel = "More options", stopPropagatio
           }
           setOpen((o) => !o);
         }}
-        className={`grid h-9 w-9 place-items-center rounded-full bg-paper/80 text-ink shadow-soft backdrop-blur-sm ${focusRing}`}
+        className={`relative grid h-9 w-9 place-items-center rounded-full bg-paper/80 text-ink shadow-soft backdrop-blur-sm before:absolute before:-inset-1 before:content-[''] ${focusRing}`}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
           <circle cx="5" cy="12" r="2" />

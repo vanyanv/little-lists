@@ -17,7 +17,7 @@ export default async function OnboardingLayout({ children }: { children: ReactNo
   // onboarding should feel like the app but keep the room quiet.
   return (
     <div className="flex min-h-dvh w-full justify-center bg-cream-deep">
-      <div className="paper-grain relative min-h-dvh w-full max-w-[440px] overflow-x-hidden bg-cream shadow-[0_0_70px_oklch(0.5_0.05_60_/_0.14)]">
+      <div className="paper-grain relative min-h-dvh w-full max-w-[440px] overflow-x-hidden bg-cream shadow-frame">
         <main className="relative z-[1] min-h-dvh">{children}</main>
       </div>
     </div>

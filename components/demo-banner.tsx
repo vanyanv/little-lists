@@ -48,7 +48,7 @@ export function DemoBanner() {
         type="button"
         onClick={dismiss}
         aria-label="Dismiss"
-        className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-brown-soft transition-colors hover:bg-cream-deep ${focusRing}`}
+        className={`relative grid h-8 w-8 shrink-0 place-items-center rounded-full text-brown-soft transition-colors before:absolute before:-inset-1.5 before:content-[''] hover:bg-cream-deep ${focusRing}`}
       >
         <svg aria-hidden width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />

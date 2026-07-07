@@ -31,7 +31,7 @@ export function GettingStartedCard() {
         <button
           type="button"
           onClick={dismissChecklist}
-          className={`shrink-0 rounded-pill px-2 py-1 text-[0.78rem] font-semibold text-brown-soft transition-colors hover:bg-cream-deep ${focusRing}`}
+          className={`relative shrink-0 rounded-pill px-2 py-1 text-[0.78rem] font-semibold text-brown-soft transition-colors before:absolute before:-inset-2.5 before:content-[''] hover:bg-cream-deep ${focusRing}`}
         >
           Hide this
         </button>

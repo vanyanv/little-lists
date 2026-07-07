@@ -65,7 +65,7 @@ export function PersonCard({ person }: { person: Person }) {
           {chips.map((s) => (
             <span
               key={s.id}
-              className="inline-flex items-center gap-1 rounded-pill bg-paper/70 px-2.5 py-1 text-[0.72rem] font-semibold text-[var(--t-ink)]"
+              className="inline-flex items-center gap-1 rounded-pill bg-paper/70 px-2.5 py-1 text-[0.75rem] font-semibold text-[var(--t-ink)]"
             >
               <CategoryIcon id={s.id} size={12} /> {s.label}
             </span>

@@ -78,7 +78,7 @@ export function PersonDetailSection({
                           type="button"
                           onClick={() => onDelete(e.id)}
                           aria-label={`Remove ${e.title}`}
-                          className={`grid h-7 w-7 place-items-center rounded-full text-[var(--t-ink)]/50 transition-colors hover:bg-ink/10 hover:text-[var(--t-ink)] ${focusRingInset}`}
+                          className={`relative grid h-7 w-7 place-items-center rounded-full text-[var(--t-ink)]/50 transition-colors before:absolute before:-inset-2 before:content-[''] hover:bg-ink/10 hover:text-[var(--t-ink)] ${focusRingInset}`}
                         >
                           <span aria-hidden className="text-base leading-none">×</span>
                         </button>
@@ -107,7 +107,7 @@ export function PersonDetailSection({
                           type="button"
                           onClick={() => onDelete(e.id)}
                           aria-label={`Remove ${e.title}`}
-                          className={`mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full text-brown-soft transition-colors hover:bg-ink/10 hover:text-ink ${focusRingInset}`}
+                          className={`relative mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full text-brown-soft transition-colors before:absolute before:-inset-2 before:content-[''] hover:bg-ink/10 hover:text-ink ${focusRingInset}`}
                         >
                           <span aria-hidden className="text-base leading-none">×</span>
                         </button>

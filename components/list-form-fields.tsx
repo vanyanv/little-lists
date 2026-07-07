@@ -90,7 +90,7 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
           <motion.span
             animate={{ opacity: atEnd ? 0 : 1, x: atEnd ? 4 : 0 }}
             transition={{ duration: 0.2 }}
-            className="shrink-0 text-[0.72rem] font-bold lowercase tracking-tight text-[var(--t-ink)] opacity-80"
+            className="shrink-0 text-[0.75rem] font-bold lowercase tracking-tight text-[var(--t-ink)] opacity-80"
             aria-hidden
           >
             swipe for more →
@@ -147,7 +147,7 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
                   <span className={`grid h-8 w-8 place-items-center rounded-lg transition ${active ? "bg-paper shadow-soft" : "bg-paper/70"}`}>
                     <AnimatedCategoryIcon id={t} size={18} play={active} />
                   </span>
-                  <span className="text-[0.74rem] font-bold leading-tight text-[var(--t-ink)]">{meta.label}</span>
+                  <span className="text-[0.75rem] font-bold leading-tight text-[var(--t-ink)]">{meta.label}</span>
                 </motion.button>
               );
             })}
@@ -165,7 +165,7 @@ export function ListFormFields({ value, onChange, onChooseTemplate }: ListFormFi
       <div className="mt-5">
         <div className="mb-2 flex items-baseline justify-between gap-2">
           <p className="text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">choose a color</p>
-          <span className="text-[0.72rem] font-bold lowercase tracking-tight text-[var(--t-ink)]">{theme}</span>
+          <span className="text-[0.75rem] font-bold lowercase tracking-tight text-[var(--t-ink)]">{theme}</span>
         </div>
         <ThemeColorPicker value={theme} onChange={(c) => onChange({ theme: c })} />
       </div>

@@ -45,7 +45,7 @@ export function ProfileHeader() {
             </h1>
           </div>
           <p className="mt-1 text-[0.9rem] font-semibold text-brown">{profile.handle}</p>
-          <span className="mt-2 inline-flex items-center gap-1.5 rounded-pill bg-paper/70 px-2.5 py-1 text-[0.72rem] font-bold text-[var(--t-ink)]">
+          <span className="mt-2 inline-flex items-center gap-1.5 rounded-pill bg-paper/70 px-2.5 py-1 text-[0.75rem] font-bold text-[var(--t-ink)]">
             <span className="h-1.5 w-1.5 rounded-full bg-current" />
             {profile.isPublic ? "Public little world" : "Just for me"}
           </span>

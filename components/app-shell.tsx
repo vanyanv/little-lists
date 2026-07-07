@@ -39,7 +39,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <UiProvider>
       <div className="flex min-h-dvh w-full justify-center bg-cream-deep">
-        <div className="paper-grain relative min-h-dvh w-full max-w-[440px] overflow-x-hidden bg-cream shadow-[0_0_70px_oklch(0.5_0.05_60_/_0.14)]">
+        <div className="paper-grain relative min-h-dvh w-full max-w-[440px] overflow-x-hidden bg-cream shadow-frame">
           <main className="relative z-[1] min-h-dvh pb-36">
             <PageTransition>{children}</PageTransition>
           </main>

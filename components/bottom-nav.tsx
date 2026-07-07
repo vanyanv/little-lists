@@ -38,7 +38,7 @@ function ProfileIcon({ active }: IconProps) {
 }
 
 const TABS = [
-  { href: "/app", label: "Lists", Icon: ListsIcon, match: (p: string) => p === "/app" || p.startsWith("/app/list") },
+  { href: "/app", label: "Lists", Icon: ListsIcon, match: (p: string) => p === "/app" || p.startsWith("/app/list/") },
   { href: "/app/people", label: "People", Icon: PeopleIcon, match: (p: string) => p.startsWith("/app/people") || p.startsWith("/app/person") },
   { href: "/app/profile", label: "Profile", Icon: ProfileIcon, match: (p: string) => p.startsWith("/app/profile") },
 ];
@@ -70,7 +70,7 @@ export function BottomNav() {
               <span className="relative">
                 <Icon active={active} />
               </span>
-              <span className="relative text-[0.68rem] font-bold tracking-wide">{label}</span>
+              <span className="relative text-[0.75rem] font-bold tracking-wide">{label}</span>
             </Link>
           );
         })}
