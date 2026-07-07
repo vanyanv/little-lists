@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useList, useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { listCountLabel, themeClass } from "@/lib/visual";
 import { softSpring } from "@/lib/motion";
+import { focusRing } from "@/lib/a11y";
 import { STATUS_META, TEMPLATE_META, statusesForList, type List } from "@/lib/types";
 import { DetailHeader } from "@/components/detail-header";
 import { ItemCard } from "@/components/item-card";
@@ -32,6 +33,7 @@ export default function ListDetailScreen() {
   const router = useRouter();
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState<ViewMode>(() => defaultViewFor(list));
+  const [query, setQuery] = useState("");
   const reduce = useReducedMotion();
 
   // change the view here AND remember it on the list for next time
@@ -40,12 +42,20 @@ export default function ListDetailScreen() {
     if (list) setListView(list.id, next);
   };
 
-  // reset browsing state when moving to a different little world
+  // The saved per-list view must win over the template default, but on a hard
+  // refresh `view` is seeded before the client store has the list, so it can
+  // land on "cozy". Re-derive it once — per list id — the first time the list is
+  // actually available after hydration; a ref keeps a later in-session view
+  // change from being clobbered when the list object re-renders.
+  const derivedForRef = useRef<string | null>(null);
   useEffect(() => {
+    if (!hydrated || !list) return;
+    if (derivedForRef.current === list.id) return;
+    derivedForRef.current = list.id;
     setFilter("all");
+    setQuery("");
     setView(defaultViewFor(list));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [hydrated, list]);
 
   const options = useMemo<FilterOption[]>(() => {
     if (!list) return [];
@@ -62,8 +72,13 @@ export default function ListDetailScreen() {
 
   const visible = useMemo(() => {
     if (!list) return [];
-    return filterItemsByStatus(list.items, filter);
-  }, [list, filter]);
+    const byStatus = filterItemsByStatus(list.items, filter);
+    const q = query.trim().toLowerCase();
+    if (!q) return byStatus;
+    return byStatus.filter(
+      (i) => i.title.toLowerCase().includes(q) || (i.note ?? "").toLowerCase().includes(q)
+    );
+  }, [list, filter, query]);
 
   const listMenu = list ? (
     <OverflowMenu
@@ -120,6 +135,15 @@ export default function ListDetailScreen() {
         ? "flex flex-col gap-2.5"
         : "flex flex-col gap-3";
 
+  // Long lists get gentler treatment: a search field to sift through them, and
+  // (past ~40) we drop the per-item layout animation so reordering stays smooth.
+  const showSearch = list.items.length > 30;
+  const skipLayout = list.items.length > 40;
+  const searching = query.trim().length > 0;
+  // content-visibility lets the browser skip laying out off-screen rows; the
+  // intrinsic-size hint keeps the scrollbar honest before they're rendered.
+  const rowClass = view === "list" ? "[content-visibility:auto] [contain-intrinsic-size:auto_64px]" : undefined;
+
   return (
     <div className={themeClass(list.theme)}>
       <DetailHeader
@@ -131,8 +155,46 @@ export default function ListDetailScreen() {
       />
 
       {list.items.length > 0 && (
-        <div className="sticky top-0 z-10 bg-cream/85 px-4 pt-3 pb-2 backdrop-blur-md">
-          <div className="mb-2 flex justify-end">
+        <div
+          className="sticky top-0 z-10 px-4 pt-3 pb-2 backdrop-blur-md"
+          style={{
+            // fade from the themed header wash into cream, so the sticky bar
+            // hands off continuously instead of jumping to a flat panel
+            background:
+              "linear-gradient(to bottom, color-mix(in oklab, var(--t-bg) 88%, transparent), color-mix(in oklab, var(--color-cream) 88%, transparent))",
+          }}
+        >
+          <div className="mb-2 flex items-center justify-end gap-2">
+            {showSearch && (
+              <div className="relative flex-1">
+                <span aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-brown-soft/70">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                    <path d="M20 20l-3.2-3.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </span>
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Find a little thing…"
+                  aria-label="Find a little thing in this list"
+                  className={`min-h-11 w-full rounded-pill border border-line bg-paper/90 pl-9 pr-10 text-[0.9rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
+                />
+                {searching && (
+                  <button
+                    type="button"
+                    onClick={() => setQuery("")}
+                    aria-label="Clear search"
+                    className={`absolute right-1 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-brown-soft transition-colors hover:bg-cream-deep hover:text-ink ${focusRing}`}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
             <ViewToggle value={view} onChange={changeView} />
           </div>
           <FilterChips options={options} active={filter} onChange={setFilter} />
@@ -152,16 +214,29 @@ export default function ListDetailScreen() {
             }
           />
         ) : visible.length === 0 ? (
-          <EmptyState
-            sticker="sparkle"
-            title={`Nothing under ${activeLabel.toLowerCase()} yet`}
-            hint="Peek at another filter, or add something new to this little world."
-            action={
-              <Button size="sm" onClick={() => setFilter("all")}>
-                Show everything
-              </Button>
-            }
-          />
+          searching ? (
+            <EmptyState
+              sticker="sparkle"
+              title="No little things match"
+              hint={`Nothing here matches “${query.trim()}”. Try another word.`}
+              action={
+                <Button size="sm" onClick={() => setQuery("")}>
+                  Clear search
+                </Button>
+              }
+            />
+          ) : (
+            <EmptyState
+              sticker="sparkle"
+              title={`Nothing under ${activeLabel.toLowerCase()} yet`}
+              hint="Peek at another filter, or add something new to this little world."
+              action={
+                <Button size="sm" onClick={() => setFilter("all")}>
+                  Show everything
+                </Button>
+              }
+            />
+          )
         ) : (
           <AnimatePresence mode="wait">
             <motion.div
@@ -175,7 +250,8 @@ export default function ListDetailScreen() {
               {visible.map((item, i) => (
                 <motion.div
                   key={item.id}
-                  layout
+                  className={rowClass}
+                  layout={!skipLayout}
                   initial={reduce ? false : { opacity: 0, scale: 0.92, y: 12 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={reduce ? softSpring : { ...softSpring, delay: Math.min(i, 8) * 0.04 }}

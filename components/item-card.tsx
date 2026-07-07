@@ -28,8 +28,8 @@ function ItemEditor({
   item: Item;
   statuses: StatusId[];
 }) {
-  const { updateItem, deleteItem } = useStore();
-  const { openConfirm, showToast } = useUi();
+  const { addItem, updateItem, deleteItem } = useStore();
+  const { showToast } = useUi();
   const options = statuses;
   const isNote = ITEM_TYPE_META[item.type].aspect === "note";
 
@@ -195,18 +195,29 @@ function ItemEditor({
       <div className="mt-3 flex justify-end">
         <button
           type="button"
-          onClick={() =>
-            openConfirm({
-              title: "Remove this little thing?",
-              body: "It'll be gone from this little list.",
-              confirmLabel: "Remove",
-              tone: "danger",
-              onConfirm: () => {
-                deleteItem(listId, item.id);
-                showToast("Removed from your little world");
-              },
-            })
-          }
+          onClick={() => {
+            // Snapshot the item's fields before it's gone, so Undo can re-land it
+            // in this same list. A new id is fine; every visible field is restored.
+            const snapshot = item;
+            const restore = () => {
+              void addItem(listId, {
+                type: snapshot.type,
+                title: snapshot.title,
+                subtitle: snapshot.subtitle,
+                note: snapshot.note,
+                status: snapshot.status,
+                tags: snapshot.tags,
+                emoji: snapshot.emoji,
+                seed: snapshot.seed,
+                imageUrl: snapshot.imageUrl,
+                ...(snapshot.rating != null ? { meta: { rating: snapshot.rating } } : {}),
+              });
+            };
+            deleteItem(listId, snapshot.id);
+            showToast("Removed from this little list", {
+              action: { label: "Undo", onAction: restore },
+            });
+          }}
           className={`rounded-pill px-3 py-1.5 text-[0.78rem] font-bold text-brown-soft transition-colors hover:bg-cream-deep hover:text-ink ${focusRing}`}
         >
           Remove from this little list
