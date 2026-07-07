@@ -26,7 +26,7 @@ import { AnimatedCategoryIcon } from "./icons/animated-category-icon";
 import { LittleIcon } from "./icons/little-icon";
 import { StickerBadge } from "./icons/sticker-badge";
 
-const TYPES: ItemType[] = ["movie", "book", "food", "place", "custom"];
+const TYPES: ItemType[] = ["movie", "book", "music", "food", "place", "custom"];
 const EMOJI_CHOICES = ["✨", "🍜", "🍵", "📍", "🎁", "🌷", "🍔", "☕", "🍄", "🌿", "🍷", "🎧", "💡", "🔖", "🧁", "🍿", "🎟️", "🌸"];
 
 type Step = "compose" | "details";
@@ -87,6 +87,7 @@ function AddItemFlow({
   const searchKind = type === "movie" || type === "book" || type === "music" ? type : null;
 
   const [results, setResults] = useState<SearchHit[]>([]);
+  const [searchError, setSearchError] = useState(false);
   // carry the picked hit's cover + metadata into save()
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
   const [pickedMeta, setPickedMeta] = useState<Record<string, unknown> | undefined>(undefined);
@@ -97,6 +98,7 @@ function AddItemFlow({
     if (!term) {
       setResults([]);
       setSearching(false);
+      setSearchError(false);
       return;
     }
     setSearching(true);
@@ -107,10 +109,15 @@ function AddItemFlow({
           `/api/search/${searchKind}?q=${encodeURIComponent(term)}`,
           { signal: controller.signal },
         );
-        const hits: SearchHit[] = res.ok ? await res.json() : [];
+        if (!res.ok) throw new Error("search failed");
+        const hits: SearchHit[] = await res.json();
         setResults(hits);
+        setSearchError(false);
       } catch {
-        if (!controller.signal.aborted) setResults([]);
+        if (!controller.signal.aborted) {
+          setResults([]);
+          setSearchError(true);
+        }
       } finally {
         if (!controller.signal.aborted) setSearching(false);
       }
@@ -125,6 +132,7 @@ function AddItemFlow({
   useEffect(() => {
     setResults([]);
     setPicked(null);
+    setSearchError(false);
   }, [searchKind]);
 
   // auto-pick a sensible destination list when type changes (home entry)
@@ -146,9 +154,11 @@ function AddItemFlow({
     setTimeout(() => setStep("details"), 260);
   };
 
-  const continueManual = () => {
-    if (!title.trim()) return;
-    setSeed(title);
+  const continueManual = (text?: string) => {
+    const value = (text ?? title).trim();
+    if (!value) return;
+    setTitle(value);
+    setSeed(value);
     setImageUrl(undefined);
     setPickedMeta(undefined);
     setStatus(statuses[0]);
@@ -182,7 +192,7 @@ function AddItemFlow({
       showToast("Saved to your little world ✨");
     } catch {
       setSaving(false);
-      showToast("That didn't save — let's try again 🌿");
+      showToast("That didn't save. Let's try again 🌿");
     }
   };
 
@@ -246,10 +256,17 @@ function AddItemFlow({
 
             {searchable ? (
               <div className="mt-4 min-h-[8rem]">
-                {searching ? (
+                {searching && results.length === 0 ? (
                   <SoftDotLoader />
                 ) : (
-                  <motion.div role="listbox" aria-label="Search results" variants={staggerContainer} initial="hidden" animate="show" className="flex flex-col gap-2">
+                  <motion.div
+                    role="listbox"
+                    aria-label="Search results"
+                    variants={staggerContainer}
+                    initial="hidden"
+                    animate="show"
+                    className={`flex flex-col gap-2 transition-opacity ${searching ? "pointer-events-none opacity-60" : ""}`}
+                  >
                     {results.map((r) => {
                       const chosen = picked === r.sourceId;
                       return (
@@ -299,10 +316,22 @@ function AddItemFlow({
                         Start typing to find it ✨
                       </p>
                     )}
-                    {results.length === 0 && query.trim().length > 0 && (
-                      <p className="px-1 py-6 text-center text-[0.9rem] text-brown">
-                        No match, but you can still tuck it in. Try Custom ✨
-                      </p>
+                    {results.length === 0 && query.trim().length > 0 && !searching && (
+                      <div className="flex flex-col items-center gap-3 px-1 py-6 text-center">
+                        <p className="text-[0.9rem] text-brown">
+                          {searchError
+                            ? "Search is napping. Add it by hand below 🌿"
+                            : "No match out there. Tuck it in by hand?"}
+                        </p>
+                        <Button
+                          variant="soft"
+                          size="md"
+                          className="min-h-11"
+                          onClick={() => continueManual(query)}
+                        >
+                          Add &quot;{query.trim()}&quot; anyway
+                        </Button>
+                      </div>
                     )}
                   </motion.div>
                 )}
@@ -326,7 +355,7 @@ function AddItemFlow({
                     </button>
                   ))}
                 </div>
-                <Button block size="lg" onClick={continueManual} disabled={!title.trim()} className="mt-4">
+                <Button block size="lg" onClick={() => continueManual()} disabled={!title.trim()} className="mt-4">
                   Continue
                 </Button>
               </div>

@@ -256,7 +256,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     sticker: "film",
     searchable: true,
     statusHeading: "how do you feel about it?",
-    addHeading: () => "Add a movie to this little list.",
+    addHeading: (t) => `Add a movie to ${t}.`,
   },
   book: {
     label: "Book list",
@@ -270,7 +270,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     sticker: "book",
     searchable: true,
     statusHeading: "where are you with it?",
-    addHeading: () => "Add a book to this little list.",
+    addHeading: (t) => `Add a book to ${t}.`,
   },
   music: {
     label: "Music list",
@@ -284,7 +284,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     sticker: "sparkle",
     searchable: true,
     statusHeading: "how's it sound?",
-    addHeading: () => "Add a song or album to this little list.",
+    addHeading: (t) => `Add a song or album to ${t}.`,
   },
   food: {
     label: "Food list",
@@ -298,7 +298,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     sticker: "leaf",
     searchable: false,
     statusHeading: "how do you feel about it?",
-    addHeading: () => "Add something to this little list.",
+    addHeading: (t) => `Add something to ${t}.`,
   },
   place: {
     label: "Place list",
@@ -343,7 +343,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     searchable: false,
     statusHeading: "what's the plan?",
     extraField: { label: "Where?", placeholder: "home, the city, somewhere new…" },
-    addHeading: () => "Add a date idea to this little list.",
+    addHeading: (t) => `Add a date idea to ${t}.`,
   },
   people: {
     label: "People notes",
