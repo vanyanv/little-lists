@@ -68,8 +68,6 @@ interface StoreValue {
   lists: List[];
   people: Person[];
   profile: Profile;
-  /** kept for the list page's "not really missing, still loading" guard */
-  hydrated: boolean;
   celebration: CelebrationSignal | null;
   addList: (input: CreateListInput) => Promise<List>;
   addItem: (listId: string, item: CreateItemInput) => Promise<Item | null>;
@@ -84,7 +82,7 @@ interface StoreValue {
     patch: Partial<Item>,
     opts?: { persist?: boolean }
   ) => void;
-  deleteItem: (listId: string, itemId: string) => void;
+  deleteItem: (listId: string, itemId: string) => Promise<void>;
   setListView: (listId: string, view: ViewMode) => void;
   addPerson: (input: CreatePersonInput) => Promise<Person>;
   addPersonDetail: (personId: string, sectionId: string, draft: PersonDetailDraft) => Promise<void>;
@@ -254,14 +252,38 @@ export function ListsProvider({
     }).catch((err) => console.error("updateItem failed", err));
   }, []);
 
-  const deleteItem = useCallback<StoreValue["deleteItem"]>((listId, itemId) => {
+  const deleteItem = useCallback<StoreValue["deleteItem"]>(async (listId, itemId) => {
+    // Remember where the item lived so a failed server-delete can be rolled back
+    // exactly, closing the window where an Undo would otherwise duplicate it.
+    type Removed = { item: Item; index: number } | null;
+    let removed: Removed = null;
     setLists((prev) =>
-      prev.map((l) =>
-        l.id === listId ? { ...l, items: l.items.filter((i) => i.id !== itemId) } : l
-      )
+      prev.map((l) => {
+        if (l.id !== listId) return l;
+        const index = l.items.findIndex((i) => i.id === itemId);
+        if (index === -1) return l;
+        removed = { item: l.items[index], index };
+        return { ...l, items: l.items.filter((i) => i.id !== itemId) };
+      })
     );
     if (isTempId(itemId)) return;
-    void deleteItemAction(itemId).catch((err) => console.error("deleteItem failed", err));
+    try {
+      await deleteItemAction(itemId);
+    } catch (err) {
+      console.error("deleteItem failed", err);
+      const snap = removed as Removed;
+      if (snap) {
+        setLists((prev) =>
+          prev.map((l) => {
+            if (l.id !== listId) return l;
+            const items = [...l.items];
+            items.splice(Math.min(snap.index, items.length), 0, snap.item);
+            return { ...l, items };
+          })
+        );
+      }
+      throw err; // let the caller surface the warm error toast
+    }
   }, []);
 
   /* ── people ────────────────────────────────────────────────────── */
@@ -386,7 +408,6 @@ export function ListsProvider({
       lists,
       people,
       profile,
-      hydrated: true,
       celebration,
       addList,
       addItem,

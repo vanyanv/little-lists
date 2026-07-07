@@ -53,7 +53,7 @@ export function DemoBanner() {
         <button
           type="button"
           onClick={clearAndDismiss}
-          className={`relative rounded-pill px-2.5 py-1.5 text-[0.8rem] font-semibold text-brown-soft transition-colors hover:bg-cream-deep hover:text-ink ${focusRing}`}
+          className={`relative rounded-pill px-2.5 py-1.5 text-[0.8rem] font-semibold text-brown-soft transition-colors before:absolute before:inset-x-0 before:-inset-y-2 before:content-[''] hover:bg-cream-deep hover:text-ink ${focusRing}`}
         >
           Clear examples
         </button>

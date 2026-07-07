@@ -16,7 +16,7 @@ export function Toast() {
 
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(dismissToast, toast.action ? 6000 : 2400);
+    const t = setTimeout(() => dismissToast(toast.id), toast.action ? 6000 : 2400);
     return () => clearTimeout(t);
   }, [toast, dismissToast]);
 
@@ -41,7 +41,9 @@ export function Toast() {
                     if (firedActionFor.current === toast.id) return;
                     firedActionFor.current = toast.id;
                     toast.action?.onAction();
-                    dismissToast();
+                    // only clear if this toast is still the live one — a fading
+                    // toast's Undo must not kill a newer toast underneath it
+                    dismissToast(toast.id);
                   }}
                   className={`flex min-h-11 min-w-11 items-center justify-center rounded-pill px-2 text-[0.92rem] font-bold leading-none text-cream underline underline-offset-2 ${focusRingOnDark}`}
                 >

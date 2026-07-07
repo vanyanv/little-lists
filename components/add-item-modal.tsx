@@ -231,7 +231,7 @@ function AddItemFlow({
               className={`mt-4 ${inputPrimary}`}
             />
 
-            {/* type picker only when there's no list context yet */}
+            {/* Type picker for the list-less "add from anywhere" flow. Currently unreachable — every openItemSheet call passes a listId — kept for a future global-add entry point. */}
             {!presetListId && (
               <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1">
                 {TYPES.map((t) => {

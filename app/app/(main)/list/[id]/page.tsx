@@ -16,7 +16,6 @@ import { ViewToggle, type ViewMode } from "@/components/view-toggle";
 import { EmptyState } from "@/components/empty-state";
 import { OverflowMenu } from "@/components/overflow-menu";
 import { Button } from "@/components/button";
-import { SoftDotLoader } from "@/components/soft-dot-loader";
 import { filterItemsByStatus } from "@/lib/store-helpers";
 
 /** the list's saved view, falling back to its template default */
@@ -28,7 +27,7 @@ function defaultViewFor(list?: Pick<List, "template" | "defaultView">): ViewMode
 export default function ListDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const list = useList(id);
-  const { hydrated, setListView, deleteList } = useStore();
+  const { setListView, deleteList } = useStore();
   const { openItemSheet, openEditList, openConfirm, showToast } = useUi();
   const router = useRouter();
   const [filter, setFilter] = useState("all");
@@ -42,20 +41,18 @@ export default function ListDetailScreen() {
     if (list) setListView(list.id, next);
   };
 
-  // The saved per-list view must win over the template default, but on a hard
-  // refresh `view` is seeded before the client store has the list, so it can
-  // land on "cozy". Re-derive it once — per list id — the first time the list is
-  // actually available after hydration; a ref keeps a later in-session view
-  // change from being clobbered when the list object re-renders.
+  // The saved per-list view must win over the template default. Derive it once
+  // per list id the first time the list is available; a ref keeps a later
+  // in-session view change from being clobbered when the list object re-renders.
   const derivedForRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!hydrated || !list) return;
+    if (!list) return;
     if (derivedForRef.current === list.id) return;
     derivedForRef.current = list.id;
     setFilter("all");
     setQuery("");
     setView(defaultViewFor(list));
-  }, [hydrated, list]);
+  }, [list]);
 
   const options = useMemo<FilterOption[]>(() => {
     if (!list) return [];
@@ -104,16 +101,6 @@ export default function ListDetailScreen() {
       ]}
     />
   ) : null;
-
-  // saved lists load from localStorage after mount — wait for that before
-  // deciding a list is truly missing, so a direct URL visit doesn't flash 404
-  if (!list && !hydrated) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center">
-        <SoftDotLoader label="opening this little world" />
-      </div>
-    );
-  }
 
   if (!list) {
     return (

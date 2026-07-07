@@ -114,16 +114,6 @@ export const STATUS_META: Record<StatusId, { label: string; tone: StatusTone }> 
   "cat-notes": { label: "Notes", tone: "neutral" },
 };
 
-// which statuses can be chosen for each item type, first = default
-export const STATUSES_FOR: Record<ItemType, StatusId[]> = {
-  movie: ["want-to-watch", "watched", "favorite", "not-for-me"],
-  book: ["want-to-read", "reading", "finished", "favorite", "dnf"],
-  music: ["want-to-listen", "listened", "on-repeat", "favorite", "not-for-me"],
-  food: ["love", "hate", "maybe", "never-again", "need-to-try"],
-  place: ["need-to-try", "favorite", "love", "maybe"],
-  custom: ["love", "maybe", "favorite", "need-to-try"],
-};
-
 export interface Item {
   id: string;
   type: ItemType;

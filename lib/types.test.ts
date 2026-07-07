@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   STATUS_META,
-  STATUSES_FOR,
   TEMPLATE_META,
   statusesForList,
   type ListTemplate,
@@ -27,16 +26,17 @@ describe("statusesForList", () => {
   });
 });
 
-describe("STATUSES_FOR.food", () => {
+describe("TEMPLATE_META.food.statuses", () => {
   it("includes the food template's positive statuses alongside the negatives", () => {
-    // Regression: the food editor set had been trimmed to only negatives,
+    // Regression: the food status set had been trimmed to only negatives,
     // so a food item could never be marked love / maybe / need-to-try.
+    const { statuses } = TEMPLATE_META.food;
     for (const s of ["love", "maybe", "need-to-try"] as const) {
-      expect(STATUSES_FOR.food, `positive status "${s}"`).toContain(s);
+      expect(statuses, `positive status "${s}"`).toContain(s);
     }
-    // and it should mirror the food template's full chip set
-    expect([...STATUSES_FOR.food].sort()).toEqual(
-      [...TEMPLATE_META.food.statuses].sort()
-    );
+    // the negatives that share the set are still there
+    for (const s of ["hate", "never-again"] as const) {
+      expect(statuses, `negative status "${s}"`).toContain(s);
+    }
   });
 });

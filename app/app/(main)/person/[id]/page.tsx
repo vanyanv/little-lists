@@ -11,7 +11,6 @@ import { PersonDetailSection } from "@/components/person-detail-section";
 import { EmptyState } from "@/components/empty-state";
 import { OverflowMenu } from "@/components/overflow-menu";
 import { Button } from "@/components/button";
-import { SoftDotLoader } from "@/components/soft-dot-loader";
 import { AnimatedCategoryIcon } from "@/components/icons/animated-category-icon";
 import { focusRing } from "@/lib/a11y";
 
@@ -25,20 +24,10 @@ const STARTER_PROMPTS: { sectionId: string; label: string }[] = [
 export default function PersonDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const person = usePerson(id);
-  const { hydrated, deletePersonDetail, deletePerson } = useStore();
+  const { deletePersonDetail, deletePerson } = useStore();
   const { openDetailSheet, openEditPerson, openConfirm, showToast, openEditDetail } = useUi();
   const router = useRouter();
   const reduce = useReducedMotion();
-
-  // saved people load from localStorage after mount — wait for that before
-  // deciding a person is truly missing, so a direct URL visit doesn't flash 404
-  if (!person && !hydrated) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center">
-        <SoftDotLoader label="opening this little world" />
-      </div>
-    );
-  }
 
   if (!person) {
     return (

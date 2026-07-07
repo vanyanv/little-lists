@@ -52,7 +52,8 @@ interface UiValue {
   closeSheet: () => void;
   toast: ToastSignal | null;
   showToast: (message: string, opts?: ToastOptions) => void;
-  dismissToast: () => void;
+  /** dismiss the current toast; pass an id to only clear it if it's still current */
+  dismissToast: (id?: number) => void;
   confirm: ConfirmState | null;
   openConfirm: (opts: ConfirmOptions) => void;
   closeConfirm: () => void;
@@ -93,7 +94,10 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
     toastSeq.current += 1;
     setToast({ id: toastSeq.current, message, action: opts?.action });
   }, []);
-  const dismissToast = useCallback(() => setToast(null), []);
+  const dismissToast = useCallback(
+    (id?: number) => setToast((cur) => (cur && (id == null || cur.id === id) ? null : cur)),
+    []
+  );
 
   const value = useMemo(
     () => ({

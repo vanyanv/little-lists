@@ -200,7 +200,7 @@ function ItemEditor({
             // in this same list. A new id is fine; every visible field is restored.
             const snapshot = item;
             const restore = () => {
-              void addItem(listId, {
+              addItem(listId, {
                 type: snapshot.type,
                 title: snapshot.title,
                 subtitle: snapshot.subtitle,
@@ -211,9 +211,11 @@ function ItemEditor({
                 seed: snapshot.seed,
                 imageUrl: snapshot.imageUrl,
                 ...(snapshot.rating != null ? { meta: { rating: snapshot.rating } } : {}),
-              });
+              }).catch(() => showToast("That didn't save. Let's try again 🌿"));
             };
-            deleteItem(listId, snapshot.id);
+            deleteItem(listId, snapshot.id).catch(() =>
+              showToast("That didn't save. Let's try again 🌿")
+            );
             showToast("Removed from this little list", {
               action: { label: "Undo", onAction: restore },
             });
