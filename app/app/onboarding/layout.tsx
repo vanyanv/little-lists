@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
+import { MotionConfig } from "motion/react";
 import { getCurrentUserProfile } from "@/lib/server/profile";
 
 // Depends on the signed-in user's profile flag, so render per-request.
@@ -16,10 +17,12 @@ export default async function OnboardingLayout({ children }: { children: ReactNo
   // The same cozy phone frame as AppShell, minus nav, FAB, and sheets —
   // onboarding should feel like the app but keep the room quiet.
   return (
-    <div className="flex min-h-dvh w-full justify-center bg-cream-deep">
-      <div className="paper-grain relative min-h-dvh w-full max-w-[440px] overflow-x-hidden bg-cream shadow-frame">
-        <main className="relative z-[1] min-h-dvh">{children}</main>
+    <MotionConfig reducedMotion="user">
+      <div className="flex min-h-dvh w-full justify-center bg-cream-deep">
+        <div className="paper-grain relative min-h-dvh w-full max-w-[440px] overflow-x-hidden bg-cream shadow-frame">
+          <main className="relative z-[1] min-h-dvh">{children}</main>
+        </div>
       </div>
-    </div>
+    </MotionConfig>
   );
 }

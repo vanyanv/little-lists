@@ -2,8 +2,21 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { sheetSpring } from "@/lib/motion";
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])';
+
+function getFocusable(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter((el) => {
+    // motion.button (whileTap/whileHover) stamps tabindex="0" even on disabled buttons,
+    // so disabled state has to be checked directly rather than trusted to the selector.
+    if ((el as HTMLButtonElement | HTMLInputElement).disabled) return false;
+    if (el.getAttribute("aria-disabled") === "true") return false;
+    return el.offsetParent !== null || el === document.activeElement;
+  });
+}
 
 interface BottomSheetProps {
   open: boolean;
@@ -16,15 +29,77 @@ interface BottomSheetProps {
 /** A native-feeling mobile sheet: scrim fade + spring slide, drag to dismiss. */
 export function BottomSheet({ open, onClose, children, ariaLabel }: BottomSheetProps) {
   const reduce = useReducedMotion();
+  const sheetRef = useRef<HTMLDivElement>(null);
+
+  // Track the last element focused outside any dialog, continuously (not just while
+  // open). A child's autoFocus fires during the same commit that mounts the sheet,
+  // before this component's own effects run, so by the time an "on open" effect could
+  // read document.activeElement it would already see the autofocused child, not the
+  // real trigger (e.g. the FAB). Watching focusin from mount sidesteps that race.
+  const lastOutsideFocusRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const onFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && !target.closest('[role="dialog"]')) {
+        lastOutsideFocusRef.current = target;
+      }
+    };
+    document.addEventListener("focusin", onFocusIn);
+    return () => document.removeEventListener("focusin", onFocusIn);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+
+    // Hand focus back to whatever triggered the sheet when it closes.
+    const previouslyFocused = lastOutsideFocusRef.current ?? (document.activeElement as HTMLElement | null);
+
+    // Move focus into the sheet, unless a child already claimed it via autoFocus.
+    const container = sheetRef.current;
+    if (container && !container.contains(document.activeElement)) {
+      container.focus();
+    }
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab" || !container) return;
+
+      // Query fresh each press: sheet content (steps, form fields) can change while open.
+      const focusable = getFocusable(container);
+      if (focusable.length === 0) {
+        e.preventDefault();
+        container.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      // Treat focus sitting on the container itself (no autoFocus child) as a boundary too,
+      // so Shift+Tab from there wraps to the last item instead of escaping to the scrim.
+      const atEdgeOrOutside = active === container || !container.contains(active);
+      if (e.shiftKey) {
+        if (atEdgeOrOutside || active === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (atEdgeOrOutside || active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
+      // Restore focus to wherever it came from, unless that element is gone.
+      if (previouslyFocused && document.body.contains(previouslyFocused)) {
+        previouslyFocused.focus();
+      }
     };
   }, [open, onClose]);
 
@@ -46,9 +121,11 @@ export function BottomSheet({ open, onClose, children, ariaLabel }: BottomSheetP
           {/* sheet, aligned to the phone frame */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center">
             <motion.div
+              ref={sheetRef}
               role="dialog"
               aria-modal="true"
               aria-label={ariaLabel}
+              tabIndex={-1}
               drag="y"
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={{ top: 0, bottom: 0.4 }}

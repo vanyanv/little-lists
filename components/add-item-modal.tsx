@@ -406,7 +406,11 @@ function DetailsStep(props: {
       transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
       className={themed}
     >
-      <button type="button" onClick={onBack} className="mb-3 flex items-center gap-1 text-[0.86rem] font-bold text-brown">
+      <button
+        type="button"
+        onClick={onBack}
+        className={`mb-3 flex items-center gap-1 rounded-pill text-[0.86rem] font-bold text-brown ${focusRing}`}
+      >
         <span aria-hidden>‹</span> back
       </button>
 
