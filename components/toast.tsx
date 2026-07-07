@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useUi } from "@/lib/ui";
 import { softSpring } from "@/lib/motion";
+import { focusRingOnDark } from "@/lib/a11y";
 
 /** A tiny, warm confirmation that floats just above the bottom nav. */
 export function Toast() {
@@ -11,7 +12,7 @@ export function Toast() {
 
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(dismissToast, 2400);
+    const t = setTimeout(dismissToast, toast.action ? 6000 : 2400);
     return () => clearTimeout(t);
   }, [toast, dismissToast]);
 
@@ -29,6 +30,18 @@ export function Toast() {
               className="pointer-events-auto absolute inset-x-0 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] mx-auto flex w-fit max-w-[88%] items-center gap-2 rounded-pill bg-ink px-4 py-3 text-cream shadow-lift"
             >
               <span className="text-[0.92rem] font-bold leading-none">{toast.message}</span>
+              {toast.action && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    toast.action?.onAction();
+                    dismissToast();
+                  }}
+                  className={`flex min-h-11 min-w-11 items-center justify-center rounded-pill px-2 text-[0.92rem] font-bold leading-none text-cream underline underline-offset-2 ${focusRingOnDark}`}
+                >
+                  {toast.action.label}
+                </button>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

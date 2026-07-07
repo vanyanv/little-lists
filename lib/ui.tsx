@@ -25,9 +25,19 @@ export interface ConfirmOptions {
 
 export type ConfirmState = ConfirmOptions;
 
+export interface ToastAction {
+  label: string;
+  onAction: () => void;
+}
+
+export interface ToastOptions {
+  action?: ToastAction;
+}
+
 export interface ToastSignal {
   id: number;
   message: string;
+  action?: ToastAction;
 }
 
 interface UiValue {
@@ -41,7 +51,7 @@ interface UiValue {
   openEditDetail: (personId: string, sectionId: string, detailId: string) => void;
   closeSheet: () => void;
   toast: ToastSignal | null;
-  showToast: (message: string) => void;
+  showToast: (message: string, opts?: ToastOptions) => void;
   dismissToast: () => void;
   confirm: ConfirmState | null;
   openConfirm: (opts: ConfirmOptions) => void;
@@ -79,9 +89,9 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
   const openConfirm = useCallback((opts: ConfirmOptions) => setConfirm(opts), []);
   const closeConfirm = useCallback(() => setConfirm(null), []);
 
-  const showToast = useCallback((message: string) => {
+  const showToast = useCallback((message: string, opts?: ToastOptions) => {
     toastSeq.current += 1;
-    setToast({ id: toastSeq.current, message });
+    setToast({ id: toastSeq.current, message, action: opts?.action });
   }, []);
   const dismissToast = useCallback(() => setToast(null), []);
 
