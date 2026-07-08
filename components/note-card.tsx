@@ -26,7 +26,8 @@ export function NoteCard({ item }: { item: Item }) {
         <StickerBadge emoji={item.emoji} tone="wash" size={56} rounded="rounded-xl" />
       )}
       <div className="min-w-0 flex-1">
-        <div className="flex items-start gap-1.5">
+        {/* pr-5 clears the absolute pencil edit hint the parent card overlays top-right */}
+        <div className="flex items-start gap-1.5 pr-5">
           <h3 className="flex-1 font-display text-[1.02rem] font-semibold leading-snug text-ink">
             {item.title}
           </h3>
