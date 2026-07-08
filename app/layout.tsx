@@ -25,9 +25,14 @@ const clerkLocalization = {
   },
   formFieldInputPlaceholder__username: "a name you like",
   formFieldInputPlaceholder__emailAddress: "you@somewhere.com",
+  formFieldInputPlaceholder__emailAddress_username: "the name or email you picked",
   // Sign-up's password field reads a distinct key from sign-in's.
   formFieldInputPlaceholder__password: "something only you know",
   formFieldInputPlaceholder__signUpPassword: "something only you know",
+  unstable__errors: {
+    form_identifier_not_found: "We can't find that name or email. One more look?",
+    form_password_incorrect: "That password doesn't quite match. Try again 🌿",
+  },
 };
 
 const fraunces = Fraunces({
