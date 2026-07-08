@@ -65,7 +65,9 @@ export function OverflowMenu({ items, ariaLabel = "More options", stopPropagatio
             ? nodes.length - 1
             : e.key === "ArrowDown"
               ? (idx + 1 + nodes.length) % nodes.length
-              : (idx - 1 + nodes.length) % nodes.length;
+              : idx === -1
+                ? nodes.length - 1
+                : (idx - 1 + nodes.length) % nodes.length;
       nodes[next]?.focus();
     };
     window.addEventListener("keydown", onKey);
