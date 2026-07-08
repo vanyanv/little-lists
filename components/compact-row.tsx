@@ -27,7 +27,7 @@ export function CompactRow({ item }: { item: Item }) {
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <h3 className="truncate font-display text-[0.98rem] font-semibold leading-tight text-ink">
+          <h3 className="min-w-0 flex-1 truncate font-display text-[0.98rem] font-semibold leading-tight text-ink">
             {item.title}
           </h3>
           {item.rating ? (
@@ -53,10 +53,14 @@ export function CompactRow({ item }: { item: Item }) {
               <LittleIcon name="pencil" size={12} />
             </span>
           )}
-          {isExample(item.tags) && <ExampleChip />}
         </div>
-        {item.subtitle && (
-          <p className="mt-0.5 truncate text-[0.82rem] font-semibold text-brown-soft">{item.subtitle}</p>
+        {(item.subtitle || isExample(item.tags)) && (
+          <div className="mt-0.5 flex items-center gap-1.5">
+            {item.subtitle && (
+              <p className="min-w-0 truncate text-[0.82rem] font-semibold text-brown-soft">{item.subtitle}</p>
+            )}
+            {isExample(item.tags) && <ExampleChip />}
+          </div>
         )}
       </div>
 
