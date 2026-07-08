@@ -60,7 +60,7 @@ export function Toast() {
   );
 
   return (
-    <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center">
+    <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-center">
       <div className="relative w-full max-w-[440px]">
         <AnimatePresence>
           {toast && (
