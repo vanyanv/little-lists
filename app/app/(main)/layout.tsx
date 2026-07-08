@@ -10,9 +10,8 @@ import type { Profile } from "@/lib/types";
 // whole segment is rendered per-request rather than prerendered at build time.
 export const dynamic = "force-dynamic";
 
-// Shown only if the DB is briefly unreachable and a resolved profile is missing
-// a field; neutral so it never leaks a real-looking identity. A reload picks up
-// the real profile.
+// Shown only if a resolved user has no profile row yet mid-request; neutral so
+// it never leaks a real-looking identity. A reload picks up the real profile.
 const FALLBACK_PROFILE: Profile = {
   name: "friend",
   handle: "",
@@ -47,17 +46,16 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // than home wearing a placeholder identity.
   if (!hasProfile || !onboardingCompleted) redirect("/app/onboarding");
 
-  let seed: StoreSeed = { lists: [], people: [], profile: FALLBACK_PROFILE };
-  try {
-    const data = await getInitialData();
-    seed = {
-      lists: data.lists,
-      people: data.people,
-      profile: data.profile ?? FALLBACK_PROFILE,
-    };
-  } catch (err) {
-    console.error("getInitialData failed; seeding an empty little world", err);
-  }
+  // A failed load must NOT render as an empty little world: a user with real
+  // data would see a false fresh-start, the most trust-breaking screen this
+  // app can show. Throwing reaches app/app/error.tsx, which promises their
+  // little worlds are safe and offers a retry.
+  const data = await getInitialData();
+  const seed: StoreSeed = {
+    lists: data.lists,
+    people: data.people,
+    profile: data.profile ?? FALLBACK_PROFILE,
+  };
 
   return (
     <ListsProvider seed={seed}>
