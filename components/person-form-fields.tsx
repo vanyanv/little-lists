@@ -142,14 +142,16 @@ export function PersonFormFields({ value, onChange }: PersonFormFieldsProps) {
               </option>
             ))}
           </select>
-          <input
-            aria-label="Day"
-            inputMode="numeric"
-            value={day}
-            onChange={(e) => onDay(e.target.value)}
-            placeholder="day"
-            className={`${inputField} w-20 shrink-0 text-center`}
-          />
+          <div className="w-20 shrink-0">
+            <input
+              aria-label="Day"
+              inputMode="numeric"
+              value={day}
+              onChange={(e) => onDay(e.target.value)}
+              placeholder="day"
+              className={`${inputField} text-center`}
+            />
+          </div>
         </div>
       </div>
 
