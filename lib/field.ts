@@ -8,7 +8,7 @@ const fieldBase = `w-full rounded-xl border border-line text-ink placeholder:tex
 /** the primary / first field of a sheet — larger, a touch more emphasis */
 export const inputPrimary = `${fieldBase} bg-cream-deep/50 px-4 py-3.5 text-[1.05rem] font-medium`;
 /** a standard secondary field — notes, tags, extra details */
-export const inputField = `${fieldBase} bg-cream-deep/40 px-4 py-3 text-[0.95rem]`;
+export const inputField = `${fieldBase} bg-cream-deep/40 px-4 py-3 text-[1rem]`;
 /** a multi-line secondary field */
 export const textareaField = `${inputField} resize-none`;
 

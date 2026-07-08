@@ -175,7 +175,7 @@ export default function ListDetailScreen() {
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Find a little thing…"
                   aria-label="Find a little thing in this list"
-                  className={`min-h-11 w-full rounded-pill border border-line bg-paper/90 pl-9 pr-10 text-[0.9rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
+                  className={`min-h-11 w-full rounded-pill border border-line bg-paper/90 pl-9 pr-10 text-[1rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
                 />
                 {searching && (
                   <button

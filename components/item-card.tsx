@@ -87,7 +87,7 @@ function ItemEditor({
           queueEdit({ title: e.target.value });
         }}
         onBlur={flush}
-        className={`w-full rounded-lg border border-line bg-paper px-3 py-2 text-[0.95rem] font-medium text-ink focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
+        className={`w-full rounded-lg border border-line bg-paper px-3 py-2 text-[1rem] font-medium text-ink focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
       />
 
       {/* emoji — note-type items only */}
@@ -175,7 +175,7 @@ function ItemEditor({
         onBlur={flush}
         placeholder="Add a note so future you remembers why ✨"
         rows={2}
-        className={`w-full resize-none rounded-lg border border-line bg-paper px-3 py-2 text-[0.9rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
+        className={`w-full resize-none rounded-lg border border-line bg-paper px-3 py-2 text-[1rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
       />
 
       {/* little labels */}
@@ -189,7 +189,7 @@ function ItemEditor({
         }}
         onBlur={flush}
         placeholder="like a person, a mood, a someday…"
-        className={`w-full rounded-lg border border-line bg-paper px-3 py-2 text-[0.9rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
+        className={`w-full rounded-lg border border-line bg-paper px-3 py-2 text-[1rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
       />
 
       <div className="mt-3 flex justify-end">

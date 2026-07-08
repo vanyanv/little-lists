@@ -134,7 +134,7 @@ export default function HomeScreen() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Find a little world…"
-          className={`w-full bg-transparent text-[0.98rem] text-ink placeholder:text-brown-soft/80 focus:outline-none ${focusRing}`}
+          className={`w-full bg-transparent text-[1rem] text-ink placeholder:text-brown-soft/80 focus:outline-none ${focusRing}`}
         />
       </div>
 
