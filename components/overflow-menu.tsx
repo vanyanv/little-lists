@@ -30,9 +30,44 @@ export function OverflowMenu({ items, ariaLabel = "More options", stopPropagatio
     setMounted(true);
   }, []);
 
+  // Return focus to the trigger when the menu closes (Escape, selection, or
+  // tap-away), per the WAI-ARIA menu-button pattern.
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (open) {
+      wasOpen.current = true;
+      return;
+    }
+    if (wasOpen.current) {
+      wasOpen.current = false;
+      triggerRef.current?.focus();
+    }
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
+      const nodes = Array.from(
+        menuRef.current?.querySelectorAll<HTMLButtonElement>('button[role="menuitem"]') ?? []
+      );
+      if (nodes.length === 0) return;
+      e.preventDefault();
+      const idx = nodes.indexOf(document.activeElement as HTMLButtonElement);
+      const next =
+        e.key === "Home"
+          ? 0
+          : e.key === "End"
+            ? nodes.length - 1
+            : e.key === "ArrowDown"
+              ? (idx + 1 + nodes.length) % nodes.length
+              : (idx - 1 + nodes.length) % nodes.length;
+      nodes[next]?.focus();
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
