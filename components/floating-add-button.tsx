@@ -49,7 +49,7 @@ export function FloatingAddButton() {
           whileTap={{ scale: 0.9 }}
           className={`pointer-events-auto absolute bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-5 text-cream shadow-lift ${focusRingOnDark} ${
             onHome
-              ? "flex items-center gap-2 rounded-pill px-5 text-[0.95rem] font-bold"
+              ? "flex items-center gap-2 rounded-pill px-5 text-[0.95rem] font-bold max-[359px]:w-[60px] max-[359px]:justify-center max-[359px]:px-0"
               : "grid place-items-center rounded-full"
           }`}
           style={{ height: 60, ...(onHome ? {} : { width: 60 }), background: "var(--color-ink)" }}
@@ -60,7 +60,7 @@ export function FloatingAddButton() {
             className="flex items-center gap-2"
           >
             <span className="text-[1.7rem] leading-none font-light">+</span>
-            {onHome && <span className="leading-none">Start a little list</span>}
+            {onHome && <span className="leading-none max-[359px]:hidden">Start a little list</span>}
           </motion.span>
         </motion.button>
       </div>
