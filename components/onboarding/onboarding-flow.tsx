@@ -279,7 +279,10 @@ export function OnboardingFlow() {
             </p>
             <div className="mt-8 w-full max-w-[17rem]">
               <Button size="lg" block onClick={finish}>
-                Take me to my <span className="whitespace-nowrap">little worlds 🌷</span>
+                {/* one span: Button is inline-flex, which swallows whitespace between flex items */}
+                <span>
+                  Take me to my <span className="whitespace-nowrap">little worlds 🌷</span>
+                </span>
               </Button>
             </div>
           </motion.section>
