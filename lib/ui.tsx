@@ -1,10 +1,19 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
-import type { ListTemplate } from "./types";
+import type { ItemType, ListTemplate } from "./types";
+
+/** a pocket scrap being filed through the add-item flow */
+export interface ScrapRef {
+  id: string;
+  text: string;
+  /** detected kind, when the pocket already knows what this is */
+  kind?: ItemType;
+}
 
 export type SheetState =
-  | { kind: "item"; listId?: string }
+  | { kind: "item"; listId?: string; scrap?: ScrapRef }
+  | { kind: "pocket" }
   | { kind: "detail"; personId: string; sectionId?: string }
   | { kind: "list"; template?: ListTemplate }
   | { kind: "person" }
@@ -45,6 +54,8 @@ export interface ToastSignal {
 interface UiValue {
   sheet: SheetState;
   openItemSheet: (listId?: string) => void;
+  openPocketSheet: () => void;
+  openScrapFiling: (scrap: ScrapRef) => void;
   openDetailSheet: (personId: string, sectionId?: string) => void;
   openListSheet: (template?: ListTemplate) => void;
   openPersonSheet: () => void;
@@ -72,6 +83,8 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
   const openItemSheet = useCallback((listId?: string) => {
     setSheet({ kind: "item", listId });
   }, []);
+  const openPocketSheet = useCallback(() => setSheet({ kind: "pocket" }), []);
+  const openScrapFiling = useCallback((scrap: ScrapRef) => setSheet({ kind: "item", scrap }), []);
   const openDetailSheet = useCallback((personId: string, sectionId?: string) => {
     setSheet({ kind: "detail", personId, sectionId });
   }, []);
@@ -105,6 +118,8 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
     () => ({
       sheet,
       openItemSheet,
+      openPocketSheet,
+      openScrapFiling,
       openDetailSheet,
       openListSheet,
       openPersonSheet,
@@ -120,7 +135,7 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
       closeConfirm,
     }),
     [
-      sheet, openItemSheet, openDetailSheet, openListSheet, openPersonSheet,
+      sheet, openItemSheet, openPocketSheet, openScrapFiling, openDetailSheet, openListSheet, openPersonSheet,
       openEditList, openEditPerson, openEditDetail, closeSheet,
       toast, showToast, dismissToast, confirm, openConfirm, closeConfirm,
     ]

@@ -8,6 +8,7 @@ import { useStore } from "@/lib/store";
 import { BottomNav } from "./bottom-nav";
 import { FloatingAddButton } from "./floating-add-button";
 import { AddItemModal } from "./add-item-modal";
+import { PocketSheet } from "./pocket-sheet";
 import { AddDetailSheet } from "./add-detail-sheet";
 import { CreateListSheet } from "./create-list-sheet";
 import { CreatePersonSheet } from "./create-person-sheet";
@@ -50,6 +51,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <SaveErrorToast />
             <BottomNav />
             <AddItemModal />
+            <PocketSheet />
             <AddDetailSheet />
             <CreateListSheet />
             <CreatePersonSheet />
