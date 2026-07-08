@@ -2,17 +2,41 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { SignOutButton } from "@clerk/nextjs";
+import { SignOutButton, useClerk } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
+import { useUi } from "@/lib/ui";
 import { ITEM_TYPE_META } from "@/lib/types";
-import { focusRing } from "@/lib/a11y";
+import { isExample } from "@/lib/onboarding";
+import { archiveSummary } from "@/lib/visual";
+import { focusRing, focusRingInset } from "@/lib/a11y";
 import { ProfileHeader } from "@/components/profile-header";
 import { Cover } from "@/components/cover";
 import { Button } from "@/components/button";
 import { LittleIcon } from "@/components/icons/little-icon";
 
+function CornerRow({
+  children,
+  onClick,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex min-h-12 w-full items-center justify-between gap-3 px-4 py-3 text-left text-[0.95rem] font-semibold text-ink transition-colors hover:bg-cream-deep ${focusRingInset}`}
+    >
+      {children}
+      <span aria-hidden className="text-brown-soft">›</span>
+    </button>
+  );
+}
+
 export default function ProfileScreen() {
-  const { lists } = useStore();
+  const { lists, people, clearExamples } = useStore();
+  const { openConfirm, showToast } = useUi();
+  const { openUserProfile } = useClerk();
 
   const loved = useMemo(() => {
     const out: { listId: string; item: (typeof lists)[number]["items"][number] }[] = [];
@@ -24,12 +48,22 @@ export default function ProfileScreen() {
     return out.slice(0, 10);
   }, [lists]);
 
+  const hasExamples = useMemo(
+    () => lists.some((l) => l.items.some((i) => isExample(i.tags))),
+    [lists]
+  );
+
   return (
     <div className="px-4 pt-[calc(env(safe-area-inset-top)+1.25rem)]">
       <p className="px-1 text-[0.92rem] font-bold text-brown">Your little corner 🌙</p>
       <div className="mt-3">
         <ProfileHeader />
       </div>
+
+      {/* the archive at a glance */}
+      <p className="mt-3 px-1 text-[0.9rem] font-semibold text-brown">
+        {archiveSummary(lists, people)}
+      </p>
 
       {/* things you love */}
       {loved.length > 0 && (
@@ -61,6 +95,41 @@ export default function ProfileScreen() {
           </div>
         </section>
       )}
+
+      {/* the practical corner: account, privacy, examples */}
+      <section className="mt-8" aria-label="Your account">
+        <div className="overflow-hidden rounded-2xl bg-paper shadow-soft ring-1 ring-line/40">
+          <CornerRow onClick={() => openUserProfile()}>Your account</CornerRow>
+          <div className="mx-4 h-px bg-line/60" />
+          <Link
+            href="/privacy"
+            className={`flex min-h-12 w-full items-center justify-between gap-3 px-4 py-3 text-left text-[0.95rem] font-semibold text-ink transition-colors hover:bg-cream-deep ${focusRingInset}`}
+          >
+            How we look after your little worlds
+            <span aria-hidden className="text-brown-soft">›</span>
+          </Link>
+          {hasExamples && (
+            <>
+              <div className="mx-4 h-px bg-line/60" />
+              <CornerRow
+                onClick={() =>
+                  openConfirm({
+                    title: "Clear the example ideas?",
+                    body: "Everything you added yourself stays right where it is.",
+                    confirmLabel: "Clear examples",
+                    onConfirm: () => {
+                      clearExamples();
+                      showToast("All yours now ✨");
+                    },
+                  })
+                }
+              >
+                Clear the example ideas
+              </CornerRow>
+            </>
+          )}
+        </div>
+      </section>
 
       <div className="mt-10 mb-4 flex justify-center">
         <SignOutButton>

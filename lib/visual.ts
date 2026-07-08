@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import type { List, ThemeColor } from "./types";
+import type { List, Person, ThemeColor } from "./types";
 import { TEMPLATE_META } from "./types";
 
 /** tiny stable string hash → positive int */
@@ -43,4 +43,18 @@ export function listCountLabel(list: List): string {
   if (n === 0) return "waiting for its first little thing";
   if (n === 1) return `1 ${TEMPLATE_META[list.template].nounSingular}`;
   return `${n} ${list.noun}`;
+}
+
+/** the profile's archive line: "3 little worlds · 14 little things · 2 people remembered" */
+export function archiveSummary(lists: List[], people: Person[]): string {
+  const worlds = lists.length;
+  const things = lists.reduce((n, l) => n + l.items.length, 0);
+  const parts = [
+    `${worlds} little ${worlds === 1 ? "world" : "worlds"}`,
+    `${things} little ${things === 1 ? "thing" : "things"}`,
+  ];
+  if (people.length > 0) {
+    parts.push(`${people.length} ${people.length === 1 ? "person" : "people"} remembered`);
+  }
+  return parts.join(" · ");
 }
