@@ -14,6 +14,7 @@ import {
   type Person,
   type PersonDetailEntry,
   type Profile,
+  type Scrap,
   type ThemeColor,
   type ViewMode,
 } from "./types";
@@ -25,10 +26,14 @@ import {
   createListAction,
   createPersonAction,
   createPersonDetailAction,
+  createScrapAction,
   deleteItemAction,
   deleteListAction,
   deletePersonAction,
   deletePersonDetailAction,
+  deleteScrapAction,
+  fileScrapAction,
+  saveScrapDetectionAction,
   setListPinnedAction,
   setListViewAction,
   updateItemAction,
@@ -41,6 +46,7 @@ import {
   type CreatePersonInput,
 } from "./actions";
 import { deriveListMeta, insertDetail, moveDetailBetweenSections, removeDetail, replaceDetail } from "./store-helpers";
+import { SCRAP_MAX_LENGTH, type DetectionResult } from "./scraps";
 
 let _seq = 0;
 function makeId(prefix = "x"): string {
@@ -78,6 +84,7 @@ export interface PersonDetailDraft {
 interface StoreValue {
   lists: List[];
   people: Person[];
+  scraps: Scrap[];
   profile: Profile;
   celebration: CelebrationSignal | null;
   saveError: SaveErrorSignal | null;
@@ -96,6 +103,10 @@ interface StoreValue {
   ) => void;
   deleteItem: (listId: string, itemId: string) => Promise<void>;
   setListView: (listId: string, view: ViewMode) => void;
+  addScrap: (text: string) => Promise<void>;
+  deleteScrap: (scrapId: string) => DeleteHandle;
+  setScrapDetection: (scrapId: string, detection: DetectionResult) => void;
+  fileScrap: (scrapId: string, listId: string, input: CreateItemInput) => DeleteHandle;
   addPerson: (input: CreatePersonInput) => Promise<Person>;
   addPersonDetail: (personId: string, sectionId: string, draft: PersonDetailDraft) => Promise<void>;
   deletePersonDetail: (personId: string, sectionId: string, detailId: string) => DeleteHandle;
@@ -123,6 +134,7 @@ const StoreContext = createContext<StoreValue | null>(null);
 export interface StoreSeed {
   lists: List[];
   people: Person[];
+  scraps: Scrap[];
   profile: Profile;
 }
 
@@ -135,6 +147,7 @@ export function ListsProvider({
 }) {
   const [lists, setLists] = useState<List[]>(seed.lists);
   const [people, setPeople] = useState<Person[]>(seed.people);
+  const [scraps, setScraps] = useState<Scrap[]>(seed.scraps);
   const [profile, setProfile] = useState<Profile>(seed.profile);
   const [celebration, setCelebration] = useState<CelebrationSignal | null>(null);
 
@@ -385,6 +398,145 @@ export function ListsProvider({
     }
   }, []);
 
+  /* ── scraps (the pocket) ───────────────────────────────────────── */
+
+  const addScrap = useCallback<StoreValue["addScrap"]>(async (text) => {
+    const trimmed = text.trim().slice(0, SCRAP_MAX_LENGTH);
+    if (!trimmed) return;
+    const tempId = makeId("scrap");
+    const optimistic: Scrap = { id: tempId, text: trimmed, detection: null, createdAt: new Date().toISOString() };
+    setScraps((prev) => [optimistic, ...prev]);
+    try {
+      const created = await createScrapAction(trimmed);
+      setScraps((prev) => prev.map((s) => (s.id === tempId ? created : s)));
+    } catch (err) {
+      setScraps((prev) => prev.filter((s) => s.id !== tempId));
+      throw err;
+    }
+  }, []);
+
+  // Deferred delete, same contract as deleteList/deletePerson: gone from the UI
+  // now, server delete only on commit() (Undo-toast expiry).
+  const deleteScrap = useCallback<StoreValue["deleteScrap"]>((scrapId) => {
+    let removed: { scrap: Scrap; index: number } | null = null;
+    setScraps((prev) => {
+      const index = prev.findIndex((s) => s.id === scrapId);
+      if (index === -1) return prev;
+      removed = { scrap: prev[index], index };
+      return prev.filter((s) => s.id !== scrapId);
+    });
+    const restore = () => {
+      const snap = removed;
+      if (!snap) return;
+      setScraps((prev) => {
+        const next = [...prev];
+        next.splice(Math.min(snap.index, next.length), 0, snap.scrap);
+        return next;
+      });
+    };
+    let settled = false;
+    return {
+      undo: () => {
+        if (settled) return;
+        settled = true;
+        restore();
+      },
+      commit: () => {
+        if (settled) return;
+        settled = true;
+        if (isTempId(scrapId)) return;
+        void deleteScrapAction(scrapId).catch((err) => {
+          console.error("deleteScrap failed", err);
+          restore();
+          signalSaveError();
+        });
+      },
+    };
+  }, [signalSaveError]);
+
+  const setScrapDetection = useCallback<StoreValue["setScrapDetection"]>((scrapId, detection) => {
+    setScraps((prev) => prev.map((s) => (s.id === scrapId ? { ...s, detection } : s)));
+    if (isTempId(scrapId)) return;
+    // cache-only write: on failure the scrap just gets re-detected next open
+    void saveScrapDetectionAction(scrapId, detection).catch((err) => {
+      console.error("setScrapDetection failed", err);
+    });
+  }, []);
+
+  // Deferred file: the scrap leaves the pocket and the item appears in its list
+  // immediately; commit() persists both sides in one transaction, undo() puts
+  // everything back untouched.
+  const fileScrap = useCallback<StoreValue["fileScrap"]>((scrapId, listId, input) => {
+    let removed: { scrap: Scrap; index: number } | null = null;
+    setScraps((prev) => {
+      const index = prev.findIndex((s) => s.id === scrapId);
+      if (index === -1) return prev;
+      removed = { scrap: prev[index], index };
+      return prev.filter((s) => s.id !== scrapId);
+    });
+    const tempItemId = makeId("item");
+    const optimistic: Item = {
+      id: tempItemId,
+      fresh: true,
+      type: input.type,
+      title: input.title,
+      subtitle: input.subtitle,
+      note: input.note,
+      status: input.status,
+      tags: input.tags,
+      emoji: input.emoji,
+      seed: input.seed,
+      imageUrl: input.imageUrl,
+    };
+    setLists((prev) =>
+      prev.map((l) => (l.id === listId ? { ...l, items: [optimistic, ...l.items] } : l))
+    );
+    const restore = () => {
+      const snap = removed;
+      if (snap) {
+        setScraps((prev) => {
+          const next = [...prev];
+          next.splice(Math.min(snap.index, next.length), 0, snap.scrap);
+          return next;
+        });
+      }
+      setLists((prev) =>
+        prev.map((l) => (l.id === listId ? { ...l, items: l.items.filter((i) => i.id !== tempItemId) } : l))
+      );
+    };
+    let settled = false;
+    return {
+      undo: () => {
+        if (settled) return;
+        settled = true;
+        restore();
+      },
+      commit: () => {
+        if (settled) return;
+        settled = true;
+        // an unswapped optimistic scrap has no server row to retire — plain create
+        const persist = isTempId(scrapId)
+          ? createItemAction(listId, input)
+          : fileScrapAction(scrapId, listId, input);
+        void persist
+          .then((created) => {
+            setLists((prev) =>
+              prev.map((l) =>
+                l.id === listId
+                  ? { ...l, items: l.items.map((i) => (i.id === tempItemId ? { ...created, fresh: true } : i)) }
+                  : l
+              )
+            );
+          })
+          .catch((err) => {
+            console.error("fileScrap failed", err);
+            restore();
+            signalSaveError();
+          });
+      },
+    };
+  }, [signalSaveError]);
+
   /* ── people ────────────────────────────────────────────────────── */
 
   const addPerson = useCallback<StoreValue["addPerson"]>(async (input) => {
@@ -601,6 +753,7 @@ export function ListsProvider({
     () => ({
       lists,
       people,
+      scraps,
       profile,
       celebration,
       saveError,
@@ -609,6 +762,10 @@ export function ListsProvider({
       updateItem,
       deleteItem,
       setListView,
+      addScrap,
+      deleteScrap,
+      setScrapDetection,
+      fileScrap,
       updateList,
       setListPinned,
       deleteList,
@@ -626,6 +783,7 @@ export function ListsProvider({
     [
       lists,
       people,
+      scraps,
       profile,
       celebration,
       saveError,
@@ -634,6 +792,10 @@ export function ListsProvider({
       updateItem,
       deleteItem,
       setListView,
+      addScrap,
+      deleteScrap,
+      setScrapDetection,
+      fileScrap,
       updateList,
       setListPinned,
       deleteList,
@@ -670,7 +832,13 @@ export function usePerson(id: string): Person | undefined {
 /* ── helpers ───────────────────────────────────────────────────────── */
 
 function isTempId(id: string): boolean {
-  return id.startsWith("list-") || id.startsWith("item-") || id.startsWith("person-") || id.startsWith("detail-");
+  return (
+    id.startsWith("list-") ||
+    id.startsWith("item-") ||
+    id.startsWith("person-") ||
+    id.startsWith("detail-") ||
+    id.startsWith("scrap-")
+  );
 }
 
 // Build an optimistic list that mirrors what the server will return,

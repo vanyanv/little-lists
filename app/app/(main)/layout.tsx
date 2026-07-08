@@ -54,6 +54,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const seed: StoreSeed = {
     lists: data.lists,
     people: data.people,
+    scraps: data.scraps,
     profile: data.profile ?? FALLBACK_PROFILE,
   };
 
