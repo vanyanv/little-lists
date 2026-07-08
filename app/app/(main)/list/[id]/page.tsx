@@ -132,7 +132,13 @@ export default function ListDetailScreen() {
   const searching = query.trim().length > 0;
   // content-visibility lets the browser skip laying out off-screen rows; the
   // intrinsic-size hint keeps the scrollbar honest before they're rendered.
-  const rowClass = view === "list" ? "[content-visibility:auto] [contain-intrinsic-size:auto_64px]" : undefined;
+  const rowClass =
+    view === "list"
+      ? "[content-visibility:auto] [contain-intrinsic-size:auto_64px]"
+      : view === "grid"
+        ? // an expanded editor needs the whole row, not half a grid column
+          "has-[[aria-expanded=true]]:col-span-full"
+        : undefined;
 
   return (
     <div className={themeClass(list.theme)}>
