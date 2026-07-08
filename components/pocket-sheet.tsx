@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
@@ -15,6 +15,10 @@ import { inputPrimary, sheetTitle } from "@/lib/field";
 import { BottomSheet } from "./bottom-sheet";
 import { Button } from "./button";
 import { OverflowMenu } from "./overflow-menu";
+
+// Survives sheet close/reopen: an unmounted PocketInside leaves its in-flight
+// detections running, and a fresh mount must not re-request the same scraps.
+const inFlightDetections = new Set<string>();
 
 export function PocketSheet() {
   const { sheet, closeSheet } = useUi();
@@ -55,19 +59,18 @@ function PocketInside() {
 
   // Lazy, once-ever detection: check up to DETECT_BATCH unchecked scraps per
   // open; results (including "none") persist, so this converges to no work.
-  const inFlight = useRef<Set<string>>(new Set());
   useEffect(() => {
     const pending = scraps
-      .filter((s) => s.detection === null && !isTempScrapId(s.id) && !inFlight.current.has(s.id))
+      .filter((s) => s.detection === null && !isTempScrapId(s.id) && !inFlightDetections.has(s.id))
       .slice(0, DETECT_BATCH);
     for (const s of pending) {
-      inFlight.current.add(s.id);
+      inFlightDetections.add(s.id);
       void detectScrap(s.text)
         .then((result) => setScrapDetection(s.id, result))
         .catch(() => {
           /* all providers down — stay unchecked, retry next open */
         })
-        .finally(() => inFlight.current.delete(s.id));
+        .finally(() => inFlightDetections.delete(s.id));
     }
   }, [scraps, setScrapDetection]);
 
