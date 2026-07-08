@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useStore } from "@/lib/store";
-import { useUi } from "@/lib/ui";
+import { useUi, type ScrapRef } from "@/lib/ui";
 import {
   ITEM_TYPE_META,
   TEMPLATE_META,
@@ -35,13 +35,15 @@ export function AddItemModal() {
   const { sheet, closeSheet } = useUi();
   const open = sheet?.kind === "item";
   const presetListId = open ? sheet.listId : undefined;
+  const scrap = open ? sheet.scrap : undefined;
 
   return (
     <BottomSheet open={open} onClose={closeSheet} ariaLabel="Add a little thing">
       {open && (
         <AddItemFlow
-          key={presetListId ?? "home"}
+          key={presetListId ?? scrap?.id ?? "home"}
           presetListId={presetListId}
+          scrap={scrap}
           onClose={closeSheet}
         />
       )}
@@ -51,23 +53,25 @@ export function AddItemModal() {
 
 function AddItemFlow({
   presetListId,
+  scrap,
   onClose,
 }: {
   presetListId?: string;
+  scrap?: ScrapRef;
   onClose: () => void;
 }) {
-  const { lists, addItem, fireCelebration } = useStore();
+  const { lists, addItem, addList, fileScrap, fireCelebration } = useStore();
   const { showToast } = useUi();
   const presetList = lists.find((l) => l.id === presetListId);
 
   const [step, setStep] = useState<Step>("compose");
-  const [type, setType] = useState<ItemType>(presetList?.kind ?? "movie");
-  const [query, setQuery] = useState("");
+  const [type, setType] = useState<ItemType>(presetList?.kind ?? scrap?.kind ?? "movie");
+  const [query, setQuery] = useState(scrap?.text ?? "");
   const [searching, setSearching] = useState(false);
   const [picked, setPicked] = useState<string | null>(null);
 
   // chosen thing
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(scrap?.text ?? "");
   const [subtitle, setSubtitle] = useState("");
   const [seed, setSeed] = useState("");
   const [emoji, setEmoji] = useState("✨");
@@ -78,6 +82,7 @@ function AddItemFlow({
   const [note, setNote] = useState("");
   const [tag, setTag] = useState("");
   const [saving, setSaving] = useState(false);
+  const [creatingList, setCreatingList] = useState(false);
 
   const meta = ITEM_TYPE_META[type];
   const template: ListTemplate = presetList?.template ?? (type as ListTemplate);
@@ -166,29 +171,55 @@ function AddItemFlow({
     setStep("details");
   };
 
+  const createTargetList = async () => {
+    if (creatingList) return;
+    setCreatingList(true);
+    try {
+      const t = template; // presetList?.template ?? (type as ListTemplate), already derived above
+      const m = TEMPLATE_META[t];
+      const created = await addList({ title: m.label, emoji: m.emoji, theme: m.theme, template: t, defaultView: m.defaultView });
+      setTargetListId(created.id);
+    } catch {
+      showToast("That didn't save. Let's try again 🌿");
+    } finally {
+      setCreatingList(false);
+    }
+  };
+
   const save = async () => {
     const listId = targetListId ?? lists[0]?.id;
     if (!listId || saving) return;
-    const wasEmpty = (lists.find((l) => l.id === listId)?.items.length ?? 0) === 0;
+    const input = {
+      type,
+      title: title.trim(),
+      subtitle: subtitle.trim() || undefined,
+      note: note.trim() || undefined,
+      status,
+      tags: tag.trim() ? [tag.trim()] : undefined,
+      emoji: meta.aspect === "note" ? emoji : undefined,
+      seed: seed || title,
+      imageUrl,
+      meta: pickedMeta,
+    };
 
+    if (scrap) {
+      // deferred file: optimistic now, one transaction on toast expiry, undo restores
+      const listTitle = lists.find((l) => l.id === listId)?.title ?? "your list";
+      const handle = fileScrap(scrap.id, listId, input);
+      onClose();
+      showToast(`Filed into ${listTitle} ✨`, {
+        action: { label: "Undo", onAction: handle.undo },
+        onExpire: handle.commit,
+      });
+      return;
+    }
+
+    const wasEmpty = (lists.find((l) => l.id === listId)?.items.length ?? 0) === 0;
     setSaving(true);
     try {
-      await addItem(listId, {
-        type,
-        title: title.trim(),
-        subtitle: subtitle.trim() || undefined,
-        note: note.trim() || undefined,
-        status,
-        tags: tag.trim() ? [tag.trim()] : undefined,
-        emoji: meta.aspect === "note" ? emoji : undefined,
-        seed: seed || title,
-        imageUrl,
-        meta: pickedMeta,
-      });
-
+      await addItem(listId, input);
       // rare milestone: this list just came alive
       if (wasEmpty) fireCelebration("confetti");
-
       onClose();
       showToast("Saved to your little world ✨");
     } catch {
@@ -389,6 +420,8 @@ function AddItemFlow({
             saving={saving}
             onBack={() => setStep("compose")}
             onSave={save}
+            onCreateList={presetListId ? undefined : createTargetList}
+            creatingList={creatingList}
           />
         )}
       </AnimatePresence>
@@ -419,10 +452,13 @@ function DetailsStep(props: {
   saving: boolean;
   onBack: () => void;
   onSave: () => void;
+  onCreateList?: () => void;
+  creatingList?: boolean;
 }) {
   const {
     type, title, subtitle, setSubtitle, seed, imageUrl, emoji, lists, targetListId, setTargetListId,
     statuses, statusHeading, extraField, status, setStatus, note, setNote, tag, setTag, saving, onBack, onSave,
+    onCreateList, creatingList,
   } = props;
   const isPoster = ITEM_TYPE_META[type].aspect !== "note";
   const targetList = lists.find((l) => l.id === targetListId);
@@ -480,6 +516,16 @@ function DetailsStep(props: {
                 {l.title}
               </button>
             ))}
+            {onCreateList && (
+              <button
+                type="button"
+                onClick={onCreateList}
+                disabled={creatingList}
+                className={`flex shrink-0 items-center gap-1.5 rounded-pill border border-dashed border-line px-3 py-2 text-[0.82rem] font-bold text-brown transition ${focusRing} disabled:opacity-50`}
+              >
+                ＋ a new little list
+              </button>
+            )}
           </div>
         </div>
       )}
