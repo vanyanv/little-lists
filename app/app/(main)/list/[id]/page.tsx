@@ -92,8 +92,11 @@ export default function ListDetailScreen() {
               confirmLabel: "Delete list",
               tone: "danger",
               onConfirm: () => {
-                deleteList(list.id);
-                showToast("Removed from your little world");
+                const handle = deleteList(list.id);
+                showToast("Removed from your little world", {
+                  action: { label: "Undo", onAction: handle.undo },
+                  onExpire: handle.commit,
+                });
                 router.replace("/app");
               },
             }),

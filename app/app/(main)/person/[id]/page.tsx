@@ -58,8 +58,11 @@ export default function PersonDetailScreen() {
               confirmLabel: "Delete person",
               tone: "danger",
               onConfirm: () => {
-                deletePerson(person.id);
-                showToast("Gone, along with their little details");
+                const handle = deletePerson(person.id);
+                showToast("Gone, along with their little details", {
+                  action: { label: "Undo", onAction: handle.undo },
+                  onExpire: handle.commit,
+                });
                 router.replace("/app/people");
               },
             }),
@@ -122,8 +125,11 @@ export default function PersonDetailScreen() {
                     confirmLabel: "Remove",
                     tone: "danger",
                     onConfirm: () => {
-                      deletePersonDetail(person.id, s.id, detailId);
-                      showToast("Removed from your little world");
+                      const handle = deletePersonDetail(person.id, s.id, detailId);
+                      showToast("Removed that little detail", {
+                        action: { label: "Undo", onAction: handle.undo },
+                        onExpire: handle.commit,
+                      });
                     },
                   })
                 }

@@ -32,12 +32,14 @@ export interface ToastAction {
 
 export interface ToastOptions {
   action?: ToastAction;
+  onExpire?: () => void;
 }
 
 export interface ToastSignal {
   id: number;
   message: string;
   action?: ToastAction;
+  onExpire?: () => void;
 }
 
 interface UiValue {
@@ -92,7 +94,7 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
 
   const showToast = useCallback((message: string, opts?: ToastOptions) => {
     toastSeq.current += 1;
-    setToast({ id: toastSeq.current, message, action: opts?.action });
+    setToast({ id: toastSeq.current, message, action: opts?.action, onExpire: opts?.onExpire });
   }, []);
   const dismissToast = useCallback(
     (id?: number) => setToast((cur) => (cur && (id == null || cur.id === id) ? null : cur)),

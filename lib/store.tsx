@@ -62,6 +62,12 @@ export interface SaveErrorSignal {
   id: string;
 }
 
+/** returned by the deferred deletes: exactly one of undo/commit should run */
+export interface DeleteHandle {
+  undo: () => void;
+  commit: () => void;
+}
+
 /** what the add-a-detail flow hands the store */
 export interface PersonDetailDraft {
   title: string;
@@ -92,7 +98,7 @@ interface StoreValue {
   setListView: (listId: string, view: ViewMode) => void;
   addPerson: (input: CreatePersonInput) => Promise<Person>;
   addPersonDetail: (personId: string, sectionId: string, draft: PersonDetailDraft) => Promise<void>;
-  deletePersonDetail: (personId: string, sectionId: string, detailId: string) => void;
+  deletePersonDetail: (personId: string, sectionId: string, detailId: string) => DeleteHandle;
   setProfileTheme: (theme: ThemeColor) => void;
   dismissChecklist: () => void;
   /** drop the onboarding-seeded example items from every list */
@@ -101,9 +107,9 @@ interface StoreValue {
   updateList: (listId: string, patch: Partial<Pick<List, "title" | "emoji" | "theme" | "template" | "defaultView">>) => void;
   /** pin a list to the top of Home (or unpin it) */
   setListPinned: (listId: string, pinned: boolean) => void;
-  deleteList: (listId: string) => void;
+  deleteList: (listId: string) => DeleteHandle;
   updatePerson: (personId: string, patch: Partial<Pick<Person, "name" | "emoji" | "theme" | "note" | "specialDay">>) => void;
-  deletePerson: (personId: string) => void;
+  deletePerson: (personId: string) => DeleteHandle;
   updatePersonDetail: (
     personId: string,
     fromSectionId: string,
@@ -224,11 +230,45 @@ export function ListsProvider({
     });
   }, [signalSaveError]);
 
+  // Deferred delete: the list leaves the UI now, but the server delete only
+  // fires on commit() (when the Undo toast expires). undo() simply restores
+  // local state — nothing was sent, so nothing needs recreating.
   const deleteList = useCallback<StoreValue["deleteList"]>((listId) => {
-    setLists((prev) => prev.filter((l) => l.id !== listId));
-    if (isTempId(listId)) return;
-    void deleteListAction(listId).catch((err) => console.error("deleteList failed", err));
-  }, []);
+    let removed: { list: List; index: number } | null = null;
+    setLists((prev) => {
+      const index = prev.findIndex((l) => l.id === listId);
+      if (index === -1) return prev;
+      removed = { list: prev[index], index };
+      return prev.filter((l) => l.id !== listId);
+    });
+    const restore = () => {
+      const snap = removed;
+      if (!snap) return;
+      setLists((prev) => {
+        const next = [...prev];
+        next.splice(Math.min(snap.index, next.length), 0, snap.list);
+        return next;
+      });
+    };
+    let settled = false;
+    return {
+      undo: () => {
+        if (settled) return;
+        settled = true;
+        restore();
+      },
+      commit: () => {
+        if (settled) return;
+        settled = true;
+        if (isTempId(listId)) return;
+        void deleteListAction(listId).catch((err) => {
+          console.error("deleteList failed", err);
+          restore();
+          signalSaveError();
+        });
+      },
+    };
+  }, [signalSaveError]);
 
   /* ── items ─────────────────────────────────────────────────────── */
 
@@ -391,13 +431,38 @@ export function ListsProvider({
 
   const deletePersonDetail = useCallback<StoreValue["deletePersonDetail"]>(
     (personId, sectionId, detailId) => {
-      setPeople((prev) => removeDetail(prev, personId, sectionId, detailId));
-      if (isTempId(detailId)) return;
-      void deletePersonDetailAction(detailId).catch((err) =>
-        console.error("deletePersonDetail failed", err)
-      );
+      let removedEntry: PersonDetailEntry | null = null;
+      setPeople((prev) => {
+        const person = prev.find((p) => p.id === personId);
+        removedEntry =
+          person?.sections.find((s) => s.id === sectionId)?.entries.find((e) => e.id === detailId) ?? null;
+        return removeDetail(prev, personId, sectionId, detailId);
+      });
+      const restore = () => {
+        const snap = removedEntry;
+        if (!snap) return;
+        setPeople((prev) => insertDetail(prev, personId, sectionId, snap));
+      };
+      let settled = false;
+      return {
+        undo: () => {
+          if (settled) return;
+          settled = true;
+          restore();
+        },
+        commit: () => {
+          if (settled) return;
+          settled = true;
+          if (isTempId(detailId)) return;
+          void deletePersonDetailAction(detailId).catch((err) => {
+            console.error("deletePersonDetail failed", err);
+            restore();
+            signalSaveError();
+          });
+        },
+      };
     },
-    []
+    [signalSaveError]
   );
 
   const updatePerson = useCallback<StoreValue["updatePerson"]>((personId, patch) => {
@@ -424,11 +489,45 @@ export function ListsProvider({
     });
   }, [signalSaveError]);
 
+  // Deferred delete: the person leaves the UI now, but the server delete only
+  // fires on commit() (when the Undo toast expires). undo() simply restores
+  // local state — nothing was sent, so nothing needs recreating.
   const deletePerson = useCallback<StoreValue["deletePerson"]>((personId) => {
-    setPeople((prev) => prev.filter((p) => p.id !== personId));
-    if (isTempId(personId)) return;
-    void deletePersonAction(personId).catch((err) => console.error("deletePerson failed", err));
-  }, []);
+    let removed: { person: Person; index: number } | null = null;
+    setPeople((prev) => {
+      const index = prev.findIndex((p) => p.id === personId);
+      if (index === -1) return prev;
+      removed = { person: prev[index], index };
+      return prev.filter((p) => p.id !== personId);
+    });
+    const restore = () => {
+      const snap = removed;
+      if (!snap) return;
+      setPeople((prev) => {
+        const next = [...prev];
+        next.splice(Math.min(snap.index, next.length), 0, snap.person);
+        return next;
+      });
+    };
+    let settled = false;
+    return {
+      undo: () => {
+        if (settled) return;
+        settled = true;
+        restore();
+      },
+      commit: () => {
+        if (settled) return;
+        settled = true;
+        if (isTempId(personId)) return;
+        void deletePersonAction(personId).catch((err) => {
+          console.error("deletePerson failed", err);
+          restore();
+          signalSaveError();
+        });
+      },
+    };
+  }, [signalSaveError]);
 
   const updatePersonDetail = useCallback<StoreValue["updatePersonDetail"]>(
     (personId, fromSectionId, detailId, patch) => {

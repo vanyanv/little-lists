@@ -63,8 +63,11 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
                 confirmLabel: "Delete list",
                 tone: "danger",
                 onConfirm: () => {
-                  deleteList(list.id);
-                  showToast("Removed from your little world");
+                  const handle = deleteList(list.id);
+                  showToast("Removed from your little world", {
+                    action: { label: "Undo", onAction: handle.undo },
+                    onExpire: handle.commit,
+                  });
                 },
               }),
           },
