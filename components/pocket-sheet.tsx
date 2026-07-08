@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
-import { POCKET_COZY_THRESHOLD, SCRAP_MAX_LENGTH, scrapAge } from "@/lib/scraps";
+import {
+  DETECT_BATCH, POCKET_COZY_THRESHOLD, SCRAP_MAX_LENGTH,
+  bestListForKind, detectScrap, isTempScrapId, scrapAge,
+} from "@/lib/scraps";
+import { TEMPLATE_META, type ListTemplate } from "@/lib/types";
 import type { Scrap } from "@/lib/types";
 import { softSpring } from "@/lib/motion";
 import { inputPrimary, sheetTitle } from "@/lib/field";
@@ -23,7 +27,7 @@ export function PocketSheet() {
 }
 
 function PocketInside() {
-  const { scraps, addScrap, deleteScrap } = useStore();
+  const { scraps, lists, addScrap, deleteScrap, setScrapDetection, fileScrap, addList } = useStore();
   const { showToast, openScrapFiling } = useUi();
   const [text, setText] = useState("");
   const [now] = useState(() => new Date());
@@ -44,6 +48,59 @@ function PocketInside() {
   const remove = (scrap: Scrap) => {
     const handle = deleteScrap(scrap.id);
     showToast("Scrap tossed", {
+      action: { label: "Undo", onAction: handle.undo },
+      onExpire: handle.commit,
+    });
+  };
+
+  // Lazy, once-ever detection: check up to DETECT_BATCH unchecked scraps per
+  // open; results (including "none") persist, so this converges to no work.
+  const inFlight = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const pending = scraps
+      .filter((s) => s.detection === null && !isTempScrapId(s.id) && !inFlight.current.has(s.id))
+      .slice(0, DETECT_BATCH);
+    for (const s of pending) {
+      inFlight.current.add(s.id);
+      void detectScrap(s.text)
+        .then((result) => setScrapDetection(s.id, result))
+        .catch(() => {
+          /* all providers down — stay unchecked, retry next open */
+        })
+        .finally(() => inFlight.current.delete(s.id));
+    }
+  }, [scraps, setScrapDetection]);
+
+  const fileFromChip = async (scrap: Scrap) => {
+    const d = scrap.detection;
+    if (!d || "none" in d) return;
+    const template = d.kind as ListTemplate;
+    const tm = TEMPLATE_META[template];
+    let target = bestListForKind(lists, d.kind);
+    if (!target) {
+      try {
+        target = await addList({
+          title: tm.label,
+          emoji: tm.emoji,
+          theme: tm.theme,
+          template,
+          defaultView: tm.defaultView,
+        });
+      } catch {
+        showToast("That didn't save. Let's try again 🌿");
+        return;
+      }
+    }
+    const handle = fileScrap(scrap.id, target.id, {
+      type: d.kind,
+      title: d.title,
+      subtitle: d.subtitle || undefined,
+      status: tm.statuses[0],
+      seed: d.title,
+      imageUrl: d.imageUrl,
+      meta: d.meta,
+    });
+    showToast(`Filed into ${target.title} ✨`, {
       action: { label: "Undo", onAction: handle.undo },
       onExpire: handle.commit,
     });
@@ -110,6 +167,18 @@ function PocketInside() {
                     <p className="truncate text-[0.95rem] font-semibold text-ink">{s.text}</p>
                     <p className="text-[0.78rem] font-medium text-brown-soft">{scrapAge(s.createdAt, now)}</p>
                   </button>
+                  {s.detection && !("none" in s.detection) && (
+                    <button
+                      type="button"
+                      onClick={() => void fileFromChip(s)}
+                      className="shrink-0 rounded-pill bg-cream-deep px-2.5 py-1.5 text-[0.78rem] font-bold text-ink ring-1 ring-line/60 transition hover:bg-cream-deep/70"
+                    >
+                      →{" "}
+                      {bestListForKind(lists, s.detection.kind)?.title ??
+                        `new ${TEMPLATE_META[s.detection.kind as ListTemplate].label}`}
+                      ?
+                    </button>
+                  )}
                   <OverflowMenu
                     ariaLabel={`Options for ${s.text}`}
                     items={[{ label: "Toss it", tone: "danger", onSelect: () => remove(s) }]}
