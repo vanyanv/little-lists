@@ -47,7 +47,7 @@ Shadows are soft and warm-tinted (oklch shadow color ~hue 60, low chroma):
 - **Chips** (`chip.tsx`): pill, three variants — `filter` (≥44px tap target; active = `bg-ink text-cream`, inactive = `bg-paper ring-line`), `tag` (paper + ring), `soft` (theme `--t-bg`/`--t-ink`).
 - **Status pills** (`status-pill.tsx`): tone-tinted pill with glyph + label, sizes sm/md.
 - **Bottom sheet** (`bottom-sheet.tsx`): scrim (`bg-ink/30` + 2px blur), spring slide-up, drag-to-dismiss, grab handle, `max-w-[440px]`, `maxHeight 92dvh`, safe-area bottom padding, Escape to close, body scroll lock.
-- **Bottom nav** (`bottom-nav.tsx`): floating pill bar, `max-w-[420px]`, `backdrop-blur-md`, animated `layoutId` active pill, custom stroke icons. Note: outer wrapper has no safe-area inset yet.
+- **Bottom nav** (`bottom-nav.tsx`): floating pill bar, `max-w-[420px]`, `backdrop-blur-md`, animated `layoutId` active pill, custom stroke icons. Safe-area inset handled via `mb-[max(0.75rem,env(safe-area-inset-bottom))]`.
 - **Floating add button** (`floating-add-button.tsx`): 60px ink circle, `shadow-lift`, context-aware label + action, perpetual gentle bob.
 - **Toast** (`toast.tsx`), **confirm sheet** (`confirm-sheet.tsx`), **view toggle** (`view-toggle.tsx`), **filter chips** (`filter-chips.tsx`), **empty state** (`empty-state.tsx`), **sticker** (`sticker.tsx`).
 
