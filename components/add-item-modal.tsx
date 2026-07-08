@@ -161,7 +161,7 @@ function AddItemFlow({
   };
 
   const continueManual = (text?: string) => {
-    const value = (text ?? title).trim();
+    const value = (text ?? (query || title)).trim();
     if (!value) return;
     setTitle(value);
     setSeed(value);
@@ -203,6 +203,7 @@ function AddItemFlow({
     };
 
     if (scrap) {
+      setSaving(true);
       // deferred file: optimistic now, one transaction on toast expiry, undo restores
       const listTitle = lists.find((l) => l.id === listId)?.title ?? "your list";
       const handle = fileScrap(scrap.id, listId, input);
@@ -262,7 +263,7 @@ function AddItemFlow({
               className={`mt-4 ${inputPrimary}`}
             />
 
-            {/* Type picker for the list-less "add from anywhere" flow. Currently unreachable — every openItemSheet call passes a listId — kept for a future global-add entry point. */}
+            {/* Type picker for the list-less flow — reached when filing a scrap from the pocket. */}
             {!presetListId && (
               <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1">
                 {TYPES.map((t) => {
@@ -388,7 +389,7 @@ function AddItemFlow({
                     </button>
                   ))}
                 </div>
-                <Button block size="lg" onClick={() => continueManual()} disabled={!title.trim()} className="mt-4">
+                <Button block size="lg" onClick={() => continueManual()} disabled={!(query || title).trim()} className="mt-4">
                   Continue
                 </Button>
               </div>
