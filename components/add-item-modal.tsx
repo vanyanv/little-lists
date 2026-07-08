@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useStore } from "@/lib/store";
 import { useUi, type ScrapRef } from "@/lib/ui";
@@ -140,12 +140,18 @@ function AddItemFlow({
     setSearchError(false);
   }, [searchKind]);
 
-  // auto-pick a sensible destination list when type changes (home entry)
+  // auto-pick a sensible destination list when type changes (scrap/global entry).
+  // Deferred commits/undos churn `lists` identity mid-flow — never clobber a
+  // still-valid manual choice; re-pick only on a type switch or a dead selection.
+  const lastAutoPickType = useRef<ItemType | null>(null);
   useEffect(() => {
     if (presetListId) return;
+    const selectionAlive = targetListId != null && lists.some((l) => l.id === targetListId);
+    if (lastAutoPickType.current === type && selectionAlive) return;
+    lastAutoPickType.current = type;
     const match = lists.find((l) => l.kind === type);
     setTargetListId(match?.id ?? lists[0]?.id);
-  }, [type, presetListId, lists]);
+  }, [type, presetListId, lists, targetListId]);
 
   const pickResult = (r: SearchHit) => {
     if (searching) return; // stale hit from the superseded query — ignore

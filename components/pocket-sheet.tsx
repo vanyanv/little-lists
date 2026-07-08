@@ -20,6 +20,9 @@ import { OverflowMenu } from "./overflow-menu";
 // detections running, and a fresh mount must not re-request the same scraps.
 const inFlightDetections = new Set<string>();
 
+// One-tap chips: a second tap during the exit animation would file twice.
+const filingScraps = new Set<string>();
+
 export function PocketSheet() {
   const { sheet, closeSheet } = useUi();
   const open = sheet?.kind === "pocket";
@@ -77,6 +80,8 @@ function PocketInside() {
   const fileFromChip = async (scrap: Scrap) => {
     const d = scrap.detection;
     if (!d || "none" in d) return;
+    if (filingScraps.has(scrap.id)) return;
+    filingScraps.add(scrap.id);
     const template = d.kind as ListTemplate;
     const tm = TEMPLATE_META[template];
     let target = bestListForKind(lists, d.kind);
@@ -91,6 +96,7 @@ function PocketInside() {
         });
       } catch {
         showToast("That didn't save. Let's try again 🌿");
+        filingScraps.delete(scrap.id);
         return;
       }
     }
@@ -104,8 +110,17 @@ function PocketInside() {
       meta: d.meta,
     });
     showToast(`Filed into ${target.title} ✨`, {
-      action: { label: "Undo", onAction: handle.undo },
-      onExpire: handle.commit,
+      action: {
+        label: "Undo",
+        onAction: () => {
+          filingScraps.delete(scrap.id);
+          handle.undo();
+        },
+      },
+      onExpire: () => {
+        filingScraps.delete(scrap.id);
+        handle.commit();
+      },
     });
   };
 
@@ -146,7 +161,9 @@ function PocketInside() {
                   : `${scraps.length} scraps waiting`}
             </p>
             <AnimatePresence initial={false}>
-              {scraps.map((s) => (
+              {scraps.map((s) => {
+                const temp = isTempScrapId(s.id);
+                return (
                 <motion.div
                   key={s.id}
                   layout
@@ -158,6 +175,7 @@ function PocketInside() {
                 >
                   <button
                     type="button"
+                    disabled={temp}
                     onClick={() =>
                       openScrapFiling({
                         id: s.id,
@@ -182,12 +200,15 @@ function PocketInside() {
                       ?
                     </button>
                   )}
-                  <OverflowMenu
-                    ariaLabel={`Options for ${s.text}`}
-                    items={[{ label: "Toss it", tone: "danger", onSelect: () => remove(s) }]}
-                  />
+                  {!temp && (
+                    <OverflowMenu
+                      ariaLabel={`Options for ${s.text}`}
+                      items={[{ label: "Toss it", tone: "danger", onSelect: () => remove(s) }]}
+                    />
+                  )}
                 </motion.div>
-              ))}
+                );
+              })}
             </AnimatePresence>
           </>
         )}
