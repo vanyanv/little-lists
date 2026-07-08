@@ -68,8 +68,11 @@ export function PersonCard({ person }: { person: Person }) {
                   confirmLabel: "Delete person",
                   tone: "danger",
                   onConfirm: () => {
-                    deletePerson(person.id);
-                    showToast("Gone, along with their little details");
+                    const handle = deletePerson(person.id);
+                    showToast("Gone, along with their little details", {
+                      action: { label: "Undo", onAction: handle.undo },
+                      onExpire: handle.commit,
+                    });
                   },
                 }),
             },
