@@ -116,7 +116,8 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
         <div className="relative p-4">
           <div className="flex items-start justify-between gap-2">
             <StickerBadge emoji={list.emoji} size={46} rounded="rounded-xl" />
-            <div className="pt-0.5">
+            {/* pr-8 keeps the collage clear of the absolute ⋯ menu in the corner */}
+            <div className="pt-0.5 pr-8">
               <CardStack items={list.items.slice(0, 3)} kind={list.kind} size="sm" />
             </div>
           </div>
