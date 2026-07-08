@@ -5,6 +5,7 @@ import type {
   Person as DbPerson,
   PersonDetail as DbPersonDetail,
   Profile as DbProfile,
+  Scrap as DbScrap,
   TemplateType,
 } from "@prisma/client";
 import {
@@ -16,6 +17,7 @@ import {
   type Person,
   type PersonSection,
   type Profile,
+  type Scrap,
   type StatusId,
   type ThemeColor,
   type ViewMode,
@@ -120,5 +122,16 @@ export function mapProfile(row: DbProfile): Profile {
     isPublic: false,
     demoSeeded: row.demoSeeded,
     checklistDismissed: row.checklistDismissed,
+  };
+}
+
+/* ── scraps ──────────────────────────────────────────────────────────── */
+
+export function mapScrap(row: DbScrap): Scrap {
+  return {
+    id: row.id,
+    text: row.text,
+    detection: (row.detection as unknown as Scrap["detection"]) ?? null,
+    createdAt: row.createdAt.toISOString(),
   };
 }

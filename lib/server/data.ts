@@ -1,12 +1,13 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserProfile } from "@/lib/server/profile";
-import type { List, Person, Profile } from "@/lib/types";
-import { mapList, mapPerson, mapProfile } from "@/lib/server/serialize";
+import type { List, Person, Profile, Scrap } from "@/lib/types";
+import { mapList, mapPerson, mapProfile, mapScrap } from "@/lib/server/serialize";
 
 export interface InitialData {
   lists: List[];
   people: Person[];
+  scraps: Scrap[];
   profile: Profile | null;
 }
 
@@ -18,11 +19,11 @@ export interface InitialData {
  */
 export async function getInitialData(): Promise<InitialData> {
   const profile = await getCurrentUserProfile();
-  if (!profile) return { lists: [], people: [], profile: null };
+  if (!profile) return { lists: [], people: [], scraps: [], profile: null };
 
   const userId = profile.clerkUserId;
 
-  const [lists, people] = await Promise.all([
+  const [lists, people, scraps] = await Promise.all([
     prisma.list.findMany({
       where: { userId },
       // pinned worlds float to the top; everything else stays freshest-first
@@ -34,11 +35,13 @@ export async function getInitialData(): Promise<InitialData> {
       orderBy: { createdAt: "desc" },
       include: { details: { orderBy: { createdAt: "asc" } } },
     }),
+    prisma.scrap.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
   ]);
 
   return {
     lists: lists.map(mapList),
     people: people.map(mapPerson),
+    scraps: scraps.map(mapScrap),
     profile: mapProfile(profile),
   };
 }

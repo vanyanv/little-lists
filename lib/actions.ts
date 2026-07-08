@@ -4,9 +4,10 @@ import { Prisma, type PersonDetail } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserProfile } from "@/lib/server/profile";
 import { DB_SECTION_TO_ID, ID_TO_DB_SECTION } from "@/lib/people";
-import { mapItem, mapList, mapPerson, mapProfile, templateToDb } from "@/lib/server/serialize";
+import { mapItem, mapList, mapPerson, mapProfile, mapScrap, templateToDb } from "@/lib/server/serialize";
 import { DEMO_PERSON, EXAMPLE_TAG, STARTER_OPTIONS } from "@/lib/onboarding";
 import { pickDemoName } from "@/lib/demo-names";
+import { SCRAP_MAX_LENGTH, type DetectionResult } from "@/lib/scraps";
 import {
   TEMPLATE_META,
   type Item,
@@ -16,6 +17,7 @@ import {
   type Person,
   type PersonDetailEntry,
   type Profile,
+  type Scrap,
   type StatusId,
   type ThemeColor,
   type ViewMode,
@@ -117,6 +119,26 @@ export interface CreateItemInput {
   meta?: Record<string, unknown>;
 }
 
+function itemCreateData(clerkUserId: string, listId: string, input: CreateItemInput) {
+  const metadata = {
+    ...(input.meta ?? {}),
+    type: input.type,
+    ...(input.seed ? { seed: input.seed } : {}),
+  } satisfies Prisma.InputJsonObject;
+  return {
+    listId,
+    userId: clerkUserId,
+    title: input.title,
+    subtitle: input.subtitle ?? null,
+    note: input.note ?? null,
+    status: input.status ?? null,
+    emoji: input.emoji ?? null,
+    imageUrl: input.imageUrl ?? null,
+    tags: input.tags ?? [],
+    metadata,
+  };
+}
+
 export async function createItemAction(listId: string, input: CreateItemInput): Promise<Item> {
   const { clerkUserId } = await requireUserProfile();
 
@@ -127,26 +149,7 @@ export async function createItemAction(listId: string, input: CreateItemInput): 
   });
   if (!list) throw new Error("createItemAction: list not found");
 
-  const metadata = {
-    ...(input.meta ?? {}),
-    type: input.type,
-    ...(input.seed ? { seed: input.seed } : {}),
-  } satisfies Prisma.InputJsonObject;
-
-  const row = await prisma.listItem.create({
-    data: {
-      listId,
-      userId: clerkUserId,
-      title: input.title,
-      subtitle: input.subtitle ?? null,
-      note: input.note ?? null,
-      status: input.status ?? null,
-      emoji: input.emoji ?? null,
-      imageUrl: input.imageUrl ?? null,
-      tags: input.tags ?? [],
-      metadata,
-    },
-  });
+  const row = await prisma.listItem.create({ data: itemCreateData(clerkUserId, listId, input) });
   return mapItem(row, input.type);
 }
 
@@ -188,6 +191,51 @@ export async function updateItemAction(itemId: string, patch: UpdateItemPatch): 
 export async function deleteItemAction(itemId: string): Promise<void> {
   const { clerkUserId } = await requireUserProfile();
   await prisma.listItem.deleteMany({ where: { id: itemId, userId: clerkUserId } });
+}
+
+/* ── scraps ──────────────────────────────────────────────────────────── */
+
+export async function createScrapAction(text: string): Promise<Scrap> {
+  const { clerkUserId } = await requireUserProfile();
+  const trimmed = text.trim().slice(0, SCRAP_MAX_LENGTH);
+  if (!trimmed) throw new Error("createScrapAction: empty text");
+  const row = await prisma.scrap.create({ data: { userId: clerkUserId, text: trimmed } });
+  return mapScrap(row);
+}
+
+export async function deleteScrapAction(scrapId: string): Promise<void> {
+  const { clerkUserId } = await requireUserProfile();
+  await prisma.scrap.deleteMany({ where: { id: scrapId, userId: clerkUserId } });
+}
+
+/** persist the enrichment guess (or a definitive "none") so detection runs once per scrap */
+export async function saveScrapDetectionAction(scrapId: string, detection: DetectionResult): Promise<void> {
+  const { clerkUserId } = await requireUserProfile();
+  await prisma.scrap.updateMany({
+    where: { id: scrapId, userId: clerkUserId },
+    data: { detection: detection as unknown as Prisma.InputJsonObject },
+  });
+}
+
+/** file a scrap: create the list item and retire the scrap in one transaction */
+export async function fileScrapAction(scrapId: string, listId: string, input: CreateItemInput): Promise<Item> {
+  const { clerkUserId } = await requireUserProfile();
+  return prisma.$transaction(async (tx) => {
+    const scrap = await tx.scrap.findFirst({
+      where: { id: scrapId, userId: clerkUserId },
+      select: { id: true },
+    });
+    if (!scrap) throw new Error("fileScrapAction: scrap not found");
+    const list = await tx.list.findFirst({
+      where: { id: listId, userId: clerkUserId },
+      select: { id: true },
+    });
+    if (!list) throw new Error("fileScrapAction: list not found");
+
+    const row = await tx.listItem.create({ data: itemCreateData(clerkUserId, listId, input) });
+    await tx.scrap.delete({ where: { id: scrapId } });
+    return mapItem(row, input.type);
+  });
 }
 
 /* ── people ──────────────────────────────────────────────────────────── */
