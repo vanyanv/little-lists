@@ -29,7 +29,14 @@ export function FilterChips({ options, active, onChange }: FilterChipsProps) {
           <motion.button
             key={opt.id}
             type="button"
-            onClick={() => onChange(opt.id)}
+            onClick={(e) => {
+              onChange(opt.id);
+              e.currentTarget.scrollIntoView({
+                behavior: reduce ? "auto" : "smooth",
+                inline: "nearest",
+                block: "nearest",
+              });
+            }}
             whileTap={tap}
             aria-pressed={isActive}
             aria-label={`${opt.label}, ${opt.count}`}

@@ -69,6 +69,18 @@ export default function HomeScreen() {
   // drop the hero and show a uniform grid so the layout stops reshuffling.
   const isFiltering = query.trim() !== "" || cat !== "all";
 
+  // only offer type filters the user can actually match — a chip for a kind
+  // they own no lists of is a guaranteed dead end
+  const categories = useMemo(() => {
+    const owned = new Set(lists.map((l) => l.kind));
+    return CATEGORIES.filter((c) => !c.kinds || c.kinds.some((k) => owned.has(k)));
+  }, [lists]);
+
+  // if the active chip disappears (its last list was deleted), fall back to all
+  useEffect(() => {
+    if (!categories.some((c) => c.id === cat)) setCat("all");
+  }, [categories, cat]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const kinds = CATEGORIES.find((c) => c.id === cat)?.kinds;
@@ -140,8 +152,20 @@ export default function HomeScreen() {
 
       {/* category chips */}
       <div className="no-scrollbar fade-x -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
-        {CATEGORIES.map((c) => (
-          <Chip key={c.id} variant="filter" active={cat === c.id} onClick={() => setCat(c.id)}>
+        {categories.map((c) => (
+          <Chip
+            key={c.id}
+            variant="filter"
+            active={cat === c.id}
+            onClick={(e) => {
+              setCat(c.id);
+              e.currentTarget.scrollIntoView({
+                behavior: reduce ? "auto" : "smooth",
+                inline: "nearest",
+                block: "nearest",
+              });
+            }}
+          >
             {c.glyph && <LittleIcon name={c.glyph} size={14} />}
             {c.label}
           </Chip>

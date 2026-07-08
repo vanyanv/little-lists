@@ -11,7 +11,7 @@ interface ChipProps {
   children: ReactNode;
   variant?: ChipVariant;
   active?: boolean;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
 }
 
