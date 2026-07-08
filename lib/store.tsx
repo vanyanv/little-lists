@@ -57,6 +57,11 @@ export interface CelebrationSignal {
   variant: CelebrationVariant;
 }
 
+/** pulses when a background save fails after its optimistic update was rolled back */
+export interface SaveErrorSignal {
+  id: string;
+}
+
 /** what the add-a-detail flow hands the store */
 export interface PersonDetailDraft {
   title: string;
@@ -69,6 +74,7 @@ interface StoreValue {
   people: Person[];
   profile: Profile;
   celebration: CelebrationSignal | null;
+  saveError: SaveErrorSignal | null;
   addList: (input: CreateListInput) => Promise<List>;
   addItem: (listId: string, item: CreateItemInput) => Promise<Item | null>;
   /**
@@ -130,6 +136,11 @@ export function ListsProvider({
     setCelebration({ id: makeId("celebrate"), variant });
   }, []);
 
+  const [saveError, setSaveError] = useState<SaveErrorSignal | null>(null);
+  const signalSaveError = useCallback(() => {
+    setSaveError({ id: makeId("save-error") });
+  }, []);
+
   /* ── lists ─────────────────────────────────────────────────────── */
 
   const addList = useCallback<StoreValue["addList"]>(async (input) => {
@@ -148,17 +159,29 @@ export function ListsProvider({
   }, []);
 
   const setListView = useCallback<StoreValue["setListView"]>((listId, view) => {
-    setLists((prev) => prev.map((l) => (l.id === listId ? { ...l, defaultView: view } : l)));
-    if (isTempId(listId)) return; // not persisted yet; the swap will carry the view
-    void setListViewAction(listId, view).catch((err) =>
-      console.error("setListView failed", err)
-    );
-  }, []);
-
-  const updateList = useCallback<StoreValue["updateList"]>((listId, patch) => {
+    let before: List | undefined;
     setLists((prev) =>
       prev.map((l) => {
         if (l.id !== listId) return l;
+        before = l;
+        return { ...l, defaultView: view };
+      })
+    );
+    if (isTempId(listId)) return; // not persisted yet; the swap will carry the view
+    void setListViewAction(listId, view).catch((err) => {
+      console.error("setListView failed", err);
+      const snap = before;
+      if (snap) setLists((prev) => prev.map((l) => (l.id === listId ? snap : l)));
+      signalSaveError();
+    });
+  }, [signalSaveError]);
+
+  const updateList = useCallback<StoreValue["updateList"]>((listId, patch) => {
+    let before: List | undefined;
+    setLists((prev) =>
+      prev.map((l) => {
+        if (l.id !== listId) return l;
+        before = l;
         const next = { ...l, ...patch };
         if (patch.template !== undefined) {
           const meta = deriveListMeta(patch.template);
@@ -175,16 +198,31 @@ export function ListsProvider({
       theme: patch.theme,
       template: patch.template,
       defaultView: patch.defaultView,
-    }).catch((err) => console.error("updateList failed", err));
-  }, []);
+    }).catch((err) => {
+      console.error("updateList failed", err);
+      const snap = before;
+      if (snap) setLists((prev) => prev.map((l) => (l.id === listId ? snap : l)));
+      signalSaveError();
+    });
+  }, [signalSaveError]);
 
   const setListPinned = useCallback<StoreValue["setListPinned"]>((listId, pinned) => {
-    setLists((prev) => prev.map((l) => (l.id === listId ? { ...l, pinned } : l)));
-    if (isTempId(listId)) return; // not persisted yet; created already unpinned
-    void setListPinnedAction(listId, pinned).catch((err) =>
-      console.error("setListPinned failed", err)
+    let before: List | undefined;
+    setLists((prev) =>
+      prev.map((l) => {
+        if (l.id !== listId) return l;
+        before = l;
+        return { ...l, pinned };
+      })
     );
-  }, []);
+    if (isTempId(listId)) return; // not persisted yet; created already unpinned
+    void setListPinnedAction(listId, pinned).catch((err) => {
+      console.error("setListPinned failed", err);
+      const snap = before;
+      if (snap) setLists((prev) => prev.map((l) => (l.id === listId ? snap : l)));
+      signalSaveError();
+    });
+  }, [signalSaveError]);
 
   const deleteList = useCallback<StoreValue["deleteList"]>((listId) => {
     setLists((prev) => prev.filter((l) => l.id !== listId));
@@ -232,10 +270,18 @@ export function ListsProvider({
   }, []);
 
   const updateItem = useCallback<StoreValue["updateItem"]>((listId, itemId, patch, opts) => {
+    let before: Item | undefined;
     setLists((prev) =>
       prev.map((l) =>
         l.id === listId
-          ? { ...l, items: l.items.map((i) => (i.id === itemId ? { ...i, ...patch } : i)) }
+          ? {
+              ...l,
+              items: l.items.map((i) => {
+                if (i.id !== itemId) return i;
+                before = i;
+                return { ...i, ...patch };
+              }),
+            }
           : l
       )
     );
@@ -249,8 +295,21 @@ export function ListsProvider({
       tags: patch.tags,
       emoji: patch.emoji,
       rating: patch.rating,
-    }).catch((err) => console.error("updateItem failed", err));
-  }, []);
+    }).catch((err) => {
+      console.error("updateItem failed", err);
+      const snap = before;
+      if (snap) {
+        setLists((prev) =>
+          prev.map((l) =>
+            l.id === listId
+              ? { ...l, items: l.items.map((i) => (i.id === itemId ? snap : i)) }
+              : l
+          )
+        );
+      }
+      signalSaveError();
+    });
+  }, [signalSaveError]);
 
   const deleteItem = useCallback<StoreValue["deleteItem"]>(async (listId, itemId) => {
     // Remember where the item lived so a failed server-delete can be rolled back
@@ -342,7 +401,14 @@ export function ListsProvider({
   );
 
   const updatePerson = useCallback<StoreValue["updatePerson"]>((personId, patch) => {
-    setPeople((prev) => prev.map((p) => (p.id === personId ? { ...p, ...patch } : p)));
+    let before: Person | undefined;
+    setPeople((prev) =>
+      prev.map((p) => {
+        if (p.id !== personId) return p;
+        before = p;
+        return { ...p, ...patch };
+      })
+    );
     if (isTempId(personId)) return;
     void updatePersonAction(personId, {
       name: patch.name,
@@ -350,8 +416,13 @@ export function ListsProvider({
       theme: patch.theme,
       note: patch.note,
       specialDay: patch.specialDay,
-    }).catch((err) => console.error("updatePerson failed", err));
-  }, []);
+    }).catch((err) => {
+      console.error("updatePerson failed", err);
+      const snap = before;
+      if (snap) setPeople((prev) => prev.map((p) => (p.id === personId ? snap : p)));
+      signalSaveError();
+    });
+  }, [signalSaveError]);
 
   const deletePerson = useCallback<StoreValue["deletePerson"]>((personId) => {
     setPeople((prev) => prev.filter((p) => p.id !== personId));
@@ -362,46 +433,70 @@ export function ListsProvider({
   const updatePersonDetail = useCallback<StoreValue["updatePersonDetail"]>(
     (personId, fromSectionId, detailId, patch) => {
       const toSectionId = patch.toSectionId ?? fromSectionId;
-      setPeople((prev) =>
-        moveDetailBetweenSections(prev, personId, fromSectionId, toSectionId, detailId, {
+      let before: Person[] | undefined;
+      setPeople((prev) => {
+        before = prev;
+        return moveDetailBetweenSections(prev, personId, fromSectionId, toSectionId, detailId, {
           title: patch.title,
           note: patch.note,
           tags: patch.tags,
-        })
-      );
+        });
+      });
       if (isTempId(detailId)) return;
       void updatePersonDetailAction(detailId, {
         title: patch.title,
         note: patch.note,
         tags: patch.tags,
         sectionId: patch.toSectionId,
-      }).catch((err) => console.error("updatePersonDetail failed", err));
+      }).catch((err) => {
+        console.error("updatePersonDetail failed", err);
+        if (before) setPeople(before);
+        signalSaveError();
+      });
     },
-    []
+    [signalSaveError]
   );
 
   /* ── profile ───────────────────────────────────────────────────── */
 
   const setProfileTheme = useCallback<StoreValue["setProfileTheme"]>((theme) => {
-    setProfile((p) => ({ ...p, theme }));
-    void updateProfileAction({ themeColor: theme }).catch((err) =>
-      console.error("setProfileTheme failed", err)
-    );
-  }, []);
+    let before: Profile | undefined;
+    setProfile((p) => {
+      before = p;
+      return { ...p, theme };
+    });
+    void updateProfileAction({ themeColor: theme }).catch((err) => {
+      console.error("setProfileTheme failed", err);
+      if (before) setProfile(before);
+      signalSaveError();
+    });
+  }, [signalSaveError]);
 
   const dismissChecklist = useCallback<StoreValue["dismissChecklist"]>(() => {
-    setProfile((p) => ({ ...p, checklistDismissed: true }));
-    void updateProfileAction({ checklistDismissed: true }).catch((err) =>
-      console.error("dismissChecklist failed", err)
-    );
-  }, []);
+    let before: Profile | undefined;
+    setProfile((p) => {
+      before = p;
+      return { ...p, checklistDismissed: true };
+    });
+    void updateProfileAction({ checklistDismissed: true }).catch((err) => {
+      console.error("dismissChecklist failed", err);
+      if (before) setProfile(before);
+      signalSaveError();
+    });
+  }, [signalSaveError]);
 
   const clearExamples = useCallback<StoreValue["clearExamples"]>(() => {
-    setLists((prev) =>
-      prev.map((l) => ({ ...l, items: l.items.filter((i) => !isExample(i.tags)) }))
-    );
-    void clearExamplesAction().catch((err) => console.error("clearExamples failed", err));
-  }, []);
+    let before: List[] | undefined;
+    setLists((prev) => {
+      before = prev;
+      return prev.map((l) => ({ ...l, items: l.items.filter((i) => !isExample(i.tags)) }));
+    });
+    void clearExamplesAction().catch((err) => {
+      console.error("clearExamples failed", err);
+      if (before) setLists(before);
+      signalSaveError();
+    });
+  }, [signalSaveError]);
 
   const value = useMemo<StoreValue>(
     () => ({
@@ -409,6 +504,7 @@ export function ListsProvider({
       people,
       profile,
       celebration,
+      saveError,
       addList,
       addItem,
       updateItem,
@@ -433,6 +529,7 @@ export function ListsProvider({
       people,
       profile,
       celebration,
+      saveError,
       addList,
       addItem,
       updateItem,

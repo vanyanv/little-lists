@@ -17,6 +17,7 @@ import { EditDetailSheet } from "./edit-detail-sheet";
 import { ConfirmSheet } from "./confirm-sheet";
 import { Celebration } from "./celebration";
 import { Toast } from "./toast";
+import { SaveErrorToast } from "./save-error-toast";
 
 function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -46,6 +47,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </main>
             <FloatingAddButton />
             <Toast />
+            <SaveErrorToast />
             <BottomNav />
             <AddItemModal />
             <AddDetailSheet />
