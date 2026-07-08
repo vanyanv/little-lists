@@ -133,7 +133,7 @@ export function PersonFormFields({ value, onChange }: PersonFormFieldsProps) {
             aria-label="Month"
             value={month}
             onChange={(e) => onMonth(e.target.value)}
-            className={`${inputField} flex-1`}
+            className={`${inputField} min-w-0`}
           >
             <option value="">month</option>
             {MONTHS.map((label, i) => (
@@ -148,7 +148,7 @@ export function PersonFormFields({ value, onChange }: PersonFormFieldsProps) {
             value={day}
             onChange={(e) => onDay(e.target.value)}
             placeholder="day"
-            className={`${inputField} w-20 text-center`}
+            className={`${inputField} w-20 shrink-0 text-center`}
           />
         </div>
       </div>
