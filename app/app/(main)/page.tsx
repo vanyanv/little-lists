@@ -65,10 +65,6 @@ export default function HomeScreen() {
 
   const hasLists = lists.length > 0;
 
-  // A search or a non-"Everything" chip narrows the view; while that's on we
-  // drop the hero and show a uniform grid so the layout stops reshuffling.
-  const isFiltering = query.trim() !== "" || cat !== "all";
-
   // only offer type filters the user can actually match — a chip for a kind
   // they own no lists of is a guaranteed dead end
   const categories = useMemo(() => {
@@ -76,14 +72,16 @@ export default function HomeScreen() {
     return CATEGORIES.filter((c) => !c.kinds || c.kinds.some((k) => owned.has(k)));
   }, [lists]);
 
-  // if the active chip disappears (its last list was deleted), fall back to all
-  useEffect(() => {
-    if (!categories.some((c) => c.id === cat)) setCat("all");
-  }, [categories, cat]);
+  // a deleted list can strand the active chip; treat a vanished id as "all"
+  const activeCat = categories.some((c) => c.id === cat) ? cat : "all";
+
+  // A search or a non-"Everything" chip narrows the view; while that's on we
+  // drop the hero and show a uniform grid so the layout stops reshuffling.
+  const isFiltering = query.trim() !== "" || activeCat !== "all";
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const kinds = CATEGORIES.find((c) => c.id === cat)?.kinds;
+    const kinds = CATEGORIES.find((c) => c.id === activeCat)?.kinds;
     const matched = lists.filter((l) => {
       const matchesCat = !kinds || kinds.includes(l.kind);
       // match the title or the list's kind, e.g. "music" finds a "Music list"
@@ -95,7 +93,7 @@ export default function HomeScreen() {
     });
     // pinned worlds float to the top; a stable sort keeps the rest freshest-first
     return [...matched].sort((a, b) => Number(b.pinned) - Number(a.pinned));
-  }, [lists, query, cat]);
+  }, [lists, query, activeCat]);
 
   const [hero, ...rest] = filtered;
 
@@ -156,7 +154,7 @@ export default function HomeScreen() {
           <Chip
             key={c.id}
             variant="filter"
-            active={cat === c.id}
+            active={activeCat === c.id}
             onClick={(e) => {
               setCat(c.id);
               e.currentTarget.scrollIntoView({
@@ -179,7 +177,7 @@ export default function HomeScreen() {
           title="Nothing in this little corner yet"
           hint="Peek at another filter, or start a new little world."
           action={
-            (query || cat !== "all") && (
+            (query || activeCat !== "all") && (
               <Button
                 size="sm"
                 onClick={() => {
