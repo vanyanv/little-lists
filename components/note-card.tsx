@@ -28,7 +28,7 @@ export function NoteCard({ item }: { item: Item }) {
       <div className="min-w-0 flex-1">
         {/* pr-7 clears the absolute pencil edit hint the parent card overlays top-right */}
         <div className="flex items-start gap-1.5 pr-7">
-          <h3 className="min-w-0 flex-1 truncate font-display text-[1.02rem] font-semibold leading-snug text-ink">
+          <h3 className="min-w-0 flex-1 break-words line-clamp-2 font-display text-[1.02rem] font-semibold leading-snug text-ink">
             {item.title}
           </h3>
           {item.status && <StatusPill status={item.status} />}
