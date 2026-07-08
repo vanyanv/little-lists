@@ -133,6 +133,28 @@ export interface Item {
   fresh?: boolean;
 }
 
+/** cached enrichment guess for a pocket scrap */
+export interface ScrapDetection {
+  kind: "movie" | "book" | "music";
+  title: string;
+  /** year (movie/music) or author (book) */
+  subtitle: string;
+  imageUrl?: string;
+  sourceId: string;
+  /** provider fields carried into ListItem.metadata on filing */
+  meta: Record<string, unknown>;
+}
+
+/** a quick capture waiting in the pocket to be filed into a list */
+export interface Scrap {
+  id: string;
+  text: string;
+  /** null = not yet checked; { none: true } = checked, no confident match */
+  detection: ScrapDetection | { none: true } | null;
+  /** ISO timestamp, for the soft age label */
+  createdAt: string;
+}
+
 export interface List {
   id: string;
   title: string;
