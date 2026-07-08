@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { List } from "./types";
 import type { SearchHit } from "./search/types";
-import { bestListForKind, pickDetection, scrapAge, titleMatches } from "./scraps";
+import { bestListForKind, detectScrap, isTempScrapId, pickDetection, scrapAge, titleMatches } from "./scraps";
 
 function hit(title: string, kind: SearchHit["type"] = "movie"): SearchHit {
   return { sourceId: `id-${title}`, type: kind, title, subtitle: "2023", imageUrl: "https://x/y.jpg", meta: { sourceId: `id-${title}` } };
@@ -64,5 +64,38 @@ describe("scrapAge", () => {
     expect(scrapAge("2026-07-08T09:00:00Z", now)).toBe("3h ago");
     expect(scrapAge("2026-07-07T09:00:00Z", now)).toBe("yesterday");
     expect(scrapAge("2026-07-04T09:00:00Z", now)).toBe("4 days ago");
+  });
+});
+
+describe("detectScrap", () => {
+  const okResponse = (hits: SearchHit[]) =>
+    ({ ok: true, json: async () => hits }) as unknown as Response;
+  const failResponse = { ok: false, json: async () => [] } as unknown as Response;
+
+  it("throws when every provider fails (no signal is not a no-match)", async () => {
+    const fetcher = (async () => failResponse) as unknown as typeof fetch;
+    await expect(detectScrap("past lives", fetcher)).rejects.toThrow("all providers failed");
+  });
+
+  it("matches from the providers that did respond", async () => {
+    const fetcher = (async (url: RequestInfo | URL) => {
+      const u = String(url);
+      if (u.includes("/movie")) return failResponse;
+      if (u.includes("/book")) return okResponse([hit("Past Lives", "book")]);
+      return okResponse([]);
+    }) as unknown as typeof fetch;
+    await expect(detectScrap("past lives", fetcher)).resolves.toMatchObject({ kind: "book", title: "Past Lives" });
+  });
+
+  it("returns none when providers respond but nothing matches", async () => {
+    const fetcher = (async () => okResponse([hit("Something Else")])) as unknown as typeof fetch;
+    await expect(detectScrap("buy socks", fetcher)).resolves.toEqual({ none: true });
+  });
+});
+
+describe("isTempScrapId", () => {
+  it("recognizes optimistic scrap ids", () => {
+    expect(isTempScrapId("scrap-ab12cd34")).toBe(true);
+    expect(isTempScrapId("clx0000000000000000000000")).toBe(false);
   });
 });
