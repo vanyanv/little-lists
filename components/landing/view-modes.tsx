@@ -1,15 +1,16 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 import type { ViewMode } from "@/lib/types";
-import { ViewIcon } from "@/components/view-toggle";
-import { riseItem, staggerContainer, inViewOnce } from "@/lib/motion";
+import { ViewToggle } from "@/components/view-toggle";
+import { nextViewMode } from "@/lib/visual";
+import { softSpring, fadeSlide, inViewOnce } from "@/lib/motion";
 
-/* The same little movie list, shown the three ways the app can render it, so the
-   difference reads at a glance instead of being described with an abstract glyph.
-   Presentational only — faux twins of the grid / list / cozy item views. Uses the
-   same drawn poster art as the hero demo, not emoji, so it reads as the real app. */
+/* One little movie list, rearranged live: the visitor (or an idle timer) flips
+   between the app's three browsing views and the same posters morph between
+   arrangements — proof, not description. First-party drawn art on purpose. */
 
 const SAMPLE = [
   { poster: "/posters/past-lives.svg", title: "Past Lives", theme: "blush" },
@@ -18,85 +19,89 @@ const SAMPLE = [
   { poster: "/posters/lady-bird.svg", title: "Lady Bird", theme: "sky" },
 ] as const;
 
-/* Tiny poster thumbnail: a fixed square crop of the drawn art, sized per preview. */
-function MiniPoster({ src, title, size }: { src: string; title: string; size: number }) {
-  return (
-    <span
-      className="relative block shrink-0 overflow-hidden rounded-md"
-      style={{ width: size, height: size }}
-    >
-      <Image src={src} alt={title} fill sizes={`${size}px`} unoptimized className="object-cover" />
-    </span>
-  );
-}
+type Sample = (typeof SAMPLE)[number];
 
-const MODES: { mode: ViewMode; title: string; line: string }[] = [
-  { mode: "grid", title: "Grid", line: "For covers, posters, and pretty browsing." },
-  { mode: "list", title: "List", line: "For scrolling through a lot fast." },
-  { mode: "cozy", title: "Cozy", line: "For thoughts, opinions, and anything freeform." },
-];
+const TITLES: Record<ViewMode, string> = { grid: "Grid", list: "List", cozy: "Cozy" };
 
-function dot(theme: string) {
-  return `var(--color-${theme})`;
-}
-
-function GridPreview() {
-  return (
-    <div className="grid grid-cols-2 gap-1.5">
-      {SAMPLE.map((s) => (
-        <div
-          key={s.title}
-          className="aspect-square overflow-hidden rounded-lg shadow-soft"
-          style={{ background: dot(s.theme) }}
-        >
-          <Image src={s.poster} alt={s.title} width={80} height={80} sizes="80px" unoptimized className="h-full w-full object-cover" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ListPreview() {
-  return (
-    <div className="flex flex-col gap-1.5">
-      {SAMPLE.slice(0, 3).map((s) => (
-        <div key={s.title} className="flex items-center gap-2 rounded-lg bg-paper px-2 py-1.5 shadow-soft">
-          <MiniPoster src={s.poster} title={s.title} size={20} />
-          <span className="truncate text-[0.72rem] font-semibold text-ink">{s.title}</span>
-          <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: dot(s.theme) }} />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function CozyPreview() {
-  return (
-    <div className="flex flex-col gap-1.5">
-      {SAMPLE.slice(0, 2).map((s) => (
-        <div key={s.title} className="rounded-lg bg-paper p-2 shadow-soft">
-          <div className="flex items-center gap-1.5">
-            <MiniPoster src={s.poster} title={s.title} size={16} />
-            <span className="text-[0.72rem] font-semibold text-ink">{s.title}</span>
-          </div>
-          <div className="mt-1.5 space-y-1">
-            <span className="block h-1 w-full rounded-full bg-cream-deep" />
-            <span className="block h-1 w-3/5 rounded-full bg-cream-deep" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-const PREVIEW: Record<ViewMode, () => React.ReactNode> = {
-  grid: GridPreview,
-  list: ListPreview,
-  cozy: CozyPreview,
+const LINES: Record<ViewMode, string> = {
+  grid: "For covers, posters, and pretty browsing.",
+  list: "For scrolling through a lot fast.",
+  cozy: "For thoughts, opinions, and anything freeform.",
 };
+
+const CYCLE_MS = 3500;
+// a manual pick holds the idle cycle long enough to actually look
+const MANUAL_PAUSE_MS = 8000;
+
+function DemoItem({ s, mode, reduce }: { s: Sample; mode: ViewMode; reduce: boolean }) {
+  const spring = reduce ? { duration: 0 } : softSpring;
+  return (
+    <motion.div
+      layout={!reduce}
+      transition={spring}
+      className={
+        mode === "grid"
+          ? "min-w-0"
+          : "flex min-w-0 items-center gap-2.5 rounded-lg bg-cream/80 px-2.5 py-2 ring-1 ring-line/30"
+      }
+    >
+      <motion.span
+        layout={!reduce}
+        transition={spring}
+        className={`relative block shrink-0 overflow-hidden ${
+          mode === "grid" ? "aspect-square w-full rounded-lg shadow-soft" : "h-9 w-9 self-start rounded-md"
+        }`}
+      >
+        <Image src={s.poster} alt={s.title} fill sizes="150px" unoptimized className="object-cover" />
+      </motion.span>
+      {mode !== "grid" && (
+        <motion.span
+          initial={reduce ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2, delay: 0.12 }}
+          className="min-w-0 flex-1"
+        >
+          <span className="block truncate text-[0.82rem] font-semibold text-ink">{s.title}</span>
+          {mode === "cozy" && (
+            <span className="mt-1.5 block space-y-1">
+              <span className="block h-1 w-full rounded-full bg-cream-deep" />
+              <span className="block h-1 w-3/5 rounded-full bg-cream-deep" />
+            </span>
+          )}
+        </motion.span>
+      )}
+      {mode === "list" && (
+        <span
+          className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full"
+          style={{ background: `var(--color-${s.theme})` }}
+        />
+      )}
+    </motion.div>
+  );
+}
 
 export function ViewModes() {
   const reduce = useReducedMotion() ?? false;
+  const demoRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(demoRef, { amount: 0.45 });
+  const [mode, setMode] = useState<ViewMode>("grid");
+  const holdUntil = useRef(0);
+
+  // idle cycle: same in-view gating as the hero phone (app-preview.tsx)
+  useEffect(() => {
+    if (reduce || !inView) return;
+    const id = setInterval(() => {
+      if (Date.now() < holdUntil.current) return;
+      setMode((m) => nextViewMode(m));
+    }, CYCLE_MS);
+    return () => clearInterval(id);
+  }, [reduce, inView]);
+
+  const pick = (m: ViewMode) => {
+    holdUntil.current = Date.now() + MANUAL_PAUSE_MS;
+    setMode(m);
+  };
+
   return (
     <section className="px-5 py-12">
       <div className="mx-auto grid max-w-4xl items-center gap-9 md:grid-cols-2">
@@ -110,35 +115,38 @@ export function ViewModes() {
           </p>
         </div>
 
-        {/* three mini-previews of the same list, settling in one after another */}
+        {/* the demo: one list, three arrangements, morphing live */}
         <motion.div
-          variants={reduce ? undefined : staggerContainer}
+          ref={demoRef}
+          variants={reduce ? undefined : fadeSlide}
           initial={reduce ? false : "hidden"}
           whileInView={reduce ? undefined : "show"}
           viewport={inViewOnce}
-          className="flex flex-col gap-3"
+          className="mx-auto w-full max-w-sm"
         >
-          {MODES.map((m) => {
-            const Preview = PREVIEW[m.mode];
-            return (
-              <motion.div
-                key={m.mode}
-                variants={reduce ? undefined : riseItem}
-                className="flex items-center gap-3.5 rounded-2xl bg-cream-deep/50 p-3.5 ring-1 ring-line/40"
-              >
-                <div className="w-[6.5rem] shrink-0">
-                  <Preview />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 text-ink">
-                    <ViewIcon mode={m.mode} size={16} />
-                    <h3 className="font-display text-[1.05rem] font-semibold">{m.title}</h3>
-                  </div>
-                  <p className="mt-1 text-[0.85rem] leading-snug text-ink-soft">{m.line}</p>
-                </div>
-              </motion.div>
-            );
-          })}
+          <div
+            role="group"
+            aria-label="Demo of the three list views"
+            className="rounded-2xl bg-paper p-4 shadow-soft ring-1 ring-line/40"
+          >
+            <div className="flex justify-center">
+              <ViewToggle value={mode} onChange={pick} />
+            </div>
+            <div className={`mt-4 ${mode === "grid" ? "grid grid-cols-2 gap-2" : "flex flex-col gap-2"}`}>
+              {SAMPLE.map((s) => (
+                <DemoItem key={s.title} s={s} mode={mode} reduce={reduce} />
+              ))}
+            </div>
+            <motion.p
+              key={mode}
+              initial={reduce ? false : { opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="mt-3.5 text-center text-[0.85rem] leading-snug text-ink-soft"
+            >
+              <span className="font-semibold text-ink">{TITLES[mode]}</span> &mdash; {LINES[mode]}
+            </motion.p>
+          </div>
         </motion.div>
       </div>
     </section>
