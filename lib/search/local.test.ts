@@ -151,11 +151,11 @@ describe("searchLittleWorld", () => {
 
   it("ranks prefix > word-start > substring within a group", () => {
     const ranked = [
-      list({ id: "r1", title: "Ambient sounds" }), // substring 'am' at start -> prefix
-      list({ id: "r2", title: "Team amble" }), // 'am' at a word start (amble)
-      list({ id: "r3", title: "Grammar notes" }), // 'am' mid-word -> substring
+      list({ id: "r3", title: "Unscramble me" }), // 'amble' mid-word (prev='r') -> substring rank 2
+      list({ id: "r2", title: "Team amble" }), // 'amble' after space -> word-start rank 1
+      list({ id: "r1", title: "Amble onward" }), // 'amble' at prefix -> rank 0
     ];
-    const groups = searchLittleWorld("am", { lists: ranked, people: [], scraps: [] });
+    const groups = searchLittleWorld("amble", { lists: ranked, people: [], scraps: [] });
     expect(idsOf("list", groups)).toEqual(["r1", "r2", "r3"]);
   });
 

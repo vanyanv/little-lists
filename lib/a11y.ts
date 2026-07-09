@@ -56,7 +56,7 @@ export function useComboboxNav({
 
   // Reset to the first option when the results change. Storing the previous key
   // in state (not a ref) is the React "adjust state during render" pattern.
-  const key = ids.join("");
+  const key = ids.join(" ");
   const [prevKey, setPrevKey] = useState(key);
   if (prevKey !== key) {
     setPrevKey(key);
