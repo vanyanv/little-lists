@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
-import { softSpring, tap } from "@/lib/motion";
+import { softSpring, tap, gentleFloat } from "@/lib/motion";
 import { focusRingOnDark } from "@/lib/a11y";
 import { Sticker } from "@/components/sticker";
 import { SaveSparkle } from "@/components/icons/save-sparkle";
@@ -20,8 +20,20 @@ export function FinalCta() {
   return (
     <section className="px-5 pb-[calc(env(safe-area-inset-bottom)+4rem)] pt-6">
       <div className="relative mx-auto max-w-2xl overflow-hidden rounded-[var(--radius-2xl)] bg-ink px-6 py-14 text-center shadow-lift">
-        <Sticker name="flower" size={64} rotate={-14} className="pointer-events-none absolute -left-4 -top-3 opacity-30" />
-        <Sticker name="sparkle" size={52} rotate={12} className="pointer-events-none absolute -bottom-3 -right-2 opacity-30" />
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute -left-4 -top-3 inline-flex"
+          animate={reduce ? undefined : gentleFloat(0)}
+        >
+          <Sticker name="flower" size={64} rotate={-14} className="opacity-30" />
+        </motion.span>
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute -bottom-3 -right-2 inline-flex"
+          animate={reduce ? undefined : gentleFloat(1.4)}
+        >
+          <Sticker name="sparkle" size={52} rotate={12} className="opacity-30" />
+        </motion.span>
         <h2 className="font-display font-semibold leading-tight text-cream" style={{ fontSize: "clamp(1.8rem, 6.5vw, 2.6rem)" }}>
           Start with one little list
         </h2>
