@@ -13,8 +13,7 @@ export default function PrivacyPage() {
       intro="The short version: your little lists are yours. Here is how we treat them, in plain language."
     >
       <InfoSection heading="Private by default">
-        Every list and note you make is visible only to you. Nothing you save is public unless you
-        choose to create a share link for it.
+        Every list and note you make is visible only to you. Nothing you save is ever shown to anyone else.
       </InfoSection>
       <InfoSection heading="Signing in">
         We use Clerk to handle sign-in securely, so your account stays protected. We never see your

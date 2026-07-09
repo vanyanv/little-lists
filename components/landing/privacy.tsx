@@ -14,9 +14,7 @@ export function Privacy() {
           Private by default
         </h2>
         <p className="mx-auto mt-3 max-w-[34rem] text-[1.02rem] leading-relaxed text-ink-soft">
-          Your little lists are yours first: only you can see a list until you make a share
-          link, and even then, only what you choose to share. No public profiles, no feeds,
-          no ads, and we never sell your taste to anyone.
+          Your little lists are yours, full stop. Only you can see what you save. No public profiles, no feeds, no ads, and we never sell your taste to anyone.
         </p>
         <Link
           href="/privacy"
