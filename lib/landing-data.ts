@@ -111,6 +111,27 @@ export const SHOWCASE_BOOKS: List = {
   ],
 };
 
+// The "See it your way" demo list gets a third set of titles so its posters
+// never repeat the hero preview or the showcase. No bundled art on purpose:
+// real covers arrive at build time via landing-art, and Cover's
+// PlaceholderPoster carries any miss.
+export const DEMO_VIEW_MOVIES: List = {
+  id: "demo-view-movies",
+  title: "Movies to Watch",
+  emoji: "🎬",
+  theme: "blush",
+  noun: "little films saved",
+  kind: "movie",
+  template: "movie",
+  pinned: false,
+  items: [
+    { id: "dv1", type: "movie", title: "The Grand Budapest Hotel", seed: "The Grand Budapest Hotel", status: "want-to-watch", subtitle: "2014" },
+    { id: "dv2", type: "movie", title: "My Neighbor Totoro", seed: "My Neighbor Totoro", status: "favorite", subtitle: "1988" },
+    { id: "dv3", type: "movie", title: "Little Miss Sunshine", seed: "Little Miss Sunshine", status: "watched", subtitle: "2006" },
+    { id: "dv4", type: "movie", title: "The Princess Bride", seed: "The Princess Bride", status: "want-to-watch", subtitle: "1987" },
+  ],
+};
+
 // Jotted-note scraps for the showcase's people teaser — kept distinct from
 // PREVIEW_PERSON.sections so the deeper PeopleMemory section below never
 // repeats a line the teaser already used.

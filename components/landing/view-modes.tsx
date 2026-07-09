@@ -1,25 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { motion, useInView, useReducedMotion } from "motion/react";
-import type { ViewMode } from "@/lib/types";
+import type { Item, List, ViewMode } from "@/lib/types";
+import { Cover } from "@/components/cover";
 import { ViewToggle } from "@/components/view-toggle";
 import { nextViewMode } from "@/lib/visual";
 import { softSpring, fadeSlide, inViewOnce } from "@/lib/motion";
+import { DEMO_VIEW_MOVIES } from "@/lib/landing-data";
 
 /* One little movie list, rearranged live: the visitor (or an idle timer) flips
    between the app's three browsing views and the same posters morph between
-   arrangements — proof, not description. First-party drawn art on purpose. */
+   arrangements — proof, not description. Real posters arrive at build time via
+   landing-art, same as the showcase; Cover's placeholder carries any miss. */
 
-const SAMPLE = [
-  { poster: "/posters/past-lives.svg", title: "Past Lives", theme: "blush" },
-  { poster: "/posters/paddington.svg", title: "Paddington", theme: "sage" },
-  { poster: "/posters/spirited-away.svg", title: "Spirited Away", theme: "butter" },
-  { poster: "/posters/lady-bird.svg", title: "Lady Bird", theme: "sky" },
-] as const;
-
-type Sample = (typeof SAMPLE)[number];
+// list-mode accent dot per row, indexed to the demo items
+const DOT_COLORS = ["blush", "sage", "butter", "sky"];
 
 const TITLES: Record<ViewMode, string> = { grid: "Grid", list: "List", cozy: "Cozy" };
 
@@ -33,7 +29,17 @@ const CYCLE_MS = 3500;
 // a manual pick holds the idle cycle long enough to actually look
 const MANUAL_PAUSE_MS = 8000;
 
-function DemoItem({ s, mode, reduce }: { s: Sample; mode: ViewMode; reduce: boolean }) {
+function DemoItem({
+  item,
+  dot,
+  mode,
+  reduce,
+}: {
+  item: Item;
+  dot: string;
+  mode: ViewMode;
+  reduce: boolean;
+}) {
   const spring = reduce ? { duration: 0 } : softSpring;
   return (
     <motion.div
@@ -45,14 +51,19 @@ function DemoItem({ s, mode, reduce }: { s: Sample; mode: ViewMode; reduce: bool
           : "flex min-w-0 items-center gap-2.5 rounded-lg bg-cream/80 px-2.5 py-2 ring-1 ring-line/30"
       }
     >
+      {/* poster widths match the real views: full-bleed grid, w-8 list rows,
+          w-12 cozy notes (compact-row.tsx / note-card.tsx) */}
       <motion.span
         layout={!reduce}
         transition={spring}
-        className={`relative block shrink-0 overflow-hidden ${
-          mode === "grid" ? "aspect-square w-full rounded-lg shadow-soft" : "h-9 w-9 self-start rounded-md"
-        }`}
+        className={`block shrink-0 ${mode === "grid" ? "w-full" : mode === "cozy" ? "w-12" : "w-8"}`}
       >
-        <Image src={s.poster} alt={s.title} fill sizes="150px" unoptimized className="object-cover" />
+        <Cover
+          item={item}
+          rounded={mode === "grid" ? "rounded-lg" : "rounded-md"}
+          className={mode === "grid" ? "shadow-soft" : "ring-1 ring-line/50"}
+          sizes="180px"
+        />
       </motion.span>
       {mode !== "grid" && (
         <motion.span
@@ -61,7 +72,7 @@ function DemoItem({ s, mode, reduce }: { s: Sample; mode: ViewMode; reduce: bool
           transition={{ duration: 0.2, delay: 0.12 }}
           className="min-w-0 flex-1"
         >
-          <span className="block truncate text-[0.82rem] font-semibold text-ink">{s.title}</span>
+          <span className="block truncate text-[0.82rem] font-semibold text-ink">{item.title}</span>
           {mode === "cozy" && (
             <span className="mt-1.5 block space-y-1">
               <span className="block h-1 w-full rounded-full bg-cream-deep" />
@@ -73,14 +84,14 @@ function DemoItem({ s, mode, reduce }: { s: Sample; mode: ViewMode; reduce: bool
       {mode === "list" && (
         <span
           className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full"
-          style={{ background: `var(--color-${s.theme})` }}
+          style={{ background: `var(--color-${dot})` }}
         />
       )}
     </motion.div>
   );
 }
 
-export function ViewModes() {
+export function ViewModes({ movies = DEMO_VIEW_MOVIES }: { movies?: List }) {
   const reduce = useReducedMotion() ?? false;
   const demoRef = useRef<HTMLDivElement>(null);
   const inView = useInView(demoRef, { amount: 0.45 });
@@ -133,8 +144,14 @@ export function ViewModes() {
               <ViewToggle value={mode} onChange={pick} />
             </div>
             <div className={`mt-4 ${mode === "grid" ? "grid grid-cols-2 gap-2" : "flex flex-col gap-2"}`}>
-              {SAMPLE.map((s) => (
-                <DemoItem key={s.title} s={s} mode={mode} reduce={reduce} />
+              {movies.items.slice(0, 4).map((item, i) => (
+                <DemoItem
+                  key={item.id}
+                  item={item}
+                  dot={DOT_COLORS[i % DOT_COLORS.length]}
+                  mode={mode}
+                  reduce={reduce}
+                />
               ))}
             </div>
             <motion.p
