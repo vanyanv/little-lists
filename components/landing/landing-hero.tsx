@@ -87,8 +87,8 @@ export function LandingHero({ movies, books }: { movies?: List; books?: List }) 
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="min-w-0 text-center md:pt-10 md:text-left"
         >
-          <h1 className="font-display font-semibold leading-[1.06] text-ink" style={{ fontSize: "clamp(1.85rem, 7.5vw, 3.4rem)" }}>
-            Make little lists for everything you love, hate, and want to remember.
+          <h1 className="font-display font-semibold leading-[1.06] text-ink" style={{ fontSize: "clamp(1.85rem, 7.5vw, 3.1rem)" }}>
+            Little lists for everything you love, hate, and want to remember.
           </h1>
 
           <p className="mx-auto mt-4 max-w-[34rem] text-balance text-[1.02rem] leading-relaxed text-brown md:mx-0">
