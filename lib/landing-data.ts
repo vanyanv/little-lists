@@ -116,7 +116,7 @@ export const SHOWCASE_BOOKS: List = {
 // repeats a line the teaser already used.
 export const SHOWCASE_PEOPLE_SCRAPS = [
   "her coffee order: oat flat white",
-  "no mushrooms, ever",
+  "her ring size, just in case",
   "mentioned wanting a book light",
   "that ramen place downtown",
 ];

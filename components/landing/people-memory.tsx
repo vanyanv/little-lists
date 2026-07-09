@@ -25,7 +25,7 @@ export function PeopleMemory() {
             <Sticker name="heart" size={15} /> People notes
           </span>
           <h2 className="mt-4 font-display font-semibold leading-tight text-ink" style={{ fontSize: "clamp(1.7rem, 6vw, 2.4rem)" }}>
-            Remember the little things about people
+            Every person gets their own little page
           </h2>
           <p className="mx-auto mt-3 max-w-[32rem] text-[1rem] leading-relaxed text-brown md:mx-0">
             Save someone&rsquo;s likes, dislikes, food preferences, gift ideas, date ideas, and the
