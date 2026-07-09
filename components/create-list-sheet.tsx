@@ -95,7 +95,7 @@ function CreateListFlow({
       </h2>
       <p className="mt-1 text-[0.92rem] text-brown">Start with a template or make it totally yours.</p>
 
-      <ListFormFields value={value} onChange={patch} onChooseTemplate={chooseTemplate} showView={false} />
+      <ListFormFields value={value} onChange={patch} onChooseTemplate={chooseTemplate} showView={false} personalizeCollapsed />
 
       <p className="mt-5 text-center text-[0.82rem] text-brown-soft">You can always change this later.</p>
 

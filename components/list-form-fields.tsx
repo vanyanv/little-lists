@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { motion } from "motion/react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   TEMPLATE_META,
   type ListTemplate,
@@ -9,7 +9,7 @@ import {
   type ViewMode,
 } from "@/lib/types";
 import { themeClass } from "@/lib/visual";
-import { softSpring, tap } from "@/lib/motion";
+import { gentleSpring, softSpring, tap } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
 import { inputPrimary } from "@/lib/field";
 import { ViewToggle } from "./view-toggle";
@@ -40,9 +40,17 @@ interface ListFormFieldsProps {
   onChooseTemplate: (t: ListTemplate) => void;
   /** show the "how it lays out" view-mode section; the create sheet applies the template's default view silently */
   showView?: boolean;
+  /** tuck emoji + theme behind a "make it yours ✨" disclosure, collapsed by default; the edit sheet leaves this off so nothing changes there */
+  personalizeCollapsed?: boolean;
 }
 
-export function ListFormFields({ value, onChange, onChooseTemplate, showView = true }: ListFormFieldsProps) {
+export function ListFormFields({
+  value,
+  onChange,
+  onChooseTemplate,
+  showView = true,
+  personalizeCollapsed = false,
+}: ListFormFieldsProps) {
   const { name, template, emoji, theme, view } = value;
 
   const railRef = useRef<HTMLDivElement>(null);
@@ -57,6 +65,11 @@ export function ListFormFields({ value, onChange, onChooseTemplate, showView = t
   useEffect(() => {
     measureRail();
   }, [measureRail]);
+
+  const [personalizeOpen, setPersonalizeOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const personalizeSpring = reduceMotion ? { duration: 0 } : gentleSpring;
+  const personalizeId = useId();
 
   return (
     <>
@@ -161,6 +174,71 @@ export function ListFormFields({ value, onChange, onChooseTemplate, showView = t
         </p>
       </div>
 
+      {/* emoji + theme, optionally tucked behind a "make it yours" disclosure */}
+      {personalizeCollapsed ? (
+        <div className="mt-5">
+          <button
+            type="button"
+            onClick={() => setPersonalizeOpen((o) => !o)}
+            aria-expanded={personalizeOpen}
+            aria-controls={personalizeId}
+            className={`flex min-h-[44px] w-full items-center justify-between gap-2 rounded-xl ${focusRing}`}
+          >
+            <span className="text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">make it yours ✨</span>
+            <motion.span
+              animate={{ rotate: personalizeOpen ? 0 : -90 }}
+              transition={personalizeSpring}
+              className="text-brown-soft"
+              aria-hidden
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </motion.span>
+          </button>
+          <AnimatePresence initial={false}>
+            {personalizeOpen && (
+              <motion.div
+                key="personalize"
+                id={personalizeId}
+                initial={reduceMotion ? false : { height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={reduceMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
+                transition={personalizeSpring}
+                className="overflow-hidden"
+              >
+                <PersonalizeFields emoji={emoji} theme={theme} onChange={onChange} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      ) : (
+        <PersonalizeFields emoji={emoji} theme={theme} onChange={onChange} />
+      )}
+
+      {/* default view */}
+      {showView && (
+        <div className="mt-5 flex items-center justify-between">
+          <p className="text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">how it lays out</p>
+          <ViewToggle value={view} onChange={(v) => onChange({ view: v })} />
+        </div>
+      )}
+    </>
+  );
+}
+
+/** the emoji + theme pickers, shared between the inline layout and the collapsible "make it yours" panel */
+function PersonalizeFields({
+  emoji,
+  theme,
+  onChange,
+}: {
+  emoji: string;
+  theme: ThemeColor;
+  onChange: (patch: Partial<ListFormValue>) => void;
+}) {
+  return (
+    <>
       {/* emoji */}
       <div className="mt-5">
         <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">pick a vibe</p>
@@ -175,14 +253,6 @@ export function ListFormFields({ value, onChange, onChooseTemplate, showView = t
         </div>
         <ThemeColorPicker value={theme} onChange={(c) => onChange({ theme: c })} />
       </div>
-
-      {/* default view */}
-      {showView && (
-        <div className="mt-5 flex items-center justify-between">
-          <p className="text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">how it lays out</p>
-          <ViewToggle value={view} onChange={(v) => onChange({ view: v })} />
-        </div>
-      )}
     </>
   );
 }
