@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import type { List, Person, ThemeColor } from "./types";
+import type { List, Person, ThemeColor, ViewMode } from "./types";
 import { TEMPLATE_META } from "./types";
 
 /** tiny stable string hash → positive int */
@@ -57,4 +57,12 @@ export function archiveSummary(lists: List[], people: Person[]): string {
     parts.push(`${people.length} ${people.length === 1 ? "person" : "people"} remembered`);
   }
   return parts.join(" · ");
+}
+
+// the landing demo's idle cycle walks the app's three browsing views in order
+const VIEW_MODE_ORDER: ViewMode[] = ["grid", "list", "cozy"];
+
+export function nextViewMode(mode: ViewMode): ViewMode {
+  const i = VIEW_MODE_ORDER.indexOf(mode);
+  return VIEW_MODE_ORDER[(i + 1) % VIEW_MODE_ORDER.length];
 }

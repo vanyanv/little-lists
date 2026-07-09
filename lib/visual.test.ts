@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { archiveSummary } from "./visual";
+import { archiveSummary, nextViewMode } from "./visual";
 import type { List, Person } from "./types";
 
 const list = (items: number): List =>
@@ -19,5 +19,13 @@ describe("archiveSummary", () => {
     expect(archiveSummary([], [person(), person()])).toBe(
       "0 little worlds · 0 little things · 2 people remembered"
     );
+  });
+});
+
+describe("nextViewMode", () => {
+  it("cycles grid → list → cozy → grid", () => {
+    expect(nextViewMode("grid")).toBe("list");
+    expect(nextViewMode("list")).toBe("cozy");
+    expect(nextViewMode("cozy")).toBe("grid");
   });
 });
