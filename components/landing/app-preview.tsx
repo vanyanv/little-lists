@@ -5,6 +5,7 @@ import { motion, useInView, useReducedMotion } from "motion/react";
 import { PREVIEW_MOVIES, PREVIEW_BOOKS, PREVIEW_FOODS, PREVIEW_GIFTS, PREVIEW_PERSON } from "@/lib/landing-data";
 import type { List } from "@/lib/types";
 import { themeClass, listCountLabel } from "@/lib/visual";
+import { LittleIcon } from "@/components/icons/little-icon";
 import { PreviewListCard, PreviewPersonCard, PreviewPosterCard } from "./preview-card";
 
 /* A phone-shaped preview of the real app, built from the actual card
@@ -16,7 +17,7 @@ import { PreviewListCard, PreviewPersonCard, PreviewPosterCard } from "./preview
    defines the phone's height; the detail screen slides over it. Cycling
    pauses offscreen and under reduced motion (which pins the home screen). */
 
-const SCREEN_MS = 4400;
+const SCREEN_MS = 6200;
 const push = { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const };
 
 function NavGlyph({ d, fill = false }: { d: string; fill?: boolean }) {
@@ -82,9 +83,10 @@ export function AppPreview({
 
   return (
     <div ref={ref} className="relative mx-auto w-full max-w-[300px]" aria-hidden="true">
-      {/* device shell */}
-      <div className="rounded-[2.6rem] bg-ink/90 p-2.5 shadow-lift ring-1 ring-ink/20">
-        <div className="paper-grain relative overflow-hidden rounded-[2.05rem] bg-cream">
+      {/* device shell — slim ink bezel with one warm edge highlight along the
+          top, so it reads as a tangible object without turning into an ad */}
+      <div className="rounded-[2.5rem] bg-ink p-2 ring-1 ring-ink/25 [box-shadow:var(--shadow-lift),inset_0_1px_0_oklch(0.975_0.013_75/0.18)]">
+        <div className="paper-grain relative overflow-hidden rounded-[2rem] bg-cream">
           {/* speaker notch */}
           <div className="absolute left-1/2 top-2 z-20 h-1.5 w-16 -translate-x-1/2 rounded-full bg-ink/15" />
 
@@ -96,20 +98,25 @@ export function AppPreview({
             transition={push}
           >
             <header className="px-1">
-              <p className="text-[0.78rem] font-bold text-brown">Hi Chris ✨</p>
+              <p className="flex items-center gap-1 text-[0.78rem] font-bold text-brown">
+                Hi Chris <LittleIcon name="sparkle" size={11} />
+              </p>
               <h3 className="mt-0.5 font-display text-[1.55rem] font-semibold leading-none text-ink">
                 Your little worlds
               </h3>
             </header>
 
+            {/* the person card sits right under the movies so the first
+                cropped glimpse on phones already shows films AND the little
+                details kept about someone, not just a list manager */}
             <div className="mt-4 flex flex-col gap-2.5">
               <PreviewListCard list={movies} variant="hero" />
+              <PreviewPersonCard person={PREVIEW_PERSON} maxChips={3} />
               <div className="grid grid-cols-2 gap-2.5">
                 <PreviewListCard list={books} />
                 <PreviewListCard list={PREVIEW_FOODS} />
               </div>
               <PreviewListCard list={PREVIEW_GIFTS} />
-              <PreviewPersonCard person={PREVIEW_PERSON} maxChips={3} />
             </div>
           </motion.div>
 

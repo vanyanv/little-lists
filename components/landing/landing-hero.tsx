@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
-import { softSpring, gentleSpring, tap, gentleFloat } from "@/lib/motion";
+import { softSpring, gentleSpring, tap } from "@/lib/motion";
 import { focusRing, focusRingOnDark } from "@/lib/a11y";
 import { LittleIcon } from "@/components/icons/little-icon";
 import type { GlyphName } from "@/components/icons/glyphs";
@@ -22,10 +22,11 @@ function CheckMark() {
   );
 }
 
-/* The cozy sticker cluster around the phone: five die-cut glyphs scattered
-   like stickers half-peeled off the scrapbook page. Anchored to the preview
+/* The cozy sticker trio around the phone: three die-cut glyphs placed like
+   stickers half-peeled off the scrapbook page. Anchored to the preview
    wrapper (never the copy column) so they can't collide with text at any
-   width. Each settles in with a stagger, then drifts almost imperceptibly. */
+   width. Each settles in with a stagger, then holds still — the entrance IS
+   the moment; nothing loops. */
 const CLUSTER: {
   name: GlyphName;
   className: string;
@@ -34,16 +35,14 @@ const CLUSTER: {
   delay: number;
 }[] = [
   { name: "clapperboard", className: "-left-2 top-6 sm:-left-5", size: 34, rotate: -12, delay: 0.35 },
-  { name: "book", className: "-right-1 top-16 sm:-right-4", size: 32, rotate: 10, delay: 0.45 },
-  { name: "tulip", className: "-left-1 bottom-24 sm:-left-4", size: 30, rotate: 8, delay: 0.55 },
-  { name: "gift", className: "-right-2 bottom-10 sm:-right-5", size: 34, rotate: -9, delay: 0.5 },
-  { name: "sparkle", className: "right-6 -top-3", size: 26, rotate: 14, delay: 0.65 },
+  { name: "book", className: "-right-1 top-20 sm:-right-4", size: 32, rotate: 10, delay: 0.45 },
+  { name: "gift", className: "-left-1 bottom-24 sm:-left-4", size: 34, rotate: -9, delay: 0.5 },
 ];
 
 function HeroStickers({ reduce }: { reduce: boolean }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 z-10">
-      {CLUSTER.map((s, i) => (
+      {CLUSTER.map((s) => (
         <motion.span
           key={s.name}
           className={`absolute ${s.className}`}
@@ -51,15 +50,33 @@ function HeroStickers({ reduce }: { reduce: boolean }) {
           animate={reduce ? undefined : { opacity: 1, scale: 1, y: 0 }}
           transition={{ ...gentleSpring, delay: s.delay }}
         >
-          <motion.span
-            className="inline-flex"
-            animate={reduce ? undefined : gentleFloat(i * 0.9)}
-          >
-            <LittleIcon name={s.name} variant="sticker" size={s.size} rotate={s.rotate} />
-          </motion.span>
+          <LittleIcon name={s.name} variant="sticker" size={s.size} rotate={s.rotate} />
         </motion.span>
       ))}
     </div>
+  );
+}
+
+/* The hero's single material cue: a strip of translucent washi tape pressed
+   over the phone's top bezel, as if the device were taped into the scrapbook.
+   Same sky tint as the tape glyph; multiply blend so it reads as film over
+   both the cream page and the dark frame. It presses on just after the phone
+   lands. Position comes from left + margin (not transform) because motion
+   owns this element's transform. */
+function TapeStrip({ reduce }: { reduce: boolean }) {
+  return (
+    <motion.span
+      aria-hidden
+      className="pointer-events-none absolute -top-3 left-1/2 z-20 ml-[-3rem] block h-7 w-28 mix-blend-multiply"
+      initial={reduce ? false : { opacity: 0, scale: 1.25 }}
+      animate={reduce ? undefined : { opacity: 1, scale: 1 }}
+      transition={{ ...gentleSpring, delay: 0.55 }}
+    >
+      <span
+        className="block h-full w-full -rotate-3 bg-sky/70"
+        style={{ clipPath: "polygon(1.5% 0%, 100% 5%, 98.5% 100%, 0% 93%)" }}
+      />
+    </motion.span>
   );
 }
 
@@ -71,31 +88,24 @@ export function LandingHero({ movies, books }: { movies?: List; books?: List }) 
 
   return (
     <section className="relative overflow-hidden px-5 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-      {/* two soft, deliberately placed warm glows — ambient wash, not stray ovals.
-          one cradles the headline, one sits behind the phone preview. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-32 -top-28 h-[28rem] w-[28rem] rounded-full bg-blush/30 blur-[120px]" />
-        <div className="absolute -right-32 top-0 h-[32rem] w-[32rem] rounded-full bg-sky/25 blur-[130px]" />
-      </div>
-
-      {/* items-start on md: the five-card phone runs tall, so the copy anchors
-          to the top of the fold instead of drifting to the phone's midpoint */}
-      <div className="relative mx-auto grid max-w-5xl items-center gap-9 py-8 md:grid-cols-2 md:items-start md:gap-10 md:py-16">
+      {/* single column through tablet portrait; the side-by-side split waits
+          for lg, where the headline and both CTA labels have real room */}
+      <div className="relative mx-auto grid max-w-5xl items-center gap-8 pt-6 pb-2 sm:pt-8 sm:pb-4 lg:grid-cols-2 lg:items-start lg:gap-10 lg:py-16">
         {/* copy */}
         <motion.div
           {...rise}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="min-w-0 text-center md:pt-10 md:text-left"
+          className="min-w-0 text-center lg:pt-10 lg:text-left"
         >
           <h1 className="text-balance font-display font-semibold leading-[1.06] text-ink" style={{ fontSize: "clamp(1.85rem, 7.5vw, 3.1rem)" }}>
             Little lists for everything you love, hate, and want to remember.
           </h1>
 
-          <p className="mx-auto mt-4 max-w-[34rem] text-balance text-[1.02rem] leading-relaxed text-brown md:mx-0">
+          <p className="mx-auto mt-4 max-w-[34rem] text-balance text-[1.02rem] leading-relaxed text-brown lg:mx-0">
             Movies to watch, books to read, foods you avoid, gift ideas, date ideas, and tiny details about people, all in one cozy place.
           </p>
 
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
             <MotionLink
               href="/sign-up"
               whileTap={reduce ? undefined : tap}
@@ -115,7 +125,7 @@ export function LandingHero({ movies, books }: { movies?: List; books?: List }) 
           </div>
 
           {/* honest, understated reassurance — no invented stats */}
-          <p className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[0.85rem] font-semibold text-ink-soft md:justify-start">
+          <p className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[0.85rem] font-semibold text-ink-soft lg:justify-start">
             <span className="inline-flex items-center gap-1.5">
               <CheckMark /> Free to start
             </span>
@@ -125,15 +135,21 @@ export function LandingHero({ movies, books }: { movies?: List; books?: List }) 
           </p>
         </motion.div>
 
-        {/* phone preview, with the sticker cluster scattered around it */}
+        {/* phone preview, taped onto the page with the sticker trio around it.
+            Below lg the phone is deliberately cropped: enough screen to show
+            real lists (movies, a person's little things), then a soft dissolve
+            into the paper so the next section arrives sooner. */}
         <motion.div
           {...(reduce ? {} : { initial: { opacity: 0, y: 24, rotate: -1.5 }, animate: { opacity: 1, y: 0, rotate: 0 } })}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: reduce ? 0 : 0.12 }}
-          className="min-w-0 px-2"
+          className="min-w-0"
         >
           <div className="relative mx-auto w-full max-w-[300px]">
             <HeroStickers reduce={reduce} />
-            <AppPreview movies={movies} books={books} />
+            <TapeStrip reduce={reduce} />
+            <div className="max-h-[27rem] overflow-hidden [mask-image:linear-gradient(to_bottom,black_calc(100%-3.5rem),transparent)] sm:max-h-[29rem] md:max-h-[30rem] lg:max-h-none lg:[mask-image:none]">
+              <AppPreview movies={movies} books={books} />
+            </div>
           </div>
         </motion.div>
       </div>
