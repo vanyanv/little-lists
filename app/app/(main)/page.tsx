@@ -5,15 +5,15 @@ import { motion, useReducedMotion } from "motion/react";
 import { useUser } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
-import { TEMPLATE_META, type ItemType, type ListTemplate } from "@/lib/types";
+import { type ItemType, type ListTemplate } from "@/lib/types";
 import { ONBOARDING_TOAST_KEY } from "@/lib/onboarding";
 import { staggerContainer, riseItem } from "@/lib/motion";
-import { focusRing } from "@/lib/a11y";
 import { ListCard } from "@/components/list-card";
 import { Chip } from "@/components/chip";
 import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/button";
 import { GettingStartedCard } from "@/components/getting-started-card";
+import { GlobalSearch } from "@/components/global-search";
 import { DemoBanner } from "@/components/demo-banner";
 import { CategoryIcon } from "@/components/icons/category-icon";
 import { LittleIcon } from "@/components/icons/little-icon";
@@ -75,25 +75,18 @@ export default function HomeScreen() {
   // a deleted list can strand the active chip; treat a vanished id as "all"
   const activeCat = categories.some((c) => c.id === cat) ? cat : "all";
 
-  // A search or a non-"Everything" chip narrows the view; while that's on we
-  // drop the hero and show a uniform grid so the layout stops reshuffling.
-  const isFiltering = query.trim() !== "" || activeCat !== "all";
+  // A non-empty query hands the whole view to global search; a non-"Everything"
+  // chip narrows the grid. Either way we drop the hero for a uniform grid so the
+  // layout stops reshuffling.
+  const searching = query.trim() !== "";
+  const catFiltering = activeCat !== "all";
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
     const kinds = CATEGORIES.find((c) => c.id === activeCat)?.kinds;
-    const matched = lists.filter((l) => {
-      const matchesCat = !kinds || kinds.includes(l.kind);
-      // match the title or the list's kind, e.g. "music" finds a "Music list"
-      const matchesQuery =
-        !q ||
-        l.title.toLowerCase().includes(q) ||
-        TEMPLATE_META[l.template].label.toLowerCase().includes(q);
-      return matchesCat && matchesQuery;
-    });
+    const matched = lists.filter((l) => !kinds || kinds.includes(l.kind));
     // pinned worlds float to the top; a stable sort keeps the rest freshest-first
     return [...matched].sort((a, b) => Number(b.pinned) - Number(a.pinned));
-  }, [lists, query, activeCat]);
+  }, [lists, activeCat]);
 
   const [hero, ...rest] = filtered;
 
@@ -132,94 +125,80 @@ export default function HomeScreen() {
       <DemoBanner />
       <GettingStartedCard />
 
-      {/* search pill */}
-      <div className="mt-4 flex items-center gap-2 rounded-pill bg-paper px-4 py-3 shadow-soft ring-1 ring-line/60">
-        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 text-brown-soft">
-          <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2" />
-          <path d="M16 16l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-        <label htmlFor="home-search" className="sr-only">Search your little worlds</label>
-        <input
-          id="home-search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Find a little world…"
-          className={`w-full bg-transparent text-[1rem] text-ink placeholder:text-brown-soft/80 focus:outline-none ${focusRing}`}
-        />
-      </div>
+      {/* Search owns its own input; while a query is present it takes over the
+          view and the category chips plus list grid step aside. */}
+      <GlobalSearch query={query} onQueryChange={setQuery} />
 
-      {/* category chips */}
-      <div className="no-scrollbar fade-x -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
-        {categories.map((c) => (
-          <Chip
-            key={c.id}
-            variant="filter"
-            active={activeCat === c.id}
-            onClick={(e) => {
-              setCat(c.id);
-              e.currentTarget.scrollIntoView({
-                behavior: reduce ? "auto" : "smooth",
-                inline: "nearest",
-                block: "nearest",
-              });
-            }}
-          >
-            {c.glyph && <LittleIcon name={c.glyph} size={14} />}
-            {c.label}
-          </Chip>
-        ))}
-      </div>
-
-      {/* cards */}
-      {filtered.length === 0 ? (
-        <EmptyState
-          sticker="sparkle"
-          title="Nothing in this little corner yet"
-          hint="Peek at another filter, or start a new little world."
-          action={
-            (query || activeCat !== "all") && (
-              <Button
-                size="sm"
-                onClick={() => {
-                  setQuery("");
-                  setCat("all");
+      {!searching && (
+        <>
+          {/* category chips */}
+          <div className="no-scrollbar fade-x -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
+            {categories.map((c) => (
+              <Chip
+                key={c.id}
+                variant="filter"
+                active={activeCat === c.id}
+                onClick={(e) => {
+                  setCat(c.id);
+                  e.currentTarget.scrollIntoView({
+                    behavior: reduce ? "auto" : "smooth",
+                    inline: "nearest",
+                    block: "nearest",
+                  });
                 }}
               >
-                Show everything
-              </Button>
-            )
-          }
-        />
-      ) : isFiltering ? (
-        <motion.div
-          variants={staggerContainer}
-          initial={reduce ? false : "hidden"}
-          animate="show"
-          className="mt-4 grid grid-cols-2 gap-3"
-        >
-          {filtered.map((l) => (
-            <motion.div key={l.id} variants={riseItem}>
-              <ListCard list={l} variant="normal" />
-            </motion.div>
-          ))}
-        </motion.div>
-      ) : (
-        <motion.div variants={staggerContainer} initial={reduce ? false : "hidden"} animate="show" className="mt-4 flex flex-col gap-3">
-          {hero && (
-            <motion.div variants={riseItem}>
-              <ListCard list={hero} variant="hero" />
-            </motion.div>
-          )}
-          {rest.length > 0 && (
-            <div className="grid grid-cols-2 gap-3">
-              {rest.map((l) => (
+                {c.glyph && <LittleIcon name={c.glyph} size={14} />}
+                {c.label}
+              </Chip>
+            ))}
+          </div>
+
+          {/* cards */}
+          {filtered.length === 0 ? (
+            <EmptyState
+              sticker="sparkle"
+              title="Nothing in this little corner yet"
+              hint="Peek at another filter, or start a new little world."
+              action={
+                catFiltering && (
+                  <Button size="sm" onClick={() => setCat("all")}>
+                    Show everything
+                  </Button>
+                )
+              }
+            />
+          ) : catFiltering ? (
+            <motion.div
+              variants={staggerContainer}
+              initial={reduce ? false : "hidden"}
+              animate="show"
+              className="mt-4 grid grid-cols-2 gap-3"
+            >
+              {filtered.map((l) => (
                 <motion.div key={l.id} variants={riseItem}>
                   <ListCard list={l} variant="normal" />
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
+          ) : (
+            <motion.div variants={staggerContainer} initial={reduce ? false : "hidden"} animate="show" className="mt-4 flex flex-col gap-3">
+              {hero && (
+                <motion.div variants={riseItem}>
+                  <ListCard list={hero} variant="hero" />
+                </motion.div>
+              )}
+              {rest.length > 0 && (
+                <div className="grid grid-cols-2 gap-3">
+                  {rest.map((l) => (
+                    <motion.div key={l.id} variants={riseItem}>
+                      <ListCard list={l} variant="normal" />
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
           )}
-        </motion.div>
+        </>
       )}
         </>
       )}
