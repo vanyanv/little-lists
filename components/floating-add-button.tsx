@@ -8,7 +8,7 @@ import { useUi } from "@/lib/ui";
 
 export function FloatingAddButton() {
   const pathname = usePathname();
-  const { openItemSheet, openDetailSheet, openListSheet, openPersonSheet } = useUi();
+  const { openItemSheet, openDetailSheet, openListSheet, openPersonSheet, openPocketSheet } = useUi();
   const reduce = useReducedMotion();
 
   const onList = pathname.startsWith("/app/list/");
@@ -26,12 +26,13 @@ export function FloatingAddButton() {
       ? "Add someone to remember"
       : onList
         ? "Add to this list"
-        : "Start a little list";
+        : "Save a little thing";
 
   const handle = () => {
     if (onPerson && id) openDetailSheet(id);
     else if (onPeople) openPersonSheet();
     else if (onList && id) openItemSheet(id);
+    else if (onHome) openPocketSheet();
     else openListSheet();
   };
 
@@ -60,7 +61,7 @@ export function FloatingAddButton() {
             className="flex items-center gap-2"
           >
             <span className="text-[1.7rem] leading-none font-light">+</span>
-            {onHome && <span className="leading-none max-[359px]:hidden">Start a little list</span>}
+            {onHome && <span className="leading-none max-[359px]:hidden">Save a little thing</span>}
           </motion.span>
         </motion.button>
       </div>

@@ -14,6 +14,7 @@ import { softSpring } from "@/lib/motion";
 import { inputPrimary, sheetTitle } from "@/lib/field";
 import { BottomSheet } from "./bottom-sheet";
 import { Button } from "./button";
+import { LittleIcon } from "./icons";
 import { OverflowMenu } from "./overflow-menu";
 
 // Survives sheet close/reopen: an unmounted PocketInside leaves its in-flight
@@ -27,7 +28,7 @@ export function PocketSheet() {
   const { sheet, closeSheet } = useUi();
   const open = sheet?.kind === "pocket";
   return (
-    <BottomSheet open={open} onClose={closeSheet} ariaLabel="Your pocket">
+    <BottomSheet open={open} onClose={closeSheet} ariaLabel="Save a little thing">
       {open && <PocketInside />}
     </BottomSheet>
   );
@@ -35,7 +36,7 @@ export function PocketSheet() {
 
 function PocketInside() {
   const { scraps, lists, addScrap, deleteScrap, setScrapDetection, fileScrap, addList } = useStore();
-  const { showToast, openScrapFiling } = useUi();
+  const { showToast, openScrapFiling, openListSheet } = useUi();
   const [text, setText] = useState("");
   const [now] = useState(() => new Date());
 
@@ -126,9 +127,9 @@ function PocketInside() {
 
   return (
     <div className="pt-1">
-      <h2 className={sheetTitle}>Your pocket</h2>
+      <h2 className={sheetTitle}>Save a little thing</h2>
       <p className="mt-1 text-[0.92rem] text-brown">
-        Jot it now, tuck it into a list later.
+        Jot it now. Tuck it into a list whenever you like.
       </p>
 
       <form onSubmit={jot} className="mt-4 flex gap-2">
@@ -146,14 +147,35 @@ function PocketInside() {
         </Button>
       </form>
 
+      <button
+        type="button"
+        onClick={() => openListSheet()}
+        className="mt-2 flex min-h-11 items-center px-1 text-[0.85rem] font-semibold text-brown-soft transition-colors hover:text-brown"
+      >
+        or start a whole little list →
+      </button>
+
       <div className="mt-5">
+        <h3 className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">
+          Your pocket
+        </h3>
         {scraps.length === 0 ? (
-          <p className="px-1 py-6 text-center text-[0.9rem] text-brown">
-            Nothing tucked away. Jot the next little thing ✨
-          </p>
+          <div className="relative overflow-hidden rounded-2xl bg-paper p-4 shadow-soft ring-1 ring-line">
+            <LittleIcon
+              name="sparkle"
+              size={56}
+              className="pointer-events-none absolute -right-2 -top-3 opacity-20"
+              rotate={-10}
+            />
+            <p className="font-display text-[1.05rem] font-semibold text-ink">This is your pocket ✨</p>
+            <p className="mt-1 text-[0.88rem] text-brown">
+              Anything you jot lands here safe. When you&rsquo;re ready, we&rsquo;ll help you tuck it into the
+              right list.
+            </p>
+          </div>
         ) : (
           <>
-            <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">
+            <p className="mb-2 text-[0.85rem] font-medium text-brown-soft">
               {scraps.length >= POCKET_COZY_THRESHOLD
                 ? "your pocket's getting cozy — tuck a few into lists? 🌿"
                 : scraps.length === 1
