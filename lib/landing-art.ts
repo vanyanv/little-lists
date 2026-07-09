@@ -7,7 +7,7 @@
 import type { Item, List } from "./types";
 import { searchMovies } from "./search/movies";
 import { searchBooks } from "./search/books";
-import { PREVIEW_MOVIES, PREVIEW_BOOKS } from "./landing-data";
+import { PREVIEW_MOVIES, PREVIEW_BOOKS, SHOWCASE_MOVIES, SHOWCASE_BOOKS } from "./landing-data";
 import type { SearchHit } from "./search/types";
 
 /** Best real image for a sample item: prefer an exact title + year match. */
@@ -38,10 +38,17 @@ async function withRealArt(
 }
 
 /** The preview lists with live artwork; safe to call during prerender. */
-export async function getLandingLists(): Promise<{ movies: List; books: List }> {
-  const [movies, books] = await Promise.all([
+export async function getLandingLists(): Promise<{
+  movies: List;
+  books: List;
+  showcaseMovies: List;
+  showcaseBooks: List;
+}> {
+  const [movies, books, showcaseMovies, showcaseBooks] = await Promise.all([
     withRealArt(PREVIEW_MOVIES, searchMovies),
     withRealArt(PREVIEW_BOOKS, searchBooks),
+    withRealArt(SHOWCASE_MOVIES, searchMovies),
+    withRealArt(SHOWCASE_BOOKS, searchBooks),
   ]);
-  return { movies, books };
+  return { movies, books, showcaseMovies, showcaseBooks };
 }

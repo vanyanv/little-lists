@@ -49,6 +49,25 @@ export const fadeSlide: Variants = {
 // shared viewport config for scroll reveals — fire once, a bit before fully visible
 export const inViewOnce = { once: true, amount: 0.3 } as const;
 
+// posters fanning out of a loose stack — each rises and settles into its own
+// resting tilt, passed per-poster via `custom`
+export const posterFan: Variants = {
+  hidden: { opacity: 0, y: 16, rotate: 0, scale: 0.94 },
+  show: (tilt: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    rotate: tilt,
+    scale: 1,
+    transition: gentleSpring,
+  }),
+};
+
+// a book slid onto a shelf: enters from the side, straightens as it lands
+export const shelfSlide: Variants = {
+  hidden: { opacity: 0, x: 22, rotate: 2 },
+  show: { opacity: 1, x: 0, rotate: 0, transition: gentleSpring },
+};
+
 // a barely-there vertical drift for decorative hero stickers. Slow and small on
 // purpose; anything livelier fights the calm-by-default rule. Callers must
 // guard with useReducedMotion — JS loops aren't covered by the global CSS rule.

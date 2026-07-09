@@ -74,6 +74,55 @@ export const PREVIEW_GIFTS: List = {
   ],
 };
 
+// The use-cases showcase gets its own titles so no poster repeats what the
+// hero's phone preview already shows. No bundled art on purpose: real covers
+// arrive at build time via landing-art, and Cover's PlaceholderPoster carries
+// any miss.
+export const SHOWCASE_MOVIES: List = {
+  id: "showcase-movies",
+  title: "Movies to Watch",
+  emoji: "🎬",
+  theme: "blush",
+  noun: "little films saved",
+  kind: "movie",
+  template: "movie",
+  pinned: false,
+  items: [
+    { id: "sm1", type: "movie", title: "Coraline", seed: "Coraline", status: "want-to-watch", subtitle: "2009" },
+    { id: "sm2", type: "movie", title: "La La Land", seed: "La La Land", status: "want-to-watch", subtitle: "2016" },
+    { id: "sm3", type: "movie", title: "Pride & Prejudice", seed: "Pride & Prejudice", status: "favorite", subtitle: "2005" },
+    { id: "sm4", type: "movie", title: "Ratatouille", seed: "Ratatouille", status: "want-to-watch", subtitle: "2007" },
+  ],
+};
+
+export const SHOWCASE_BOOKS: List = {
+  id: "showcase-books",
+  title: "Books to Read",
+  emoji: "📚",
+  theme: "lavender",
+  noun: "little stories waiting",
+  kind: "book",
+  template: "book",
+  pinned: false,
+  items: [
+    { id: "sb1", type: "book", title: "The Midnight Library", seed: "The Midnight Library", status: "want-to-read" },
+    { id: "sb2", type: "book", title: "Before the Coffee Gets Cold", seed: "Before the Coffee Gets Cold", status: "want-to-read" },
+    { id: "sb3", type: "book", title: "Tomorrow, and Tomorrow, and Tomorrow", seed: "Tomorrow Tomorrow", status: "reading" },
+  ],
+};
+
+// Jotted-note scraps for the showcase's people teaser — kept distinct from
+// PREVIEW_PERSON.sections so the deeper PeopleMemory section below never
+// repeats a line the teaser already used.
+export const SHOWCASE_PEOPLE_SCRAPS = [
+  "her coffee order: oat flat white",
+  "no mushrooms, ever",
+  "mentioned wanting a book light",
+  "that ramen place downtown",
+];
+
+export const SHOWCASE_GIFT_SCRAPS = ["book light", "coffee shop gift card", "cute bookmark"];
+
 // Section ids double as CategoryIcon keys, exactly like the real person card —
 // so each little detail gets its drawn glyph (clapperboard, book, fork…).
 // The name is a placeholder: landing surfaces render <CyclingName /> instead,

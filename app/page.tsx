@@ -19,13 +19,13 @@ export const metadata: Metadata = {
 export const revalidate = 86400;
 
 export default async function LandingPage() {
-  const { movies, books } = await getLandingLists();
+  const { movies, books, showcaseMovies, showcaseBooks } = await getLandingLists();
   return (
     <>
       <LandingHeader />
       <main className="paper-grain relative min-h-dvh overflow-x-hidden bg-cream">
         <LandingHero movies={movies} books={books} />
-        <UseCases />
+        <UseCases movies={showcaseMovies} books={showcaseBooks} />
         <ViewModes />
         <PeopleMemory />
         <Privacy />
