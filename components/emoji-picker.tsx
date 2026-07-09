@@ -11,7 +11,7 @@ interface EmojiPickerProps {
 /** A grid of tappable emoji buttons — shared across list and person form fields. */
 export function EmojiPicker({ choices, value, onChange }: EmojiPickerProps) {
   return (
-    <div className="grid grid-cols-8 gap-1.5">
+    <div className="grid grid-cols-6 gap-1.5">
       {choices.map((e) => (
         <button
           key={e}
@@ -19,7 +19,7 @@ export function EmojiPicker({ choices, value, onChange }: EmojiPickerProps) {
           aria-label={e}
           aria-pressed={value === e}
           onClick={() => onChange(e)}
-          className={`grid aspect-square place-items-center rounded-lg text-xl transition ${focusRing} ${
+          className={`grid aspect-square min-h-11 place-items-center rounded-lg text-xl transition ${focusRing} ${
             value === e ? "bg-cream-deep ring-2 ring-ink/20" : "bg-cream-deep/40"
           }`}
         >

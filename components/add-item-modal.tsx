@@ -19,6 +19,7 @@ import { focusRing } from "@/lib/a11y";
 import { inputPrimary, inputField, textareaField, sheetTitle, sheetTitleSm } from "@/lib/field";
 import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
+import { EmojiPicker } from "./emoji-picker";
 import { SoftDotLoader } from "./soft-dot-loader";
 import { Cover } from "./cover";
 import { StatusPill } from "./status-pill";
@@ -379,22 +380,7 @@ function AddItemFlow({
             ) : (
               <div className="mt-4">
                 <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">pick a little icon</p>
-                <div className="grid grid-cols-8 gap-1.5">
-                  {EMOJI_CHOICES.map((e) => (
-                    <button
-                      key={e}
-                      type="button"
-                      aria-label={e}
-                      aria-pressed={emoji === e}
-                      onClick={() => setEmoji(e)}
-                      className={`grid aspect-square place-items-center rounded-lg text-xl transition ${focusRing} ${
-                        emoji === e ? "bg-cream-deep ring-2 ring-ink/20" : "bg-cream-deep/40"
-                      }`}
-                    >
-                      {e}
-                    </button>
-                  ))}
-                </div>
+                <EmojiPicker choices={EMOJI_CHOICES} value={emoji} onChange={setEmoji} />
                 <Button block size="lg" onClick={() => continueManual()} disabled={!(query || title).trim()} className="mt-4">
                   Continue
                 </Button>
@@ -546,7 +532,7 @@ function DetailsStep(props: {
               type="button"
               aria-pressed={status === s}
               onClick={() => setStatus(s)}
-              className={`rounded-pill transition ${focusRing} ${status === s ? "ring-2 ring-ink/20" : "opacity-55 hover:opacity-90"}`}
+              className={`-my-2.5 flex min-h-11 items-center rounded-pill transition ${focusRing} ${status === s ? "ring-2 ring-ink/20" : "opacity-55 hover:opacity-90"}`}
             >
               <StatusPill status={s} />
             </button>

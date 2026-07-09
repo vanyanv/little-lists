@@ -72,7 +72,7 @@ export function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v:
             aria-pressed={active}
             aria-label={`${m.label} view`}
             title={`${m.label} view`}
-            className={`relative grid h-9 w-9 place-items-center rounded-full before:absolute before:-inset-1 before:content-[''] ${focusRing}`}
+            className={`relative grid h-10 w-10 place-items-center rounded-full before:absolute before:-inset-1 before:content-[''] ${focusRing}`}
             style={{ color: active ? "var(--color-cream)" : "var(--color-brown)" }}
           >
             {active && (
