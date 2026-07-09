@@ -129,6 +129,8 @@ export interface Item {
   emoji?: string; // food / place / custom
   /** stable seed for the designed placeholder cover; defaults to title */
   seed?: string;
+  /** the person this gift idea (or item generally) is linked to, if any */
+  personId?: string;
   /** newly added this session — used for the gentle pop-in */
   fresh?: boolean;
 }

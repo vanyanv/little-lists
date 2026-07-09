@@ -117,6 +117,8 @@ export interface CreateItemInput {
   imageUrl?: string;
   /** extra provider fields persisted into metadata JSON (year, overview, author, isbn, sourceId, …) */
   meta?: Record<string, unknown>;
+  /** links this item to a person (e.g. a gift idea for someone) */
+  personId?: string;
 }
 
 function itemCreateData(clerkUserId: string, listId: string, input: CreateItemInput) {
@@ -136,6 +138,7 @@ function itemCreateData(clerkUserId: string, listId: string, input: CreateItemIn
     imageUrl: input.imageUrl ?? null,
     tags: input.tags ?? [],
     metadata,
+    personId: input.personId ?? null,
   };
 }
 
@@ -149,6 +152,14 @@ export async function createItemAction(listId: string, input: CreateItemInput): 
   });
   if (!list) throw new Error("createItemAction: list not found");
 
+  if (input.personId) {
+    const person = await prisma.person.findFirst({
+      where: { id: input.personId, userId: clerkUserId },
+      select: { id: true },
+    });
+    if (!person) throw new Error("createItemAction: person not found");
+  }
+
   const row = await prisma.listItem.create({ data: itemCreateData(clerkUserId, listId, input) });
   return mapItem(row, input.type);
 }
@@ -161,6 +172,8 @@ export interface UpdateItemPatch {
   tags?: string[];
   emoji?: string;
   rating?: number;
+  /** links to a person, or null to clear the link */
+  personId?: string | null;
 }
 
 export async function updateItemAction(itemId: string, patch: UpdateItemPatch): Promise<Item | null> {
@@ -170,6 +183,14 @@ export async function updateItemAction(itemId: string, patch: UpdateItemPatch): 
     where: { id: itemId, userId: clerkUserId },
   });
   if (!existing) return null;
+
+  if (patch.personId) {
+    const person = await prisma.person.findFirst({
+      where: { id: patch.personId, userId: clerkUserId },
+      select: { id: true },
+    });
+    if (!person) throw new Error("updateItemAction: person not found");
+  }
 
   const data: Prisma.ListItemUpdateInput = {};
   if (patch.title !== undefined) data.title = patch.title;
@@ -181,6 +202,9 @@ export async function updateItemAction(itemId: string, patch: UpdateItemPatch): 
   if (patch.rating !== undefined) {
     const meta = (existing.metadata ?? {}) as unknown as Record<string, unknown>;
     data.metadata = { ...meta, rating: patch.rating } as Prisma.InputJsonObject;
+  }
+  if (patch.personId !== undefined) {
+    data.person = patch.personId ? { connect: { id: patch.personId } } : { disconnect: true };
   }
 
   const row = await prisma.listItem.update({ where: { id: itemId }, data });
@@ -231,6 +255,14 @@ export async function fileScrapAction(scrapId: string, listId: string, input: Cr
       select: { id: true },
     });
     if (!list) throw new Error("fileScrapAction: list not found");
+
+    if (input.personId) {
+      const person = await tx.person.findFirst({
+        where: { id: input.personId, userId: clerkUserId },
+        select: { id: true },
+      });
+      if (!person) throw new Error("fileScrapAction: person not found");
+    }
 
     const row = await tx.listItem.create({ data: itemCreateData(clerkUserId, listId, input) });
     await tx.scrap.delete({ where: { id: scrapId } });

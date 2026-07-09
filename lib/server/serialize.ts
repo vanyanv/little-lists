@@ -56,6 +56,7 @@ export function mapItem(row: DbItem, fallbackType: ItemType): Item {
     tags: row.tags.length ? row.tags : undefined,
     emoji: row.emoji ?? undefined,
     seed: meta.seed ?? undefined,
+    personId: row.personId ?? undefined,
   };
 }
 

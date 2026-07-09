@@ -298,6 +298,7 @@ export function ListsProvider({
       tags: input.tags,
       emoji: input.emoji,
       seed: input.seed,
+      personId: input.personId,
     };
     setLists((prev) =>
       prev.map((l) => (l.id === listId ? { ...l, items: [optimistic, ...l.items] } : l))
@@ -348,6 +349,7 @@ export function ListsProvider({
       tags: patch.tags,
       emoji: patch.emoji,
       rating: patch.rating,
+      personId: patch.personId,
     }).catch((err) => {
       console.error("updateItem failed", err);
       const snap = before;
@@ -487,6 +489,7 @@ export function ListsProvider({
       emoji: input.emoji,
       seed: input.seed,
       imageUrl: input.imageUrl,
+      personId: input.personId,
     };
     setLists((prev) =>
       prev.map((l) => (l.id === listId ? { ...l, items: [optimistic, ...l.items] } : l))
