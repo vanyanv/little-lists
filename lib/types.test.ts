@@ -26,6 +26,26 @@ describe("statusesForList", () => {
   });
 });
 
+describe("TEMPLATE_META.personField", () => {
+  it("is set only on the gift template, which keeps its extraField as the fallback copy", () => {
+    for (const template of TEMPLATES) {
+      const meta = TEMPLATE_META[template];
+      if (template === "gift") {
+        expect(meta.personField, "gift").toBe(true);
+        // the person picker reuses extraField for its label + note placeholder
+        expect(meta.extraField).toBeDefined();
+      } else {
+        expect(meta.personField, `template "${template}"`).toBeUndefined();
+      }
+    }
+  });
+
+  it("leaves the date template's Where field as plain free text", () => {
+    expect(TEMPLATE_META.date.personField).toBeUndefined();
+    expect(TEMPLATE_META.date.extraField?.label).toBe("Where?");
+  });
+});
+
 describe("TEMPLATE_META.food.statuses", () => {
   it("includes the food template's positive statuses alongside the negatives", () => {
     // Regression: the food status set had been trimmed to only negatives,

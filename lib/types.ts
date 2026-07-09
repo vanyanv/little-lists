@@ -258,6 +258,13 @@ export interface TemplateMeta {
   statusHeading: string;
   /** one optional adaptive field, saved into Item.subtitle */
   extraField?: { label: string; placeholder: string };
+  /**
+   * when set, the `extraField` becomes a person picker instead of free text:
+   * picking someone links `Item.personId` and denormalizes their name into
+   * `Item.subtitle`. `extraField` stays as the label/copy source and the
+   * "just a note" free-text fallback.
+   */
+  personField?: true;
   /** contextual Add Item heading */
   addHeading: (listTitle: string) => string;
 }
@@ -353,7 +360,8 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     sticker: "heart",
     searchable: false,
     statusHeading: "where's it at?",
-    extraField: { label: "Who's it for?", placeholder: "Mom, a friend, future me…" },
+    extraField: { label: "Who's it for?", placeholder: "for the office gift exchange…" },
+    personField: true,
     addHeading: (t) => `Add a gift idea to ${t}.`,
   },
   date: {

@@ -2,6 +2,7 @@ import {
   TEMPLATE_META,
   type Item,
   type ItemType,
+  type List,
   type ListTemplate,
   type Person,
   type PersonDetailEntry,
@@ -82,6 +83,23 @@ export function moveDetailBetweenSections(
 export function filterItemsByStatus(items: Item[], filter: string): Item[] {
   if (filter === "all") return items;
   return items.filter((i) => i.status === filter);
+}
+
+/**
+ * Refresh the denormalized `subtitle` on every item linked to a person, so a
+ * rename never leaves a stale name on a gift card. Only touches lists that hold
+ * a matching item (stable identity elsewhere keeps re-renders minimal).
+ */
+export function renamePersonInItems(lists: List[], personId: string, name: string): List[] {
+  return lists.map((l) => {
+    let changed = false;
+    const items = l.items.map((i) => {
+      if (i.personId !== personId) return i;
+      changed = true;
+      return { ...i, subtitle: name };
+    });
+    return changed ? { ...l, items } : l;
+  });
 }
 
 /** The derived label noun + item kind for a template (mirrors mapList on the server). */

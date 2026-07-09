@@ -45,7 +45,7 @@ import {
   type CreateListInput,
   type CreatePersonInput,
 } from "./actions";
-import { deriveListMeta, insertDetail, moveDetailBetweenSections, removeDetail, replaceDetail } from "./store-helpers";
+import { deriveListMeta, insertDetail, moveDetailBetweenSections, removeDetail, renamePersonInItems, replaceDetail } from "./store-helpers";
 import { SCRAP_MAX_LENGTH, type DetectionResult } from "./scraps";
 
 let _seq = 0;
@@ -98,7 +98,9 @@ interface StoreValue {
   updateItem: (
     listId: string,
     itemId: string,
-    patch: Partial<Item>,
+    // `personId: null` unlinks the item (Partial<Item> alone can't express it;
+    // omit-then-widen, since intersecting would narrow it back to string)
+    patch: Omit<Partial<Item>, "personId"> & { personId?: string | null },
     opts?: { persist?: boolean }
   ) => void;
   deleteItem: (listId: string, itemId: string) => Promise<void>;
@@ -333,7 +335,9 @@ export function ListsProvider({
               items: l.items.map((i) => {
                 if (i.id !== itemId) return i;
                 before = i;
-                return { ...i, ...patch };
+                // normalize a null unlink to undefined so the merged item stays an Item
+                const personId = patch.personId === undefined ? i.personId : patch.personId ?? undefined;
+                return { ...i, ...patch, personId };
               }),
             }
           : l
@@ -629,6 +633,17 @@ export function ListsProvider({
         return { ...p, ...patch };
       })
     );
+    // a rename must also refresh the denormalized subtitle on every linked item,
+    // or gift cards keep showing the old name until reload. Snapshot the lists so
+    // a failed save rolls the subtitles back alongside the person.
+    let listsBefore: List[] | undefined;
+    if (patch.name !== undefined) {
+      const newName = patch.name;
+      setLists((prev) => {
+        listsBefore = prev;
+        return renamePersonInItems(prev, personId, newName);
+      });
+    }
     if (isTempId(personId)) return;
     void updatePersonAction(personId, {
       name: patch.name,
@@ -640,6 +655,7 @@ export function ListsProvider({
       console.error("updatePerson failed", err);
       const snap = before;
       if (snap) setPeople((prev) => prev.map((p) => (p.id === personId ? snap : p)));
+      if (listsBefore) setLists(listsBefore);
       signalSaveError();
     });
   }, [signalSaveError]);

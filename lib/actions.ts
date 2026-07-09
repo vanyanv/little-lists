@@ -358,16 +358,27 @@ export async function updatePersonAction(personId: string, patch: UpdatePersonPa
   });
   if (!existing) return null;
 
-  const row = await prisma.person.update({
-    where: { id: personId },
-    data: {
-      ...(patch.name !== undefined ? { name: patch.name } : {}),
-      ...(patch.emoji !== undefined ? { emoji: patch.emoji } : {}),
-      ...(patch.theme !== undefined ? { themeColor: patch.theme } : {}),
-      ...(patch.note !== undefined ? { shortNote: patch.note || null } : {}),
-      ...(patch.specialDay !== undefined ? { specialDay: patch.specialDay || null } : {}),
-    },
-    include: { details: true },
+  const row = await prisma.$transaction(async (tx) => {
+    const updated = await tx.person.update({
+      where: { id: personId },
+      data: {
+        ...(patch.name !== undefined ? { name: patch.name } : {}),
+        ...(patch.emoji !== undefined ? { emoji: patch.emoji } : {}),
+        ...(patch.theme !== undefined ? { themeColor: patch.theme } : {}),
+        ...(patch.note !== undefined ? { shortNote: patch.note || null } : {}),
+        ...(patch.specialDay !== undefined ? { specialDay: patch.specialDay || null } : {}),
+      },
+      include: { details: true },
+    });
+    // keep the denormalized subtitle on linked items in sync with the new name,
+    // so a gift card never shows a stale "who's it for" after reload.
+    if (patch.name !== undefined) {
+      await tx.listItem.updateMany({
+        where: { personId, userId: clerkUserId },
+        data: { subtitle: patch.name },
+      });
+    }
+    return updated;
   });
   return mapPerson(row);
 }

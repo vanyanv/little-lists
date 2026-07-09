@@ -3,8 +3,9 @@ import {
   moveDetailBetweenSections,
   filterItemsByStatus,
   deriveListMeta,
+  renamePersonInItems,
 } from "./store-helpers";
-import type { Person, Item } from "./types";
+import type { List, Person, Item } from "./types";
 
 function people(): Person[] {
   return [
@@ -62,6 +63,44 @@ describe("filterItemsByStatus", () => {
   });
   it("returns nothing for a status no item has (out-of-template status hidden from that filter)", () => {
     expect(filterItemsByStatus(items, "want-to-watch")).toEqual([]);
+  });
+});
+
+describe("renamePersonInItems", () => {
+  function lists(): List[] {
+    const base = { emoji: "🎁", theme: "blush" as const, noun: "", kind: "custom" as const, template: "gift" as const, pinned: false };
+    return [
+      {
+        id: "l1", title: "Gifts", ...base,
+        items: [
+          { id: "i1", type: "custom", title: "socks", subtitle: "Mae", personId: "p1" },
+          { id: "i2", type: "custom", title: "book", subtitle: "office", personId: undefined },
+        ],
+      },
+      {
+        id: "l2", title: "More gifts", ...base,
+        items: [{ id: "i3", type: "custom", title: "mug", subtitle: "Mae", personId: "p1" }],
+      },
+    ];
+  }
+
+  it("refreshes the subtitle on every item linked to the renamed person, across lists", () => {
+    const out = renamePersonInItems(lists(), "p1", "Maya");
+    expect(out[0].items[0].subtitle).toBe("Maya");
+    expect(out[1].items[0].subtitle).toBe("Maya");
+  });
+
+  it("leaves unlinked items and their subtitles untouched", () => {
+    const out = renamePersonInItems(lists(), "p1", "Maya");
+    expect(out[0].items[1].subtitle).toBe("office");
+  });
+
+  it("keeps referential identity for lists with no matching item", () => {
+    const input = lists();
+    input[0].items = [{ id: "i2", type: "custom", title: "book", subtitle: "office" }];
+    const out = renamePersonInItems(input, "p1", "Maya");
+    expect(out[0]).toBe(input[0]); // untouched list keeps its identity
+    expect(out[1]).not.toBe(input[1]); // the list that changed is a fresh object
   });
 });
 

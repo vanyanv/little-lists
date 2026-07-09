@@ -26,6 +26,7 @@ import { StatusPill } from "./status-pill";
 import { AnimatedCategoryIcon } from "./icons/animated-category-icon";
 import { LittleIcon } from "./icons/little-icon";
 import { StickerBadge } from "./icons/sticker-badge";
+import { PersonPicker } from "./person-picker";
 
 const TYPES: ItemType[] = ["movie", "book", "music", "food", "place", "custom"];
 const EMOJI_CHOICES = ["✨", "🍜", "🍵", "📍", "🎁", "🌷", "🍔", "☕", "🍄", "🌿", "🍷", "🎧", "💡", "🔖", "🧁", "🍿", "🎟️", "🌸"];
@@ -61,7 +62,7 @@ function AddItemFlow({
   scrap?: ScrapRef;
   onClose: () => void;
 }) {
-  const { lists, addItem, addList, fileScrap, fireCelebration } = useStore();
+  const { lists, people, addItem, addList, addPerson, fileScrap, fireCelebration } = useStore();
   const { showToast } = useUi();
   const presetList = lists.find((l) => l.id === presetListId);
 
@@ -74,6 +75,8 @@ function AddItemFlow({
   // chosen thing
   const [title, setTitle] = useState(scrap?.text ?? "");
   const [subtitle, setSubtitle] = useState("");
+  // gift lists link to a person; personId is source of truth, subtitle mirrors the name
+  const [personId, setPersonId] = useState<string | undefined>(undefined);
   const [seed, setSeed] = useState("");
   const [emoji, setEmoji] = useState("✨");
 
@@ -89,6 +92,15 @@ function AddItemFlow({
   const template: ListTemplate = presetList?.template ?? (type as ListTemplate);
   const tmeta = TEMPLATE_META[template];
   const statuses = presetList ? statusesForList(presetList) : tmeta.statuses;
+
+  // the adaptive extra section follows where the item is actually being saved,
+  // so filing a scrap into a gift list surfaces the "who's it for?" picker too.
+  const targetList = lists.find((l) => l.id === targetListId);
+  const effectiveTemplate: ListTemplate = targetList?.template ?? template;
+  const effectiveMeta = TEMPLATE_META[effectiveTemplate];
+  const personField = effectiveMeta.personField ?? false;
+  // derive, never store-through: a non-gift destination can never leak a stale link
+  const effectivePersonId = personField ? personId : undefined;
   const searchable = meta.searchable;
   const searchKind = type === "movie" || type === "book" || type === "music" ? type : null;
 
@@ -207,6 +219,7 @@ function AddItemFlow({
       seed: seed || title,
       imageUrl,
       meta: pickedMeta,
+      personId: effectivePersonId,
     };
 
     if (scrap) {
@@ -403,7 +416,15 @@ function AddItemFlow({
             setTargetListId={presetListId ? undefined : setTargetListId}
             statuses={statuses}
             statusHeading={tmeta.statusHeading}
-            extraField={tmeta.extraField}
+            extraField={effectiveMeta.extraField}
+            personField={personField}
+            people={people}
+            addPerson={addPerson}
+            personId={effectivePersonId}
+            onPerson={(next) => {
+              setPersonId(next.personId);
+              setSubtitle(next.subtitle);
+            }}
             status={status}
             setStatus={setStatus}
             note={note}
@@ -436,6 +457,11 @@ function DetailsStep(props: {
   statuses: StatusId[];
   statusHeading: string;
   extraField?: { label: string; placeholder: string };
+  personField: boolean;
+  people: ReturnType<typeof useStore>["people"];
+  addPerson: ReturnType<typeof useStore>["addPerson"];
+  personId?: string;
+  onPerson: (next: { personId?: string; subtitle: string }) => void;
   status?: StatusId;
   setStatus: (s: StatusId) => void;
   note: string;
@@ -450,7 +476,8 @@ function DetailsStep(props: {
 }) {
   const {
     type, title, subtitle, setSubtitle, seed, imageUrl, emoji, lists, targetListId, setTargetListId,
-    statuses, statusHeading, extraField, status, setStatus, note, setNote, tag, setTag, saving, onBack, onSave,
+    statuses, statusHeading, extraField, personField, people, addPerson, personId, onPerson,
+    status, setStatus, note, setNote, tag, setTag, saving, onBack, onSave,
     onCreateList, creatingList,
   } = props;
   const isPoster = ITEM_TYPE_META[type].aspect !== "note";
@@ -540,7 +567,19 @@ function DetailsStep(props: {
         </div>
       </div>
 
-      {extraField && (
+      {personField ? (
+        <div className="mt-5">
+          <PersonPicker
+            people={people}
+            personId={personId}
+            subtitle={subtitle}
+            onChange={onPerson}
+            addPerson={addPerson}
+            label={extraField?.label ?? "Who's it for?"}
+            notePlaceholder={extraField?.placeholder ?? "for the office gift exchange…"}
+          />
+        </div>
+      ) : extraField ? (
         <div className="mt-5">
           <label htmlFor="add-item-extra" className="mb-2 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">{extraField.label}</label>
           <input
@@ -551,7 +590,7 @@ function DetailsStep(props: {
             className={inputField}
           />
         </div>
-      )}
+      ) : null}
 
       <div className="mt-5">
         <label htmlFor="add-item-note" className="mb-2 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">a little note</label>

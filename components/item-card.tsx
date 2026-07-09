@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Item, StatusId } from "@/lib/types";
-import { ITEM_TYPE_META } from "@/lib/types";
+import { ITEM_TYPE_META, TEMPLATE_META } from "@/lib/types";
 import { EXAMPLE_TAG, isExample } from "@/lib/onboarding";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { focusRing } from "@/lib/a11y";
 import { ExampleChip } from "./chip";
+import { PersonPicker } from "./person-picker";
 import { ExpandableCard } from "./expandable-card";
 import { PosterCard } from "./poster-card";
 import { NoteCard } from "./note-card";
@@ -28,10 +29,13 @@ function ItemEditor({
   item: Item;
   statuses: StatusId[];
 }) {
-  const { addItem, updateItem, deleteItem } = useStore();
+  const { lists, people, addItem, addPerson, updateItem, deleteItem } = useStore();
   const { showToast } = useUi();
   const options = statuses;
   const isNote = ITEM_TYPE_META[item.type].aspect === "note";
+  // gift lists edit "who's it for?" through the person picker instead of subtitle
+  const list = lists.find((l) => l.id === listId);
+  const personField = list ? TEMPLATE_META[list.template].personField ?? false : false;
 
   // Local state for the free-text fields so typing stays snappy. Each keystroke
   // updates the store optimistically (so the card summary tracks live) but the
@@ -68,6 +72,22 @@ function ItemEditor({
 
   // flush any pending trailing write when the editor closes / unmounts
   useEffect(() => flush, [flush]);
+
+  // Picking / unlinking a person is a discrete choice — persist it right away
+  // (and carry the denormalized subtitle). Typing a free-text note reuses the
+  // debounced trailing write so it stays as snappy as the other text fields.
+  const onPersonChange = useCallback(
+    (next: { personId?: string; subtitle: string }) => {
+      const linkChanged = (next.personId ?? null) !== (item.personId ?? null);
+      if (linkChanged) {
+        flush(); // don't let a queued note-text write clobber the link
+        updateItem(listId, item.id, { personId: next.personId ?? null, subtitle: next.subtitle });
+      } else {
+        queueEdit({ subtitle: next.subtitle });
+      }
+    },
+    [item.personId, item.id, listId, updateItem, queueEdit, flush]
+  );
 
   // preserve the internal "example" marker (never shown, never typed) on save
   const tagsFromText = (text: string): string[] => {
@@ -162,6 +182,24 @@ function ItemEditor({
           })}
         </div>
       </div>
+
+      {/* who's it for? — gift lists only */}
+      {personField && (
+        <div className="mt-3.5">
+          <PersonPicker
+            people={people}
+            personId={item.personId}
+            subtitle={item.subtitle ?? ""}
+            onChange={onPersonChange}
+            addPerson={addPerson}
+            label={list?.template ? TEMPLATE_META[list.template].extraField?.label ?? "Who's it for?" : "Who's it for?"}
+            notePlaceholder={
+              list?.template ? TEMPLATE_META[list.template].extraField?.placeholder ?? "for the office gift exchange…" : "for the office gift exchange…"
+            }
+            onCreateError={() => showToast("That didn't save. Let's try again 🌿")}
+          />
+        </div>
+      )}
 
       {/* note */}
       <label htmlFor={`item-note-${item.id}`} className="mb-1.5 mt-3.5 block text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">a little note</label>
