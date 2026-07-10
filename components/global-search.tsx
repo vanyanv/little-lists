@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
-import { focusRing, useComboboxNav } from "@/lib/a11y";
+import { focusRing } from "@/lib/a11y";
+import { useComboboxNav } from "@/lib/use-combobox-nav";
 import { searchLittleWorld, type LocalHit } from "@/lib/search/local";
 import { scrapAge } from "@/lib/scraps";
 import { ITEM_TYPE_META } from "@/lib/types";
@@ -222,7 +223,13 @@ export function GlobalSearch({ query, onQueryChange }: { query: string; onQueryC
             animate={{ opacity: 1, y: 0 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
             transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-3 max-h-[60vh] overflow-y-auto rounded-2xl bg-paper p-2 shadow-soft ring-1 ring-line/60"
+            // The listbox is its own scroll container (independent of <main>'s pb-36), and its
+            // max-height is viewport-relative while its top offset on the page isn't — so a
+            // flat clearance has to cover the worst case (results starting further down the
+            // page, e.g. with the first-steps checklist card showing). Reserve room for both
+            // fixed bottom fixtures (FAB, then nav) so the last option's bottom edge always
+            // lands above the FAB, not just the nav.
+            className="mt-3 max-h-[60vh] overflow-y-auto rounded-2xl bg-paper p-2 pb-[calc(env(safe-area-inset-bottom)+16rem)] shadow-soft ring-1 ring-line/60"
           >
             {showEmpty ? (
               <p className="px-3 py-6 text-center text-[0.95rem] leading-relaxed text-brown">
