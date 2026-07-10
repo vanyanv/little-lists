@@ -298,11 +298,16 @@ export function ItemCard({
   item,
   view,
   statuses,
+  hideSubtitle,
 }: {
   listId: string;
   item: Item;
   view: ViewMode;
   statuses: StatusId[];
+  /** Suppress the cozy-view subtitle line — e.g. on a person page, where every
+   *  card's subtitle is that same person's denormalized name and would just
+   *  echo the section heading. Display-only: the picker/link is untouched. */
+  hideSubtitle?: boolean;
 }) {
   const isMedia = ITEM_TYPE_META[item.type].aspect !== "note";
   const [sparkle, setSparkle] = useState(Boolean(item.fresh));
@@ -321,7 +326,7 @@ export function ItemCard({
     summary = <CompactRow item={item} />;
     chrome = "rounded-2xl bg-paper px-3 py-2 shadow-soft ring-1 ring-line/30";
   } else {
-    summary = <NoteCard item={item} />;
+    summary = <NoteCard item={item} hideSubtitle={hideSubtitle} />;
     chrome = "rounded-2xl bg-paper p-3.5 shadow-soft ring-1 ring-line/30";
   }
 

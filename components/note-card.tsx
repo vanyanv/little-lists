@@ -7,7 +7,7 @@ import { StatusPill } from "./status-pill";
 import { StickerBadge } from "./icons/sticker-badge";
 
 /** Cozy note-style summary — a mini cover for media, a sticker tile for everything else. */
-export function NoteCard({ item }: { item: Item }) {
+export function NoteCard({ item, hideSubtitle }: { item: Item; hideSubtitle?: boolean }) {
   const isMedia = ITEM_TYPE_META[item.type].aspect !== "note";
   // the seeded-example tag gets its own soft chip, so keep it out of the #hashtags
   const visibleTags = item.tags?.filter((t) => t !== EXAMPLE_TAG) ?? [];
@@ -33,7 +33,7 @@ export function NoteCard({ item }: { item: Item }) {
           </h3>
           {item.status && <StatusPill status={item.status} />}
         </div>
-        {item.subtitle && (
+        {item.subtitle && !hideSubtitle && (
           <p className="mt-0.5 text-[0.82rem] font-semibold text-brown-soft">{item.subtitle}</p>
         )}
         {isExample(item.tags) && (
