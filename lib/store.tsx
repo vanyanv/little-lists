@@ -634,15 +634,12 @@ export function ListsProvider({
       })
     );
     // a rename must also refresh the denormalized subtitle on every linked item,
-    // or gift cards keep showing the old name until reload. Snapshot the lists so
-    // a failed save rolls the subtitles back alongside the person.
-    let listsBefore: List[] | undefined;
+    // or gift cards keep showing the old name until reload. On failure we roll the
+    // subtitle back with the same surgical helper rather than reverting the whole
+    // lists array, which would clobber any unrelated mutation that landed mid-roundtrip.
     if (patch.name !== undefined) {
       const newName = patch.name;
-      setLists((prev) => {
-        listsBefore = prev;
-        return renamePersonInItems(prev, personId, newName);
-      });
+      setLists((prev) => renamePersonInItems(prev, personId, newName));
     }
     if (isTempId(personId)) return;
     void updatePersonAction(personId, {
@@ -655,7 +652,10 @@ export function ListsProvider({
       console.error("updatePerson failed", err);
       const snap = before;
       if (snap) setPeople((prev) => prev.map((p) => (p.id === personId ? snap : p)));
-      if (listsBefore) setLists(listsBefore);
+      if (patch.name !== undefined && snap) {
+        const oldName = snap.name;
+        setLists((prev) => renamePersonInItems(prev, personId, oldName));
+      }
       signalSaveError();
     });
   }, [signalSaveError]);
@@ -850,7 +850,7 @@ export function usePerson(id: string): Person | undefined {
 
 /* ── helpers ───────────────────────────────────────────────────────── */
 
-function isTempId(id: string): boolean {
+export function isTempId(id: string): boolean {
   return (
     id.startsWith("list-") ||
     id.startsWith("item-") ||

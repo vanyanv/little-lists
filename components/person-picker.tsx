@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Person } from "@/lib/types";
 import type { CreatePersonInput } from "@/lib/actions";
+import { isTempId } from "@/lib/store";
 import { focusRing } from "@/lib/a11y";
 import { inputField } from "@/lib/field";
 import { Button } from "./button";
@@ -86,7 +87,7 @@ export function PersonPicker({
     <div>
       <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">{label}</p>
       <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
-        {people.map((p) => {
+        {people.filter((p) => !isTempId(p.id)).map((p) => {
           const active = p.id === personId;
           return (
             <button key={p.id} type="button" aria-pressed={active} onClick={() => pickPerson(p)} className={chip(active)}>

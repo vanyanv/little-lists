@@ -480,6 +480,7 @@ function DetailsStep(props: {
     status, setStatus, note, setNote, tag, setTag, saving, onBack, onSave,
     onCreateList, creatingList,
   } = props;
+  const { showToast } = useUi();
   const isPoster = ITEM_TYPE_META[type].aspect !== "note";
   const targetList = lists.find((l) => l.id === targetListId);
   const themed = targetList ? themeClass(targetList.theme) : "";
@@ -577,6 +578,7 @@ function DetailsStep(props: {
             addPerson={addPerson}
             label={extraField?.label ?? "Who's it for?"}
             notePlaceholder={extraField?.placeholder ?? "for the office gift exchange…"}
+            onCreateError={() => showToast("That didn't save. Let's try again 🌿")}
           />
         </div>
       ) : extraField ? (
