@@ -1,13 +1,18 @@
 "use client";
 
+import { useMemo } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
 import { usePerson, useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
 import { staggerContainer, riseItem } from "@/lib/motion";
+import { statusesForList } from "@/lib/types";
+import { linkedItemsByPerson } from "@/lib/store-helpers";
 import { DetailHeader } from "@/components/detail-header";
 import { PersonDetailSection } from "@/components/person-detail-section";
+import { ItemCard } from "@/components/item-card";
 import { EmptyState } from "@/components/empty-state";
 import { OverflowMenu } from "@/components/overflow-menu";
 import { Button } from "@/components/button";
@@ -24,10 +29,17 @@ const STARTER_PROMPTS: { sectionId: string; label: string }[] = [
 export default function PersonDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const person = usePerson(id);
-  const { deletePersonDetail, deletePerson } = useStore();
+  const { lists, deletePersonDetail, deletePerson } = useStore();
   const { openDetailSheet, openEditPerson, openConfirm, showToast, openEditDetail } = useUi();
   const router = useRouter();
   const reduce = useReducedMotion();
+
+  // little ideas: items linked to this person (via the gift/date person picker),
+  // grouped by the list that holds them — hooks must run before the early return
+  const linked = useMemo(
+    () => (person ? linkedItemsByPerson(lists, person.id) : []),
+    [lists, person]
+  );
 
   if (!person) {
     return (
@@ -137,6 +149,32 @@ export default function PersonDetailScreen() {
             </motion.div>
           ))}
         </motion.div>
+      )}
+
+      {linked.length > 0 && (
+        <section className="mt-8 px-4 pb-6" aria-label={`Little ideas for ${person.name}`}>
+          <h2 className="px-1 font-display text-[1.3rem] font-semibold text-ink">
+            Little ideas for {person.name}
+          </h2>
+          <div className="mt-3 flex flex-col gap-5">
+            {linked.map(({ list, items }) => (
+              <div key={list.id} className={themeClass(list.theme)}>
+                <Link
+                  href={`/app/list/${list.id}`}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-1 py-0.5 font-display text-[0.98rem] font-semibold text-ink transition-colors hover:text-[var(--t-ink)] ${focusRing}`}
+                >
+                  <span aria-hidden>{list.emoji}</span>
+                  <span>{list.title}</span>
+                </Link>
+                <div className="mt-2 flex flex-col gap-2.5">
+                  {items.map((item) => (
+                    <ItemCard key={item.id} listId={list.id} item={item} view="cozy" statuses={statusesForList(list)} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );

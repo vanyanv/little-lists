@@ -107,3 +107,17 @@ export function deriveListMeta(template: ListTemplate): { noun: string; kind: It
   const meta = TEMPLATE_META[template];
   return { noun: meta.noun, kind: meta.kind };
 }
+
+/**
+ * Items linked to a person (via `Item.personId`), grouped by the list that
+ * holds them, in list order. Lists with no linked items are omitted so the
+ * person page's "little ideas" section only ever shows groups with content.
+ */
+export function linkedItemsByPerson(lists: List[], personId: string): { list: List; items: Item[] }[] {
+  const out: { list: List; items: Item[] }[] = [];
+  for (const l of lists) {
+    const items = l.items.filter((i) => i.personId === personId);
+    if (items.length > 0) out.push({ list: l, items });
+  }
+  return out;
+}

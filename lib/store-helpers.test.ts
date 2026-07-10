@@ -4,6 +4,7 @@ import {
   filterItemsByStatus,
   deriveListMeta,
   renamePersonInItems,
+  linkedItemsByPerson,
 } from "./store-helpers";
 import type { List, Person, Item } from "./types";
 
@@ -108,5 +109,39 @@ describe("deriveListMeta", () => {
   it("derives noun and kind from the template", () => {
     expect(deriveListMeta("food")).toEqual({ noun: "little tastes noted", kind: "food" });
     expect(deriveListMeta("movie")).toEqual({ noun: "little films saved", kind: "movie" });
+  });
+});
+
+describe("linkedItemsByPerson", () => {
+  function lists(): List[] {
+    const base = { emoji: "🎁", theme: "blush" as const, noun: "", kind: "custom" as const, template: "gift" as const, pinned: false };
+    return [
+      {
+        id: "l1", title: "Gifts", ...base,
+        items: [
+          { id: "i1", type: "custom", title: "socks", personId: "p1" },
+          { id: "i2", type: "custom", title: "book", personId: undefined },
+        ],
+      },
+      {
+        id: "l2", title: "Date ideas", ...base,
+        items: [{ id: "i3", type: "custom", title: "picnic", personId: "p1" }],
+      },
+      {
+        id: "l3", title: "Unrelated list", ...base,
+        items: [{ id: "i4", type: "custom", title: "widget", personId: "p2" }],
+      },
+    ];
+  }
+
+  it("groups linked items by list, in list order, omitting lists with none", () => {
+    const out = linkedItemsByPerson(lists(), "p1");
+    expect(out.map((g) => g.list.id)).toEqual(["l1", "l2"]);
+    expect(out[0].items.map((i) => i.id)).toEqual(["i1"]);
+    expect(out[1].items.map((i) => i.id)).toEqual(["i3"]);
+  });
+
+  it("returns an empty array when the person has no linked items", () => {
+    expect(linkedItemsByPerson(lists(), "p-nobody")).toEqual([]);
   });
 });
