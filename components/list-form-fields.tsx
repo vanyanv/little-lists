@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   TEMPLATE_META,
+  templateRailOrder,
   type ListTemplate,
   type ThemeColor,
   type ViewMode,
@@ -18,10 +19,6 @@ import { ThemeColorPicker } from "./theme-chip";
 import { AnimatedCategoryIcon } from "./icons/animated-category-icon";
 import { LittleIcon } from "./icons/little-icon";
 import { StickerBadge } from "./icons/sticker-badge";
-
-const TEMPLATE_ORDER: ListTemplate[] = [
-  "custom", "movie", "book", "music", "food", "place", "gift", "date", "people",
-];
 
 const EMOJI_CHOICES = ["✨", "🎬", "📚", "🍴", "📍", "🎁", "🌷", "🌼", "🛋️", "🎧", "☕", "🍵", "🌿", "🏞️", "💌", "🪩", "🖊️", "🐾"];
 
@@ -52,6 +49,7 @@ export function ListFormFields({
   personalizeCollapsed = false,
 }: ListFormFieldsProps) {
   const { name, template, emoji, theme, view } = value;
+  const templateOrder = templateRailOrder(template);
 
   const railRef = useRef<HTMLDivElement>(null);
   const [atStart, setAtStart] = useState(true);
@@ -133,7 +131,7 @@ export function ListFormFields({
             onScroll={measureRail}
             className="no-scrollbar -mx-2 flex snap-x snap-mandatory gap-2.5 overflow-x-auto scroll-px-2 px-2 pb-2 pt-2"
           >
-            {TEMPLATE_ORDER.map((t) => {
+            {templateOrder.map((t) => {
               const meta = TEMPLATE_META[t];
               const active = t === template;
               return (

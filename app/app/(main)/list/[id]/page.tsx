@@ -16,6 +16,7 @@ import { ViewToggle, type ViewMode } from "@/components/view-toggle";
 import { EmptyState } from "@/components/empty-state";
 import { OverflowMenu } from "@/components/overflow-menu";
 import { Button } from "@/components/button";
+import { PeopleTemplateNudge } from "@/components/people-template-nudge";
 import { filterItemsByStatus } from "@/lib/store-helpers";
 
 /** the list's saved view, falling back to its template default */
@@ -149,6 +150,15 @@ export default function ListDetailScreen() {
         sticker={TEMPLATE_META[list.template].sticker}
         menu={listMenu}
       />
+
+      {/* grandfathered "People notes" lists: the template is retired from
+          pickers, so steer toward the canonical People tab without touching
+          anything about how this existing list works */}
+      {list.template === "people" && (
+        <div className="px-4">
+          <PeopleTemplateNudge />
+        </div>
+      )}
 
       {list.items.length > 0 && (
         <div

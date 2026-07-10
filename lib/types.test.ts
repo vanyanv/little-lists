@@ -1,8 +1,10 @@
 import { describe, it, expect } from "vitest";
 import {
+  NEW_LIST_TEMPLATES,
   STATUS_META,
   TEMPLATE_META,
   statusesForList,
+  templateRailOrder,
   type ListTemplate,
 } from "./types";
 
@@ -43,6 +45,29 @@ describe("TEMPLATE_META.personField", () => {
   it("leaves the date template's Where field as plain free text", () => {
     expect(TEMPLATE_META.date.personField).toBeUndefined();
     expect(TEMPLATE_META.date.extraField?.label).toBe("Where?");
+  });
+});
+
+describe("templateRailOrder", () => {
+  it("never offers the retired people template when starting fresh", () => {
+    expect(NEW_LIST_TEMPLATES).not.toContain("people");
+    for (const current of NEW_LIST_TEMPLATES) {
+      expect(templateRailOrder(current)).toEqual(NEW_LIST_TEMPLATES);
+    }
+  });
+
+  it("still lets a grandfathered people_notes list render/select its own template", () => {
+    const order = templateRailOrder("people");
+    expect(order).toEqual([...NEW_LIST_TEMPLATES, "people"]);
+    expect(order).toContain("people");
+  });
+
+  it("gives every rail template a TEMPLATE_META entry", () => {
+    for (const current of [...NEW_LIST_TEMPLATES, "people"] as ListTemplate[]) {
+      for (const t of templateRailOrder(current)) {
+        expect(TEMPLATE_META[t], `template "${t}"`).toBeDefined();
+      }
+    }
   });
 });
 

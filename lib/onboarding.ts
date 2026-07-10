@@ -129,6 +129,10 @@ export const ONBOARDING_STATE_KEY = "ll:onboarding-state";
 /** localStorage flag for the "starter ideas added" banner dismissal */
 export const DEMO_BANNER_DISMISSED_KEY = "ll:demo-banner-dismissed";
 
+/** localStorage flag for the "give them their own little page" nudge shown on
+ * grandfathered people_notes lists, pointing at the canonical People tab */
+export const PEOPLE_TEMPLATE_NUDGE_DISMISSED_KEY = "ll:people-template-nudge-dismissed";
+
 /**
  * The demo person, kept in step with the landing page's PREVIEW_PERSON.
  * No fixed name: seeding picks one at random from DEMO_NAMES (lib/demo-names.ts),

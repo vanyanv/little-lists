@@ -416,3 +416,23 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
 export function statusesForList(list: Pick<List, "template">): StatusId[] {
   return TEMPLATE_META[list.template].statuses;
 }
+
+/**
+ * Templates offered when picking a starting point for a list. "people" is
+ * retired here — the People tab is the canonical place for that now — but
+ * existing `people_notes` lists must still be able to render/select their own
+ * template when edited, so `templateRailOrder` appends it back for them.
+ */
+export const NEW_LIST_TEMPLATES: ListTemplate[] = [
+  "custom", "movie", "book", "music", "food", "place", "gift", "date",
+];
+
+/** the ordered list of templates to render in the create/edit rail, for a
+ * form currently holding `current`: the picker set, plus `current` tacked on
+ * the end if it's been retired from new picks (so a grandfathered list never
+ * gets stranded off the rail). */
+export function templateRailOrder(current: ListTemplate): ListTemplate[] {
+  return NEW_LIST_TEMPLATES.includes(current)
+    ? NEW_LIST_TEMPLATES
+    : [...NEW_LIST_TEMPLATES, current];
+}
