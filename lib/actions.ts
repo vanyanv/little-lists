@@ -706,4 +706,8 @@ export async function deleteAccountAction(): Promise<void> {
   await prisma.profile.deleteMany({ where: { clerkUserId } });
   const client = await clerkClient();
   await client.users.deleteUser(clerkUserId);
+  // Belt-and-suspenders: a concurrent request could have raced with the Clerk
+  // deletion and re-created the Profile row via ensureProfileForClerkUser in
+  // that window. Clear it again now that the Clerk user is gone for good.
+  await prisma.profile.deleteMany({ where: { clerkUserId } });
 }

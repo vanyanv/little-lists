@@ -18,8 +18,10 @@ export default function PrivacyPage() {
         encrypted between your device and our servers.
       </InfoSection>
       <InfoSection heading="What we keep, and for how long">
-        Just the little lists you make: their titles, items, notes, and the details you jot about the
-        people you love, tied to your account so they are waiting for you next time. Everything you save
+        The little lists you make: their titles, items, notes, and the details you jot about the
+        people you love, tied to your account so they are waiting for you next time. We also keep a
+        small, content-free log of which features get used (never what is inside your lists) so we
+        know what to improve. It is erased when you delete your account. Everything you save
         stays until you delete it, whether that is a single item or your whole account. Account deletion
         is immediate and erases all of it.
       </InfoSection>

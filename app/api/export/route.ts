@@ -23,10 +23,16 @@ export async function GET(req: Request) {
     exportedAt: new Date().toISOString(),
     profile: { name: profile.displayName, theme: profile.themeColor ?? "blush" },
     lists: lists.map((l) => ({ id: l.id, title: l.title, emoji: l.emoji,
-      template: String(templateToUi(l.templateType)),
-      items: l.items.map((i) => ({ id: i.id, title: i.title, note: i.note,
-        status: i.status, tags: i.tags })) })),
+      template: String(templateToUi(l.templateType)), theme: l.themeColor,
+      description: l.description ?? null, pinned: l.pinned,
+      items: l.items.map((i) => {
+        const meta = (i.metadata ?? {}) as { type?: string; rating?: number };
+        return { id: i.id, title: i.title, subtitle: i.subtitle, note: i.note,
+          status: i.status, rating: meta.rating, type: meta.type, emoji: i.emoji,
+          imageUrl: i.imageUrl, tags: i.tags, personId: i.personId, pinned: i.pinned };
+      }) })),
     people: people.map((p) => ({ id: p.id, name: p.name, emoji: p.emoji,
+      theme: p.themeColor ?? "blush", note: p.shortNote ?? null, specialDay: p.specialDay ?? undefined,
       details: p.details.map((d) => ({ id: d.id, section: d.section, title: d.title,
         note: d.note, tags: d.tags })) })),
     scraps: scraps.map((s) => ({ id: s.id, text: s.text })),
