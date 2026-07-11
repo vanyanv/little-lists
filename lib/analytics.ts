@@ -33,6 +33,28 @@ export function isProductEventName(value: string): value is ProductEventName {
   return EVENT_NAMES.has(value);
 }
 
+const MAX_KEYS = 12;
+const MAX_STRING = 120;
+
+/**
+ * Defense-in-depth: strip anything that isn't a categorical primitive so no
+ * user-authored content can ever reach the analytics table. Deterministic
+ * (sorted keys) so truncation is stable in tests.
+ */
+export function sanitizeAnalyticsProperties(input: unknown): AnalyticsProperties {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) return {};
+  const out: AnalyticsProperties = {};
+  const keys = Object.keys(input as Record<string, unknown>).sort();
+  for (const key of keys) {
+    if (Object.keys(out).length >= MAX_KEYS) break;
+    const value = (input as Record<string, unknown>)[key];
+    if (typeof value === "string") out[key] = value.slice(0, MAX_STRING);
+    else if (typeof value === "number" || typeof value === "boolean" || value === null) out[key] = value;
+    // everything else (objects, arrays, functions, undefined) is dropped
+  }
+  return out;
+}
+
 /**
  * Product analytics must never make the product action fail. Callers pass only
  * categorical values, booleans, and counts, never user-authored content.
