@@ -44,4 +44,11 @@ describe("clerk webhook", () => {
     expect(res.status).toBe(200);
     expect(deleteMany).not.toHaveBeenCalled();
   });
+
+  it("returns 500 when the signing secret is not configured", async () => {
+    delete process.env.CLERK_WEBHOOK_SIGNING_SECRET;
+    const res = await POST(req({}));
+    expect(res.status).toBe(500);
+    expect(deleteMany).not.toHaveBeenCalled();
+  });
 });

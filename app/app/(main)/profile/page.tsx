@@ -41,8 +41,12 @@ export default function ProfileScreen() {
   const { openUserProfile, signOut } = useClerk();
 
   async function onDeleteAccount() {
-    await deleteAccountAction();
-    await signOut({ redirectUrl: "/" });
+    try {
+      await deleteAccountAction();
+      await signOut({ redirectUrl: "/" });
+    } catch {
+      showToast("Something went wrong deleting your account. Please try again.");
+    }
   }
 
   const loved = useMemo(() => {
@@ -179,7 +183,7 @@ export default function ProfileScreen() {
               })
             }
           >
-            <span className="text-red-600">Delete my account</span>
+            <span className="text-rosewood">Delete my account</span>
           </CornerRow>
         </div>
       </section>
