@@ -9,6 +9,7 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",
   "/privacy",
   "/terms",
+  "/api/webhooks/clerk",
 ]);
 
 // The entry screens a signed-in user should skip past, straight to their world.

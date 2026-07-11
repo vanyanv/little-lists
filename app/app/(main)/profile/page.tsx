@@ -5,6 +5,7 @@ import Link from "next/link";
 import { SignOutButton, useClerk } from "@clerk/nextjs";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
+import { deleteAccountAction } from "@/lib/actions";
 import { ITEM_TYPE_META } from "@/lib/types";
 import { isExample } from "@/lib/onboarding";
 import { archiveSummary } from "@/lib/visual";
@@ -37,7 +38,12 @@ function CornerRow({
 export default function ProfileScreen() {
   const { lists, people, clearExamples } = useStore();
   const { openConfirm, showToast } = useUi();
-  const { openUserProfile } = useClerk();
+  const { openUserProfile, signOut } = useClerk();
+
+  async function onDeleteAccount() {
+    await deleteAccountAction();
+    await signOut({ redirectUrl: "/" });
+  }
 
   const loved = useMemo(() => {
     const out: { listId: string; item: (typeof lists)[number]["items"][number] }[] = [];
@@ -154,6 +160,27 @@ export default function ProfileScreen() {
             Download as spreadsheets (CSV)
             <span aria-hidden className="text-brown-soft">↓</span>
           </a>
+        </div>
+      </section>
+
+      {/* delete account */}
+      <section className="mt-8" aria-label="Delete your account">
+        <div className="overflow-hidden rounded-2xl bg-paper shadow-soft ring-1 ring-line/40">
+          <CornerRow
+            onClick={() =>
+              openConfirm({
+                title: "Delete your account?",
+                body: "This erases everything in your little world. It can't be undone.",
+                confirmLabel: "Delete forever",
+                tone: "danger",
+                onConfirm: () => {
+                  void onDeleteAccount();
+                },
+              })
+            }
+          >
+            <span className="text-red-600">Delete my account</span>
+          </CornerRow>
         </div>
       </section>
 

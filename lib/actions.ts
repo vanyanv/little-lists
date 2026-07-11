@@ -1,6 +1,7 @@
 "use server";
 
 import { Prisma, type PersonDetail } from "@prisma/client";
+import { clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { requireUserProfile, getCurrentUserProfile } from "@/lib/server/profile";
 import {
@@ -691,4 +692,18 @@ export async function trackProductEventAction(input: {
   } catch (error) {
     console.error("trackProductEventAction failed", error);
   }
+}
+
+/* ── account ─────────────────────────────────────────────────────────── */
+
+/**
+ * Delete the signed-in user's account and all their data. Removes the DB row
+ * immediately (belt-and-suspenders: the Clerk user.deleted webhook also wipes
+ * it), then deletes the Clerk user, which ends their session.
+ */
+export async function deleteAccountAction(): Promise<void> {
+  const { clerkUserId } = await requireUserProfile();
+  await prisma.profile.deleteMany({ where: { clerkUserId } });
+  const client = await clerkClient();
+  await client.users.deleteUser(clerkUserId);
 }
