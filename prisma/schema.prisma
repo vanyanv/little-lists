@@ -64,6 +64,7 @@ model List {
   defaultViewMode ViewMode     @default(cozy)
   description     String?
   pinned          Boolean      @default(false)
+  defaultSort     String?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 

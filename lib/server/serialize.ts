@@ -18,6 +18,7 @@ import {
   type PersonSection,
   type Profile,
   type Scrap,
+  type SortMode,
   type StatusId,
   type ThemeColor,
   type ViewMode,
@@ -57,6 +58,8 @@ export function mapItem(row: DbItem, fallbackType: ItemType): Item {
     emoji: row.emoji ?? undefined,
     seed: meta.seed ?? undefined,
     personId: row.personId ?? undefined,
+    pinned: row.pinned,
+    position: row.position ?? null,
   };
 }
 
@@ -75,6 +78,7 @@ export function mapList(row: DbList & { items?: DbItem[] }): List {
     kind: meta.kind,
     template,
     defaultView: row.defaultViewMode as ViewMode,
+    defaultSort: (row.defaultSort as SortMode | null) ?? undefined,
     pinned: row.pinned,
     items,
   };

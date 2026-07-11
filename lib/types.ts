@@ -1,6 +1,10 @@
 // Little Lists — shared types
 
 import type { StickerName } from "@/components/sticker";
+import type { SortMode } from "./sort";
+// re-exported so consumers can `import type { SortMode } from "@/lib/types"`
+// alongside the other list/item types, without reaching into "./sort" directly.
+export type { SortMode };
 
 export type ThemeColor =
   | "blush"
@@ -131,6 +135,10 @@ export interface Item {
   seed?: string;
   /** the person this gift idea (or item generally) is linked to, if any */
   personId?: string;
+  /** pinned items float to the top of the list in every sort mode */
+  pinned?: boolean;
+  /** manual sort position; null/undefined => unpositioned (sorts last in custom) */
+  position?: number | null;
   /** newly added this session — used for the gentle pop-in */
   fresh?: boolean;
 }
@@ -170,6 +178,8 @@ export interface List {
   template: ListTemplate;
   /** the user's chosen browsing view; falls back to the template default */
   defaultView?: ViewMode;
+  /** the user's chosen sort for this list; falls back to "recent" */
+  defaultSort?: SortMode;
   /** pinned lists sort to the top of Home and take the hero slot */
   pinned: boolean;
   items: Item[];
