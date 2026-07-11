@@ -9,6 +9,7 @@ import { listCountLabel, themeClass } from "@/lib/visual";
 import { softSpring } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
 import { STATUS_META, TEMPLATE_META, statusesForList, type List } from "@/lib/types";
+import { EXAMPLE_TAG } from "@/lib/onboarding";
 import { DetailHeader } from "@/components/detail-header";
 import { ItemCard } from "@/components/item-card";
 import { FilterChips, type FilterOption } from "@/components/filter-chips";
@@ -55,9 +56,12 @@ export default function ListDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const list = useList(id);
   const { setListView, setListSort, reorderItems, deleteList } = useStore();
+  const people = useStore().people;
   const { openItemSheet, openEditList, openConfirm, showToast } = useUi();
   const router = useRouter();
   const [filter, setFilter] = useState("all");
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [personFilter, setPersonFilter] = useState<string | null>(null);
   const [view, setView] = useState<ViewMode>(() => defaultViewFor(list));
   const [sort, setSort] = useState<SortMode>(() => defaultSortFor(list));
   const [query, setQuery] = useState("");
@@ -83,6 +87,8 @@ export default function ListDetailScreen() {
     if (derivedForRef.current === list.id) return;
     derivedForRef.current = list.id;
     setFilter("all");
+    setTagFilter(null);
+    setPersonFilter(null);
     setQuery("");
     setView(defaultViewFor(list));
     setSort(defaultSortFor(list));
@@ -101,20 +107,42 @@ export default function ListDetailScreen() {
     return base;
   }, [list]);
 
+  const tagOptions = useMemo(() => {
+    if (!list) return [] as string[];
+    const set = new Set<string>();
+    for (const it of list.items) for (const t of it.tags ?? []) if (t !== EXAMPLE_TAG) set.add(t);
+    return [...set].sort((a, b) => a.localeCompare(b));
+  }, [list]);
+
+  const personOptions = useMemo(() => {
+    if (!list) return [] as { id: string; name: string }[];
+    const ids = new Set<string>();
+    for (const it of list.items) if (it.personId) ids.add(it.personId);
+    return [...ids]
+      .map((id) => ({ id, name: people.find((p) => p.id === id)?.name ?? "Someone" }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [list, people]);
+
   const visible = useMemo(() => {
     if (!list) return [];
-    const byStatus = filterItemsByStatus(list.items, filter);
+    let rows = filterItemsByStatus(list.items, filter);
+    if (tagFilter) rows = rows.filter((i) => (i.tags ?? []).includes(tagFilter));
+    if (personFilter) rows = rows.filter((i) => i.personId === personFilter);
     const q = query.trim().toLowerCase();
-    const filtered = !q
-      ? byStatus
-      : byStatus.filter(
-          (i) => i.title.toLowerCase().includes(q) || (i.note ?? "").toLowerCase().includes(q)
-        );
-    return sortItems(filtered, sort, statusesForList(list));
-  }, [list, filter, query, sort]);
+    if (q)
+      rows = rows.filter(
+        (i) => i.title.toLowerCase().includes(q) || (i.note ?? "").toLowerCase().includes(q)
+      );
+    return sortItems(rows, sort, statusesForList(list));
+  }, [list, filter, tagFilter, personFilter, query, sort]);
 
   const dragEnabled =
-    !!list && sort === "custom" && filter === "all" && query.trim().length === 0;
+    !!list &&
+    sort === "custom" &&
+    filter === "all" &&
+    !tagFilter &&
+    !personFilter &&
+    query.trim().length === 0;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -259,6 +287,42 @@ export default function ListDetailScreen() {
             <ViewToggle value={view} onChange={changeView} />
           </div>
           <FilterChips options={options} active={filter} onChange={setFilter} />
+          {(tagOptions.length > 0 || personOptions.length > 0) && (
+            <div className="no-scrollbar fade-x -mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1">
+              {personOptions.map((p) => {
+                const active = personFilter === p.id;
+                return (
+                  <button
+                    key={`person-${p.id}`}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setPersonFilter(active ? null : p.id)}
+                    className={`flex min-h-11 shrink-0 items-center gap-1 rounded-pill px-3.5 text-[0.8rem] font-bold transition ${focusRing} ${
+                      active ? "bg-ink text-cream shadow-soft" : "bg-paper text-brown ring-1 ring-line/70"
+                    }`}
+                  >
+                    <span aria-hidden>◍</span> {p.name}
+                  </button>
+                );
+              })}
+              {tagOptions.map((t) => {
+                const active = tagFilter === t;
+                return (
+                  <button
+                    key={`tag-${t}`}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setTagFilter(active ? null : t)}
+                    className={`flex min-h-11 shrink-0 items-center gap-1 rounded-pill px-3.5 text-[0.8rem] font-bold transition ${focusRing} ${
+                      active ? "bg-ink text-cream shadow-soft" : "bg-paper text-brown ring-1 ring-line/70"
+                    }`}
+                  >
+                    <span aria-hidden>#</span> {t}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -292,7 +356,14 @@ export default function ListDetailScreen() {
               title={`Nothing under ${activeLabel.toLowerCase()} yet`}
               hint="Peek at another filter, or add something new to this little world."
               action={
-                <Button size="sm" onClick={() => setFilter("all")}>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setFilter("all");
+                    setTagFilter(null);
+                    setPersonFilter(null);
+                  }}
+                >
                   Show everything
                 </Button>
               }
