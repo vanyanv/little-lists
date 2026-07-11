@@ -35,10 +35,10 @@ export function FinalCta() {
           <Sticker name="sparkle" size={52} rotate={12} className="opacity-30" />
         </motion.span>
         <h2 className="font-display font-semibold leading-tight text-cream" style={{ fontSize: "clamp(1.8rem, 6.5vw, 2.6rem)" }}>
-          Start with one little list
+          Start with one thing you don&rsquo;t want to forget
         </h2>
         <p className="mx-auto mt-3 max-w-[26rem] text-[1.02rem] leading-relaxed text-cream/80">
-          Make a movie list, a gift list, a food list, or something totally yours.
+          A movie recommendation, a gift idea, a place to try, or a little detail about someone you love.
         </p>
         <div className="relative mt-7 inline-flex">
           <MotionLink
@@ -49,7 +49,7 @@ export function FinalCta() {
             onTap={pop}
             className={`inline-flex items-center justify-center rounded-pill bg-cream px-8 py-4 text-[1.02rem] font-bold text-ink shadow-soft transition-colors hover:bg-paper ${focusRingOnDark}`}
           >
-            Start your first little list
+            Start your first list
           </MotionLink>
           {/* the app's save moment, borrowed for the one place the page celebrates */}
           {burst > 0 && <SaveSparkle key={burst} />}

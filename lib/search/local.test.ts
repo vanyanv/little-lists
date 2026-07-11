@@ -41,7 +41,7 @@ function people(): Person[] {
   return [
     {
       id: "p1",
-      name: "Maddie",
+      name: "Maya",
       emoji: "🌷",
       theme: "blush",
       note: "old friend from school",
@@ -102,7 +102,7 @@ describe("searchLittleWorld", () => {
   });
 
   it("matches people by name and short note", () => {
-    expect(idsOf("person", searchLittleWorld("maddie", data()))).toContain("p1");
+    expect(idsOf("person", searchLittleWorld("maya", data()))).toContain("p1");
     expect(idsOf("person", searchLittleWorld("school", data()))).toContain("p1"); // note
   });
 
@@ -122,7 +122,7 @@ describe("searchLittleWorld", () => {
   });
 
   it("is case-insensitive", () => {
-    expect(idsOf("person", searchLittleWorld("MADDIE", data()))).toContain("p1");
+    expect(idsOf("person", searchLittleWorld("MAYA", data()))).toContain("p1");
   });
 
   it("orders groups: little worlds, little things, your people, little details, in your pocket", () => {

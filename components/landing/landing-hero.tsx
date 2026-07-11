@@ -98,11 +98,11 @@ export function LandingHero({ movies, books }: { movies?: List; books?: List }) 
           className="min-w-0 text-center lg:pt-10 lg:text-left"
         >
           <h1 className="text-balance font-display font-semibold leading-[1.06] text-ink" style={{ fontSize: "clamp(1.85rem, 7.5vw, 3.1rem)" }}>
-            Little lists for everything you love, hate, and want to remember.
+            Remember what you love. Remember what they love.
           </h1>
 
           <p className="mx-auto mt-4 max-w-[34rem] text-balance text-[1.02rem] leading-relaxed text-brown lg:mx-0">
-            Movies to watch, books to read, foods you avoid, gift ideas, date ideas, and tiny details about people, all in one cozy place.
+            Keep movies, books, places, gift ideas, plans, and the little details about your favorite people in one cozy, private place.
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
@@ -112,15 +112,15 @@ export function LandingHero({ movies, books }: { movies?: List; books?: List }) 
               transition={softSpring}
               className={`inline-flex items-center justify-center rounded-pill bg-ink px-7 py-4 text-[1rem] font-bold text-cream shadow-lift transition-colors hover:bg-ink-soft ${focusRingOnDark}`}
             >
-              Start your little world
+              Start your first list
             </MotionLink>
             <MotionLink
-              href="#use-cases"
+              href="#how-it-works"
               whileTap={reduce ? undefined : tap}
               transition={softSpring}
               className={`inline-flex items-center justify-center rounded-pill bg-paper px-7 py-4 text-[1rem] font-bold text-brown ring-1 ring-line transition-colors hover:bg-cream-deep ${focusRing}`}
             >
-              See what you can make
+              See how it works
             </MotionLink>
           </div>
 
@@ -147,6 +147,19 @@ export function LandingHero({ movies, books }: { movies?: List; books?: List }) 
           <div className="relative mx-auto w-full max-w-[300px]">
             <HeroStickers reduce={reduce} />
             <TapeStrip reduce={reduce} />
+            <motion.div
+              aria-hidden
+              initial={reduce ? false : { opacity: 0, x: 10, rotate: 2 }}
+              animate={{ opacity: 1, x: 0, rotate: -2 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.7 }}
+              className="absolute -right-4 top-36 z-30 hidden max-w-[9.5rem] rounded-lg bg-paper px-3 py-2 text-left shadow-lift ring-1 ring-line/50 sm:block lg:-right-20"
+            >
+              <p className="text-[0.68rem] font-bold text-brown-soft">Maya said</p>
+              <p className="mt-0.5 font-display text-[0.82rem] font-semibold leading-tight text-ink">
+                “You would love Past Lives.”
+              </p>
+              <p className="mt-1 text-[0.66rem] font-bold text-rosewood">saved with Maya ♥</p>
+            </motion.div>
             <div className="max-h-[27rem] overflow-hidden [mask-image:linear-gradient(to_bottom,black_calc(100%-3.5rem),transparent)] sm:max-h-[29rem] md:max-h-[30rem] lg:max-h-none lg:[mask-image:none]">
               <AppPreview movies={movies} books={books} />
             </div>

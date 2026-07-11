@@ -95,7 +95,7 @@ export function PersonFormFields({ value, onChange }: PersonFormFieldsProps) {
           autoFocus
           value={name}
           onChange={(e) => onChange({ name: e.target.value })}
-          placeholder="Maddie, Mom, Sam from work…"
+          placeholder="Maya, Mom, Sam from work…"
           className={inputPrimary}
         />
       </label>

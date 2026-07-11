@@ -146,8 +146,8 @@ export const SHOWCASE_GIFT_SCRAPS = ["book light", "coffee shop gift card", "cut
 
 // Section ids double as CategoryIcon keys, exactly like the real person card —
 // so each little detail gets its drawn glyph (clapperboard, book, fork…).
-// The name is a placeholder: landing surfaces render <CyclingName /> instead,
-// rotating through DEMO_NAMES so the person stays generic.
+// Keep one consistent sample person across the landing story so recommendations,
+// people notes, and gift ideas feel connected instead of randomly generated.
 export const PREVIEW_PERSON: Person = {
   id: "preview-person",
   name: DEMO_NAMES[0],
