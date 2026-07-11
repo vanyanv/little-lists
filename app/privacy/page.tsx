@@ -26,11 +26,13 @@ export default function PrivacyPage() {
       <InfoSection heading="Who helps us run this">
         We rely on a small set of trusted services. Clerk handles sign-in, so we never see your password.
         Neon hosts the database that stores your little world, and our app host keeps the site running.
-        When you search for a movie or book, we query TMDB and Open Library to find titles. Those queries
-        only fetch results and are never sold or mined.
+        When you search for something to add, we send your query to the service that can find it, TMDB
+        for movies, Open Library and Google Books for books, and Apple&apos;s iTunes catalog for music. Those
+        queries only fetch results to show you. We do not sell or mine them.
       </InfoSection>
       <InfoSection heading="Take it with you">
-        Download everything you have saved as JSON or CSV anytime, right from your profile.
+        Download everything you have saved as a JSON file, or as CSV spreadsheets, anytime, right from
+        your profile.
       </InfoSection>
       <InfoSection heading="Leaving">
         You can delete your account from your profile, or through your account portal. Either way, your
