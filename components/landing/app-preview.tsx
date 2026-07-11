@@ -65,10 +65,12 @@ function MoviesDetailScreen({ movies }: { movies: List }) {
 export function AppPreview({
   movies = PREVIEW_MOVIES,
   books = PREVIEW_BOOKS,
+  onScreenChange,
 }: {
   /** preview lists with live artwork from the search APIs; bundled art otherwise */
   movies?: List;
   books?: List;
+  onScreenChange?: (screen: "home" | "movies") => void;
 }) {
   const reduce = useReducedMotion() ?? false;
   const ref = useRef<HTMLDivElement>(null);
@@ -77,9 +79,15 @@ export function AppPreview({
 
   useEffect(() => {
     if (reduce || !inView) return;
-    const id = setInterval(() => setInMovies((v) => !v), SCREEN_MS);
+    const id = setInterval(() => {
+      setInMovies((current) => {
+        const next = !current;
+        onScreenChange?.(next ? "movies" : "home");
+        return next;
+      });
+    }, SCREEN_MS);
     return () => clearInterval(id);
-  }, [reduce, inView]);
+  }, [reduce, inView, onScreenChange]);
 
   return (
     <div ref={ref} className="relative mx-auto w-full max-w-[300px]" aria-hidden="true">

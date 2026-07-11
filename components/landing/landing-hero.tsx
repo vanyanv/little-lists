@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { softSpring, gentleSpring, tap } from "@/lib/motion";
 import { focusRing, focusRingOnDark } from "@/lib/a11y";
 import { LittleIcon } from "@/components/icons/little-icon";
@@ -82,6 +83,7 @@ function TapeStrip({ reduce }: { reduce: boolean }) {
 
 export function LandingHero({ movies, books }: { movies?: List; books?: List }) {
   const reduce = useReducedMotion() ?? false;
+  const [previewScreen, setPreviewScreen] = useState<"home" | "movies">("home");
   const rise = reduce
     ? {}
     : { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 } };
@@ -147,21 +149,40 @@ export function LandingHero({ movies, books }: { movies?: List; books?: List }) 
           <div className="relative mx-auto w-full max-w-[300px]">
             <HeroStickers reduce={reduce} />
             <TapeStrip reduce={reduce} />
-            <motion.div
-              aria-hidden
-              initial={reduce ? false : { opacity: 0, x: 10, rotate: 2 }}
-              animate={{ opacity: 1, x: 0, rotate: -2 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.7 }}
-              className="absolute -right-4 top-36 z-30 hidden max-w-[9.5rem] rounded-lg bg-paper px-3 py-2 text-left shadow-lift ring-1 ring-line/50 sm:block lg:-right-20"
-            >
-              <p className="text-[0.68rem] font-bold text-brown-soft">Maya said</p>
-              <p className="mt-0.5 font-display text-[0.82rem] font-semibold leading-tight text-ink">
-                “You would love Past Lives.”
-              </p>
-              <p className="mt-1 text-[0.66rem] font-bold text-rosewood">saved with Maya ♥</p>
-            </motion.div>
+            <AnimatePresence>
+              {previewScreen === "home" && (
+                <motion.div
+                  key="maya-note"
+                  aria-hidden
+                  initial={reduce ? false : { opacity: 0, x: 10, rotate: 2 }}
+                  animate={{ opacity: 1, x: 0, rotate: -2 }}
+                  exit={
+                    reduce
+                      ? undefined
+                      : {
+                          opacity: 0,
+                          x: 8,
+                          rotate: 1,
+                          transition: { duration: 0.18, ease: [0.23, 1, 0.32, 1] },
+                        }
+                  }
+                  transition={{
+                    duration: reduce ? 0 : 0.5,
+                    ease: [0.23, 1, 0.32, 1],
+                    delay: reduce ? 0 : 0.7,
+                  }}
+                  className="absolute -right-4 top-36 z-30 hidden max-w-[9.5rem] rounded-lg bg-paper px-3 py-2 text-left shadow-lift ring-1 ring-line/50 sm:block lg:-right-20"
+                >
+                  <p className="text-[0.68rem] font-bold text-brown-soft">Maya said</p>
+                  <p className="mt-0.5 font-display text-[0.82rem] font-semibold leading-tight text-ink">
+                    “You would love Past Lives.”
+                  </p>
+                  <p className="mt-1 text-[0.66rem] font-bold text-rosewood">saved with Maya ♥</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <div className="max-h-[27rem] overflow-hidden [mask-image:linear-gradient(to_bottom,black_calc(100%-3.5rem),transparent)] sm:max-h-[29rem] md:max-h-[30rem] lg:max-h-none lg:[mask-image:none]">
-              <AppPreview movies={movies} books={books} />
+              <AppPreview movies={movies} books={books} onScreenChange={setPreviewScreen} />
             </div>
           </div>
         </motion.div>
