@@ -19,6 +19,7 @@ import { ConfirmSheet } from "./confirm-sheet";
 import { Celebration } from "./celebration";
 import { Toast } from "./toast";
 import { SaveErrorToast } from "./save-error-toast";
+import { InstallAppProvider } from "./install-app-row";
 
 function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -40,29 +41,31 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <UiProvider>
-      <MotionConfig reducedMotion="user">
-        <div className="flex min-h-dvh w-full justify-center bg-cream-deep">
-          <div className="paper-grain relative min-h-dvh w-full max-w-[440px] overflow-x-hidden bg-cream shadow-frame">
-            <main className="relative z-[1] min-h-dvh pb-36">
-              <PageTransition>{children}</PageTransition>
-            </main>
-            <FloatingAddButton />
-            <Toast />
-            <SaveErrorToast />
-            <BottomNav />
-            <AddItemModal />
-            <PocketSheet />
-            <AddDetailSheet />
-            <CreateListSheet />
-            <CreatePersonSheet />
-            <EditListSheet />
-            <EditPersonSheet />
-            <EditDetailSheet />
-            <ConfirmSheet />
-            <Celebration signal={celebration} />
+      <InstallAppProvider>
+        <MotionConfig reducedMotion="user">
+          <div className="flex min-h-dvh w-full justify-center bg-cream-deep">
+            <div className="paper-grain relative min-h-dvh w-full max-w-[440px] overflow-x-hidden bg-cream shadow-frame">
+              <main className="relative z-[1] min-h-dvh pb-36">
+                <PageTransition>{children}</PageTransition>
+              </main>
+              <FloatingAddButton />
+              <Toast />
+              <SaveErrorToast />
+              <BottomNav />
+              <AddItemModal />
+              <PocketSheet />
+              <AddDetailSheet />
+              <CreateListSheet />
+              <CreatePersonSheet />
+              <EditListSheet />
+              <EditPersonSheet />
+              <EditDetailSheet />
+              <ConfirmSheet />
+              <Celebration signal={celebration} />
+            </div>
           </div>
-        </div>
-      </MotionConfig>
+        </MotionConfig>
+      </InstallAppProvider>
     </UiProvider>
   );
 }

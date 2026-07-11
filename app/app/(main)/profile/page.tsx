@@ -13,6 +13,7 @@ import { ProfileHeader } from "@/components/profile-header";
 import { Cover } from "@/components/cover";
 import { Button } from "@/components/button";
 import { LittleIcon } from "@/components/icons/little-icon";
+import { InstallAppRow } from "@/components/install-app-row";
 
 function CornerRow({
   children,
@@ -108,6 +109,7 @@ export default function ProfileScreen() {
             How we look after your little worlds
             <span aria-hidden className="text-brown-soft">›</span>
           </Link>
+          <InstallAppRow />
           {hasExamples && (
             <>
               <div className="mx-4 h-px bg-line/60" />
