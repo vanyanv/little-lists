@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import type { Person } from "@/lib/types";
 import { themeClass } from "@/lib/visual";
 import { hover, softSpring, tap } from "@/lib/motion";
-import { useStore } from "@/lib/store";
+import { useStoreActions } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { focusRingStretched } from "@/lib/a11y";
 import { OverflowMenu } from "./overflow-menu";
@@ -14,7 +14,7 @@ import { StickerBadge } from "./icons/sticker-badge";
 
 export function PersonCard({ person }: { person: Person }) {
   const chips = person.sections.filter((s) => s.entries.length > 0).slice(0, 5);
-  const { deletePerson } = useStore();
+  const { deletePerson } = useStoreActions();
   const { openEditPerson, openConfirm, showToast } = useUi();
 
   return (

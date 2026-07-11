@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useStoreActions } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
 import { sheetTitle } from "@/lib/field";
@@ -22,7 +22,7 @@ export function CreatePersonSheet() {
 }
 
 function CreatePersonFlow({ onClose }: { onClose: () => void }) {
-  const { addPerson } = useStore();
+  const { addPerson } = useStoreActions();
   const { showToast } = useUi();
   const router = useRouter();
 

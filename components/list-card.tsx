@@ -6,7 +6,7 @@ import type { List } from "@/lib/types";
 import { TEMPLATE_META } from "@/lib/types";
 import { listCountLabel, themeClass } from "@/lib/visual";
 import { hover, softSpring, tap } from "@/lib/motion";
-import { useStore } from "@/lib/store";
+import { useStoreActions } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { focusRingStretched } from "@/lib/a11y";
 import { trackProductEvent } from "@/lib/analytics-client";
@@ -37,7 +37,7 @@ function ListMeta({ list, size = "normal" }: { list: List; size?: "hero" | "norm
 
 export function ListCard({ list, variant = "normal" }: { list: List; variant?: "hero" | "normal" }) {
   const hero = variant === "hero";
-  const { deleteList, setListPinned } = useStore();
+  const { deleteList, setListPinned } = useStoreActions();
   const { openEditList, openConfirm, showToast } = useUi();
 
   const menu = (

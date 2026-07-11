@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import { UiProvider } from "@/lib/ui";
-import { useStore } from "@/lib/store";
+import { useStoreState } from "@/lib/store";
 import { BottomNav } from "./bottom-nav";
 import { FloatingAddButton } from "./floating-add-button";
 import { Toast } from "./toast";
@@ -48,7 +48,7 @@ function PageTransition({ children }: { children: ReactNode }) {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { celebration } = useStore();
+  const { celebration } = useStoreState();
 
   return (
     <UiProvider>

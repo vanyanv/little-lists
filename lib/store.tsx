@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -145,7 +146,11 @@ interface StoreValue {
   ) => void;
 }
 
-const StoreContext = createContext<StoreValue | null>(null);
+type StoreState = Pick<StoreValue, "lists" | "people" | "scraps" | "profile" | "celebration" | "saveError">;
+type StoreActions = Omit<StoreValue, keyof StoreState>;
+
+const StoreStateContext = createContext<StoreState | null>(null);
+const StoreActionsContext = createContext<StoreActions | null>(null);
 
 export interface StoreSeed {
   lists: List[];
@@ -166,6 +171,13 @@ export function ListsProvider({
   const [scraps, setScraps] = useState<Scrap[]>(seed.scraps);
   const [profile, setProfile] = useState<Profile>(seed.profile);
   const [celebration, setCelebration] = useState<CelebrationSignal | null>(null);
+
+  // Actions must keep a stable identity across data mutations (see the
+  // actions useMemo below), so any action that needs to read current state
+  // outside of a setState updater reads it from a ref instead of closing
+  // over the state value directly.
+  const listsRef = useRef(lists);
+  listsRef.current = lists;
 
   const fireCelebration = useCallback((variant: CelebrationVariant = "confetti") => {
     setCelebration({ id: makeId("celebrate"), variant });
@@ -345,7 +357,7 @@ export function ListsProvider({
   }, [signalSaveError]);
 
   const duplicateList = useCallback<StoreValue["duplicateList"]>(async (listId) => {
-    const source = lists.find((l) => l.id === listId);
+    const source = listsRef.current.find((l) => l.id === listId);
     if (!source || isTempId(listId)) return null;
     const tempId = makeId("list");
     const optimistic: List = {
@@ -368,7 +380,7 @@ export function ListsProvider({
       signalSaveError();
       return null;
     }
-  }, [lists, signalSaveError]);
+  }, [signalSaveError]);
 
   /* ── items ─────────────────────────────────────────────────────── */
 
@@ -954,14 +966,8 @@ export function ListsProvider({
     });
   }, [signalSaveError]);
 
-  const value = useMemo<StoreValue>(
+  const actions = useMemo<StoreActions>(
     () => ({
-      lists,
-      people,
-      scraps,
-      profile,
-      celebration,
-      saveError,
       addList,
       addItem,
       updateItem,
@@ -992,12 +998,6 @@ export function ListsProvider({
       fireCelebration,
     }),
     [
-      lists,
-      people,
-      scraps,
-      profile,
-      celebration,
-      saveError,
       addList,
       addItem,
       updateItem,
@@ -1029,21 +1029,43 @@ export function ListsProvider({
     ]
   );
 
-  return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
+  const state = useMemo<StoreState>(
+    () => ({ lists, people, scraps, profile, celebration, saveError }),
+    [lists, people, scraps, profile, celebration, saveError]
+  );
+
+  return (
+    <StoreActionsContext.Provider value={actions}>
+      <StoreStateContext.Provider value={state}>{children}</StoreStateContext.Provider>
+    </StoreActionsContext.Provider>
+  );
 }
 
 export function useStore(): StoreValue {
-  const ctx = useContext(StoreContext);
-  if (!ctx) throw new Error("useStore must be used within ListsProvider");
-  return ctx;
+  const state = useContext(StoreStateContext);
+  const actions = useContext(StoreActionsContext);
+  if (!state || !actions) throw new Error("useStore must be used within ListsProvider");
+  return { ...state, ...actions };
+}
+
+export function useStoreActions(): StoreActions {
+  const actions = useContext(StoreActionsContext);
+  if (!actions) throw new Error("useStoreActions must be used within ListsProvider");
+  return actions;
+}
+
+export function useStoreState(): StoreState {
+  const state = useContext(StoreStateContext);
+  if (!state) throw new Error("useStoreState must be used within ListsProvider");
+  return state;
 }
 
 export function useList(id: string): List | undefined {
-  return useStore().lists.find((l) => l.id === id);
+  return useStoreState().lists.find((l) => l.id === id);
 }
 
 export function usePerson(id: string): Person | undefined {
-  return useStore().people.find((p) => p.id === id);
+  return useStoreState().people.find((p) => p.id === id);
 }
 
 /* ── helpers ───────────────────────────────────────────────────────── */

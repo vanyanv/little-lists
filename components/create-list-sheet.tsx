@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useStoreActions } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import {
   TEMPLATE_META,
@@ -33,7 +33,7 @@ function CreateListFlow({
   /** pre-picks a template (e.g. from Home's starter chips); the form stays editable */
   initialTemplate?: ListTemplate;
 }) {
-  const { addList } = useStore();
+  const { addList } = useStoreActions();
   const { showToast } = useUi();
   const router = useRouter();
 
