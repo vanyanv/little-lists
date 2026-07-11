@@ -133,6 +133,30 @@ export default function ProfileScreen() {
         </div>
       </section>
 
+      {/* export your data */}
+      <section className="mt-8" aria-label="Export your data">
+        <h2 className="px-1 font-display text-[1.3rem] font-semibold text-ink">Export your data</h2>
+        <div className="mt-3 overflow-hidden rounded-2xl bg-paper shadow-soft ring-1 ring-line/40">
+          <a
+            href="/api/export?format=json"
+            download
+            className={`flex min-h-12 w-full items-center justify-between gap-3 px-4 py-3 text-left text-[0.95rem] font-semibold text-ink transition-colors hover:bg-cream-deep ${focusRingInset}`}
+          >
+            Download everything (JSON)
+            <span aria-hidden className="text-brown-soft">↓</span>
+          </a>
+          <div className="mx-4 h-px bg-line/60" />
+          <a
+            href="/api/export?format=csv"
+            download
+            className={`flex min-h-12 w-full items-center justify-between gap-3 px-4 py-3 text-left text-[0.95rem] font-semibold text-ink transition-colors hover:bg-cream-deep ${focusRingInset}`}
+          >
+            Download as spreadsheets (CSV)
+            <span aria-hidden className="text-brown-soft">↓</span>
+          </a>
+        </div>
+      </section>
+
       <div className="mt-10 mb-4 flex justify-center">
         <SignOutButton>
           <Button variant="soft" size="sm">Sign out of your little world</Button>
