@@ -73,11 +73,35 @@ export default function RootLayout({
         className={`${fraunces.variable} ${nunito.variable} h-full`}
       >
         <head>
-          {/* color-emoji fallback for platforms without a native emoji font */}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+          {/* color-emoji fallback for platforms without a native emoji font.
+              Non-blocking: fetched as media=print, then flipped to all so it
+              never stalls first paint. iOS/Android already have native color
+              emoji, so the network cost is pure fallback insurance. */}
           <link
-            rel="stylesheet"
+            rel="preload"
+            as="style"
             href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap"
           />
+          <link
+            id="emoji-font"
+            rel="stylesheet"
+            media="print"
+            href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap"
+          />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: "var l=document.getElementById('emoji-font');if(l)l.media='all';",
+            }}
+          />
+          <noscript>
+            {/* no-JS fallback: apply the stylesheet normally */}
+            <link
+              rel="stylesheet"
+              href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap"
+            />
+          </noscript>
         </head>
         <body className="min-h-full">{children}</body>
       </html>
