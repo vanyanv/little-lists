@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useList, useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
@@ -22,25 +23,10 @@ import { RevisitBeacon } from "@/components/revisit-beacon";
 import { filterItemsByStatus } from "@/lib/store-helpers";
 import { SortControl } from "@/components/sort-control";
 import { sortItems, isSortMode, type SortMode } from "@/lib/sort";
-import {
-  DndContext,
-  PointerSensor,
-  KeyboardSensor,
-  useSensor,
-  useSensors,
-  closestCenter,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  useSortable,
-  arrayMove,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  rectSortingStrategy,
-} from "@dnd-kit/sortable";
-import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
-import { CSS } from "@dnd-kit/utilities";
+
+// The drag engine (@dnd-kit, ~4 packages) is only used in custom-sort mode;
+// load it lazily so ordinary list views don't pay for it.
+const ListDnd = dynamic(() => import("@/components/list-dnd").then((m) => m.ListDnd), { ssr: false });
 
 /** the list's saved view, falling back to its template default */
 function defaultViewFor(list?: Pick<List, "template" | "defaultView">): ViewMode {
@@ -144,21 +130,6 @@ export default function ListDetailScreen() {
     !tagFilter &&
     !personFilter &&
     query.trim().length === 0;
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
-
-  const onDragEnd = (e: DragEndEvent) => {
-    const { active, over } = e;
-    if (!list || !over || active.id === over.id) return;
-    const ids = visible.map((i) => i.id);
-    const oldIndex = ids.indexOf(String(active.id));
-    const newIndex = ids.indexOf(String(over.id));
-    if (oldIndex === -1 || newIndex === -1) return;
-    reorderItems(list.id, arrayMove(ids, oldIndex, newIndex));
-  };
 
   const listMenu = list ? (
     <OverflowMenu
@@ -384,20 +355,13 @@ export default function ListDetailScreen() {
             />
           )
         ) : dragEnabled ? (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            modifiers={view === "grid" ? [restrictToParentElement] : [restrictToVerticalAxis, restrictToParentElement]}
-            onDragEnd={onDragEnd}
-          >
-            <SortableContext items={visible.map((i) => i.id)} strategy={view === "grid" ? rectSortingStrategy : verticalListSortingStrategy}>
-              <div className={layoutClass}>
-                {visible.map((item) => (
-                  <SortableItemRow key={item.id} list={list} item={item} view={view} />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+          <ListDnd
+            list={list}
+            items={visible}
+            view={view}
+            layoutClass={layoutClass}
+            onReorder={(orderedIds) => reorderItems(list.id, orderedIds)}
+          />
         ) : (
           <AnimatePresence mode="wait">
             <motion.div
@@ -423,53 +387,6 @@ export default function ListDetailScreen() {
             </motion.div>
           </AnimatePresence>
         )}
-      </div>
-    </div>
-  );
-}
-
-function SortableItemRow({
-  list,
-  item,
-  view,
-}: {
-  list: List;
-  item: import("@/lib/types").Item;
-  view: ViewMode;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: item.id,
-  });
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 20 : undefined,
-    opacity: isDragging ? 0.9 : 1,
-  };
-  return (
-    <div ref={setNodeRef} style={style} className="flex items-start gap-1.5">
-      {item.pinned ? (
-        <span aria-hidden className="mt-1 w-6 shrink-0" />
-      ) : (
-        <button
-          type="button"
-          aria-label={`Reorder ${item.title}`}
-          {...attributes}
-          {...listeners}
-          className={`mt-1 grid h-9 w-6 shrink-0 touch-none cursor-grab place-items-center rounded-md text-brown-soft/70 transition-colors hover:bg-cream-deep hover:text-ink active:cursor-grabbing ${focusRing}`}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-            <circle cx="9" cy="6" r="1.6" />
-            <circle cx="15" cy="6" r="1.6" />
-            <circle cx="9" cy="12" r="1.6" />
-            <circle cx="15" cy="12" r="1.6" />
-            <circle cx="9" cy="18" r="1.6" />
-            <circle cx="15" cy="18" r="1.6" />
-          </svg>
-        </button>
-      )}
-      <div className="min-w-0 flex-1">
-        <ItemCard listId={list.id} item={item} view={view} statuses={statusesForList(list)} />
       </div>
     </div>
   );
