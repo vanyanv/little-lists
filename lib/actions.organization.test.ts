@@ -99,6 +99,12 @@ describe("reorderItemsAction", () => {
     expect(prisma.listItem.update).toHaveBeenCalledWith({ where: { id: "b" }, data: { position: 0 } });
     expect(prisma.listItem.update).toHaveBeenCalledWith({ where: { id: "a" }, data: { position: 1 } });
   });
+  it("rejects duplicate ids that would corrupt positions", async () => {
+    prisma.list.findFirst.mockResolvedValue({ id: "l1" });
+    prisma.listItem.findMany.mockResolvedValue([{ id: "a" }, { id: "b" }]);
+    await reorderItemsAction("l1", ["a", "a"]);
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
 });
 
 describe("moveItemAction", () => {
@@ -137,6 +143,12 @@ describe("copyItemAction", () => {
     expect(arg.pinned).toBe(false);
     expect(arg.title).toBe("X");
     expect(arg.tags).toEqual(["t"]);
+  });
+  it("requires both the item and the target list to be the caller's", async () => {
+    prisma.listItem.findFirst.mockResolvedValue({ id: "i1", metadata: {} });
+    prisma.list.findFirst.mockResolvedValue(null); // target not owned
+    expect(await copyItemAction("i1", "l2")).toBeNull();
+    expect(prisma.listItem.create).not.toHaveBeenCalled();
   });
 });
 

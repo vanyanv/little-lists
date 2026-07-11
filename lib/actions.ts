@@ -313,7 +313,13 @@ export async function reorderItemsAction(listId: string, orderedIds: string[]): 
     select: { id: true },
   });
   const ownedIds = new Set(owned.map((i) => i.id));
-  if (orderedIds.length !== ownedIds.size || orderedIds.some((id) => !ownedIds.has(id))) return;
+  if (
+    orderedIds.length !== ownedIds.size ||
+    new Set(orderedIds).size !== orderedIds.length ||
+    orderedIds.some((id) => !ownedIds.has(id))
+  ) {
+    return;
+  }
   await prisma.$transaction(
     orderedIds.map((id, index) =>
       prisma.listItem.update({ where: { id }, data: { position: index } })
