@@ -29,6 +29,7 @@ import {
   type ThemeColor,
   type ViewMode,
 } from "@/lib/types";
+import type { SortMode } from "@/lib/sort";
 
 /* ── lists ───────────────────────────────────────────────────────────── */
 
@@ -277,6 +278,144 @@ export async function deleteItemAction(itemId: string): Promise<void> {
     name: "entity_deleted",
     properties: { entity: "item" },
   });
+}
+
+/* ── organization: sort, pin, reorder, move, copy ────────────────────── */
+
+export async function setListSortAction(listId: string, sort: SortMode): Promise<void> {
+  const { clerkUserId } = await requireUserProfile();
+  await prisma.list.updateMany({
+    where: { id: listId, userId: clerkUserId },
+    data: { defaultSort: sort },
+  });
+}
+
+export async function setItemPinnedAction(itemId: string, pinned: boolean): Promise<Item | null> {
+  const { clerkUserId } = await requireUserProfile();
+  const existing = await prisma.listItem.findFirst({ where: { id: itemId, userId: clerkUserId } });
+  if (!existing) return null;
+  const row = await prisma.listItem.update({ where: { id: itemId }, data: { pinned } });
+  const fallbackType = ((existing.metadata ?? {}) as unknown as { type?: ItemType }).type ?? "custom";
+  return mapItem(row, fallbackType);
+}
+
+export async function reorderItemsAction(listId: string, orderedIds: string[]): Promise<void> {
+  const { clerkUserId } = await requireUserProfile();
+  const list = await prisma.list.findFirst({
+    where: { id: listId, userId: clerkUserId },
+    select: { id: true },
+  });
+  if (!list) return;
+  // orderedIds must be exactly this list's items — a foreign or missing id
+  // aborts the whole reorder rather than corrupting positions.
+  const owned = await prisma.listItem.findMany({
+    where: { listId, userId: clerkUserId },
+    select: { id: true },
+  });
+  const ownedIds = new Set(owned.map((i) => i.id));
+  if (orderedIds.length !== ownedIds.size || orderedIds.some((id) => !ownedIds.has(id))) return;
+  await prisma.$transaction(
+    orderedIds.map((id, index) =>
+      prisma.listItem.update({ where: { id }, data: { position: index } })
+    )
+  );
+}
+
+export async function moveItemAction(itemId: string, targetListId: string): Promise<Item | null> {
+  const { clerkUserId } = await requireUserProfile();
+  const item = await prisma.listItem.findFirst({ where: { id: itemId, userId: clerkUserId } });
+  if (!item) return null;
+  const target = await prisma.list.findFirst({
+    where: { id: targetListId, userId: clerkUserId },
+    select: { id: true },
+  });
+  if (!target) return null;
+  const max = await prisma.listItem.aggregate({
+    where: { listId: targetListId },
+    _max: { position: true },
+  });
+  const nextPos = max._max.position == null ? null : max._max.position + 1;
+  const row = await prisma.listItem.update({
+    where: { id: itemId },
+    data: { listId: targetListId, position: nextPos },
+  });
+  const fallbackType = ((item.metadata ?? {}) as unknown as { type?: ItemType }).type ?? "custom";
+  return mapItem(row, fallbackType);
+}
+
+export async function copyItemAction(itemId: string, targetListId: string): Promise<Item | null> {
+  const { clerkUserId } = await requireUserProfile();
+  const item = await prisma.listItem.findFirst({ where: { id: itemId, userId: clerkUserId } });
+  if (!item) return null;
+  const target = await prisma.list.findFirst({
+    where: { id: targetListId, userId: clerkUserId },
+    select: { id: true },
+  });
+  if (!target) return null;
+  const max = await prisma.listItem.aggregate({
+    where: { listId: targetListId },
+    _max: { position: true },
+  });
+  const nextPos = max._max.position == null ? null : max._max.position + 1;
+  const row = await prisma.listItem.create({
+    data: {
+      listId: targetListId,
+      userId: clerkUserId,
+      title: item.title,
+      subtitle: item.subtitle,
+      note: item.note,
+      status: item.status,
+      emoji: item.emoji,
+      imageUrl: item.imageUrl,
+      tags: item.tags,
+      metadata: item.metadata as Prisma.InputJsonValue,
+      personId: item.personId,
+      position: nextPos,
+      pinned: false,
+    },
+  });
+  const fallbackType = ((item.metadata ?? {}) as unknown as { type?: ItemType }).type ?? "custom";
+  return mapItem(row, fallbackType);
+}
+
+export async function duplicateListAction(listId: string): Promise<List | null> {
+  const { clerkUserId } = await requireUserProfile();
+  const source = await prisma.list.findFirst({
+    where: { id: listId, userId: clerkUserId },
+    include: { items: { orderBy: { createdAt: "desc" } } },
+  });
+  if (!source) return null;
+  const row = await prisma.list.create({
+    data: {
+      userId: clerkUserId,
+      title: `${source.title} (copy)`,
+      emoji: source.emoji,
+      templateType: source.templateType,
+      themeColor: source.themeColor,
+      defaultViewMode: source.defaultViewMode,
+      defaultSort: source.defaultSort,
+      description: source.description,
+      pinned: false,
+      items: {
+        create: source.items.map((it) => ({
+          userId: clerkUserId,
+          title: it.title,
+          subtitle: it.subtitle,
+          note: it.note,
+          status: it.status,
+          emoji: it.emoji,
+          imageUrl: it.imageUrl,
+          tags: it.tags,
+          metadata: it.metadata as Prisma.InputJsonValue,
+          position: it.position,
+          pinned: it.pinned,
+          personId: it.personId,
+        })),
+      },
+    },
+    include: { items: { orderBy: { createdAt: "desc" } } },
+  });
+  return mapList(row);
 }
 
 /* ── scraps ──────────────────────────────────────────────────────────── */
