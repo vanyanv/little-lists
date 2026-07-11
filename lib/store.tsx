@@ -22,6 +22,7 @@ import { PERSON_SECTIONS } from "./people";
 import { isExample } from "./onboarding";
 import {
   clearExamplesAction,
+  copyItemAction,
   createItemAction,
   createListAction,
   createPersonAction,
@@ -33,8 +34,10 @@ import {
   deletePersonDetailAction,
   deleteScrapAction,
   fileScrapAction,
+  moveItemAction,
   reorderItemsAction,
   saveScrapDetectionAction,
+  setItemPinnedAction,
   setListPinnedAction,
   setListSortAction,
   setListViewAction,
@@ -108,6 +111,9 @@ interface StoreValue {
     opts?: { persist?: boolean }
   ) => void;
   deleteItem: (listId: string, itemId: string) => Promise<void>;
+  setItemPinned: (listId: string, itemId: string, pinned: boolean) => void;
+  moveItem: (fromListId: string, itemId: string, toListId: string) => void;
+  copyItem: (fromItem: Item, toListId: string) => Promise<void>;
   setListView: (listId: string, view: ViewMode) => void;
   setListSort: (listId: string, sort: SortMode) => void;
   reorderItems: (listId: string, orderedIds: string[]) => void;
@@ -452,6 +458,107 @@ export function ListsProvider({
         );
       }
       throw err; // let the caller surface the warm error toast
+    }
+  }, []);
+
+  const setItemPinned = useCallback<StoreValue["setItemPinned"]>((listId, itemId, pinned) => {
+    let before: Item | undefined;
+    setLists((prev) =>
+      prev.map((l) =>
+        l.id === listId
+          ? {
+              ...l,
+              items: l.items.map((i) => {
+                if (i.id !== itemId) return i;
+                before = i;
+                return { ...i, pinned };
+              }),
+            }
+          : l
+      )
+    );
+    if (pinned) trackProductEvent("feature_used", { feature: "item_pinned" });
+    if (isTempId(itemId)) return;
+    void setItemPinnedAction(itemId, pinned).catch((err) => {
+      console.error("setItemPinned failed", err);
+      const snap = before;
+      if (snap)
+        setLists((prev) =>
+          prev.map((l) =>
+            l.id === listId ? { ...l, items: l.items.map((i) => (i.id === itemId ? snap : i)) } : l
+          )
+        );
+      signalSaveError();
+    });
+  }, [signalSaveError]);
+
+  const moveItem = useCallback<StoreValue["moveItem"]>((fromListId, itemId, toListId) => {
+    if (fromListId === toListId) return;
+    let moved: Item | undefined;
+    let fromSnap: List | undefined;
+    let toSnap: List | undefined;
+    setLists((prev) => {
+      const from = prev.find((l) => l.id === fromListId);
+      moved = from?.items.find((i) => i.id === itemId);
+      if (!moved) return prev;
+      fromSnap = from;
+      toSnap = prev.find((l) => l.id === toListId);
+      const m = moved;
+      return prev.map((l) => {
+        if (l.id === fromListId) return { ...l, items: l.items.filter((i) => i.id !== itemId) };
+        if (l.id === toListId)
+          return { ...l, items: [{ ...m, position: null, fresh: true }, ...l.items] };
+        return l;
+      });
+    });
+    if (!moved) return;
+    trackProductEvent("feature_used", { feature: "item_moved" });
+    if (isTempId(itemId)) return;
+    void moveItemAction(itemId, toListId)
+      .then((row) => {
+        if (row)
+          setLists((prev) =>
+            prev.map((l) =>
+              l.id === toListId
+                ? { ...l, items: l.items.map((i) => (i.id === itemId ? { ...row, fresh: true } : i)) }
+                : l
+            )
+          );
+      })
+      .catch((err) => {
+        console.error("moveItem failed", err);
+        const fs = fromSnap;
+        const ts = toSnap;
+        if (fs && ts)
+          setLists((prev) =>
+            prev.map((l) => (l.id === fromListId ? fs : l.id === toListId ? ts : l))
+          );
+        signalSaveError();
+      });
+  }, [signalSaveError]);
+
+  const copyItem = useCallback<StoreValue["copyItem"]>(async (fromItem, toListId) => {
+    const tempId = makeId("item");
+    const optimistic: Item = { ...fromItem, id: tempId, pinned: false, position: null, fresh: true };
+    setLists((prev) =>
+      prev.map((l) => (l.id === toListId ? { ...l, items: [optimistic, ...l.items] } : l))
+    );
+    trackProductEvent("feature_used", { feature: "item_copied" });
+    try {
+      const row = await copyItemAction(fromItem.id, toListId);
+      if (!row) throw new Error("copyItem: no row");
+      setLists((prev) =>
+        prev.map((l) =>
+          l.id === toListId
+            ? { ...l, items: l.items.map((i) => (i.id === tempId ? { ...row, fresh: true } : i)) }
+            : l
+        )
+      );
+    } catch (err) {
+      setLists((prev) =>
+        prev.map((l) => (l.id === toListId ? { ...l, items: l.items.filter((i) => i.id !== tempId) } : l))
+      );
+      throw err;
     }
   }, []);
 
@@ -831,6 +938,9 @@ export function ListsProvider({
       addItem,
       updateItem,
       deleteItem,
+      setItemPinned,
+      moveItem,
+      copyItem,
       setListView,
       setListSort,
       reorderItems,
@@ -863,6 +973,9 @@ export function ListsProvider({
       addItem,
       updateItem,
       deleteItem,
+      setItemPinned,
+      moveItem,
+      copyItem,
       setListView,
       setListSort,
       reorderItems,

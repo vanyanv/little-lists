@@ -13,6 +13,7 @@ export interface ScrapRef {
 
 export type SheetState =
   | { kind: "item"; listId?: string; scrap?: ScrapRef }
+  | { kind: "move-item"; listId: string; itemId: string }
   | { kind: "pocket" }
   | { kind: "detail"; personId: string; sectionId?: string }
   | { kind: "list"; template?: ListTemplate }
@@ -54,6 +55,7 @@ export interface ToastSignal {
 interface UiValue {
   sheet: SheetState;
   openItemSheet: (listId?: string) => void;
+  openMoveItem: (listId: string, itemId: string) => void;
   openPocketSheet: () => void;
   openScrapFiling: (scrap: ScrapRef) => void;
   openDetailSheet: (personId: string, sectionId?: string) => void;
@@ -83,6 +85,10 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
   const openItemSheet = useCallback((listId?: string) => {
     setSheet({ kind: "item", listId });
   }, []);
+  const openMoveItem = useCallback(
+    (listId: string, itemId: string) => setSheet({ kind: "move-item", listId, itemId }),
+    []
+  );
   const openPocketSheet = useCallback(() => setSheet({ kind: "pocket" }), []);
   const openScrapFiling = useCallback((scrap: ScrapRef) => setSheet({ kind: "item", scrap }), []);
   const openDetailSheet = useCallback((personId: string, sectionId?: string) => {
@@ -118,6 +124,7 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
     () => ({
       sheet,
       openItemSheet,
+      openMoveItem,
       openPocketSheet,
       openScrapFiling,
       openDetailSheet,
@@ -135,7 +142,7 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
       closeConfirm,
     }),
     [
-      sheet, openItemSheet, openPocketSheet, openScrapFiling, openDetailSheet, openListSheet, openPersonSheet,
+      sheet, openItemSheet, openMoveItem, openPocketSheet, openScrapFiling, openDetailSheet, openListSheet, openPersonSheet,
       openEditList, openEditPerson, openEditDetail, closeSheet,
       toast, showToast, dismissToast, confirm, openConfirm, closeConfirm,
     ]

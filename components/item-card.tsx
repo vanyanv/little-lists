@@ -29,8 +29,8 @@ function ItemEditor({
   item: Item;
   statuses: StatusId[];
 }) {
-  const { lists, people, addItem, addPerson, updateItem, deleteItem } = useStore();
-  const { showToast } = useUi();
+  const { lists, people, addItem, addPerson, updateItem, deleteItem, setItemPinned } = useStore();
+  const { showToast, openMoveItem } = useUi();
   const options = statuses;
   const isNote = ITEM_TYPE_META[item.type].aspect === "note";
   // gift lists edit "who's it for?" through the person picker instead of subtitle
@@ -229,6 +229,30 @@ function ItemEditor({
         placeholder="like a person, a mood, a someday…"
         className={`w-full rounded-lg border border-line bg-paper px-3 py-2 text-[1rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
       />
+
+      {/* pin + move/copy */}
+      <div className="mt-3.5 flex items-center gap-2">
+        <button
+          type="button"
+          aria-pressed={Boolean(item.pinned)}
+          onClick={() => setItemPinned(listId, item.id, !item.pinned)}
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-pill px-3 text-[0.8rem] font-bold transition ${focusRing} ${
+            item.pinned ? "bg-ink text-cream shadow-soft" : "bg-cream-deep text-brown ring-1 ring-line/60"
+          }`}
+        >
+          <LittleIcon name="star-tiny" size={14} />
+          {item.pinned ? "Pinned to top" : "Pin to top"}
+        </button>
+        {lists.length > 1 && (
+          <button
+            type="button"
+            onClick={() => openMoveItem(listId, item.id)}
+            className={`inline-flex min-h-11 items-center gap-1.5 rounded-pill bg-cream-deep px-3 text-[0.8rem] font-bold text-brown ring-1 ring-line/60 transition hover:text-ink ${focusRing}`}
+          >
+            Move or copy
+          </button>
+        )}
+      </div>
 
       <div className="mt-3 flex justify-end">
         <button

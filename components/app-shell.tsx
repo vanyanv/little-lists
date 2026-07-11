@@ -16,6 +16,7 @@ import { EditListSheet } from "./edit-list-sheet";
 import { EditPersonSheet } from "./edit-person-sheet";
 import { EditDetailSheet } from "./edit-detail-sheet";
 import { ConfirmSheet } from "./confirm-sheet";
+import { MoveItemSheet } from "./move-item-sheet";
 import { Celebration } from "./celebration";
 import { Toast } from "./toast";
 import { SaveErrorToast } from "./save-error-toast";
@@ -61,6 +62,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <EditPersonSheet />
               <EditDetailSheet />
               <ConfirmSheet />
+              <MoveItemSheet />
               <Celebration signal={celebration} />
             </div>
           </div>
