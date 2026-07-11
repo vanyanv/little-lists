@@ -17,6 +17,7 @@ import { EmptyState } from "@/components/empty-state";
 import { OverflowMenu } from "@/components/overflow-menu";
 import { Button } from "@/components/button";
 import { PeopleTemplateNudge } from "@/components/people-template-nudge";
+import { RevisitBeacon } from "@/components/revisit-beacon";
 import { filterItemsByStatus } from "@/lib/store-helpers";
 
 /** the list's saved view, falling back to its template default */
@@ -143,6 +144,7 @@ export default function ListDetailScreen() {
 
   return (
     <div className={themeClass(list.theme)}>
+      <RevisitBeacon event="list_revisited" />
       <DetailHeader
         emoji={list.emoji}
         title={list.title}

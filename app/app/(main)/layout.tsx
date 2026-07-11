@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { ListsProvider, type StoreSeed } from "@/lib/store";
 import { AppShell } from "@/components/app-shell";
+import { AnalyticsBoot } from "@/components/analytics-boot";
 import { ensureProfileForClerkUser } from "@/lib/server/profile";
 import { getInitialData } from "@/lib/server/data";
 import type { Profile } from "@/lib/types";
@@ -60,6 +61,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <ListsProvider seed={seed}>
+      <AnalyticsBoot />
       <AppShell>{children}</AppShell>
     </ListsProvider>
   );

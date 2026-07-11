@@ -17,6 +17,7 @@ import { EmptyState } from "@/components/empty-state";
 import { OverflowMenu } from "@/components/overflow-menu";
 import { Button } from "@/components/button";
 import { AnimatedCategoryIcon } from "@/components/icons/animated-category-icon";
+import { RevisitBeacon } from "@/components/revisit-beacon";
 import { focusRing } from "@/lib/a11y";
 
 // starter prompts for an empty person — each opens the add sheet on its section
@@ -85,6 +86,7 @@ export default function PersonDetailScreen() {
 
   return (
     <div className={themeClass(person.theme)}>
+      <RevisitBeacon event="person_revisited" />
       <DetailHeader
         emoji={person.emoji}
         title={`Little things about ${person.name}`}

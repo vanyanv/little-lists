@@ -9,6 +9,7 @@ import { hover, softSpring, tap } from "@/lib/motion";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { focusRingStretched } from "@/lib/a11y";
+import { trackProductEvent } from "@/lib/analytics-client";
 import { CardStack } from "./card-stack";
 import { Sticker } from "./sticker";
 import { StickerBadge } from "./icons/sticker-badge";
@@ -48,6 +49,7 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
           {
             label: list.pinned ? "Unpin" : "Pin to top",
             onSelect: () => {
+              if (!list.pinned) trackProductEvent("feature_used", { feature: "list_pin" });
               setListPinned(list.id, !list.pinned);
               showToast(list.pinned ? "Unpinned" : "Pinned to the top ✨");
             },

@@ -11,6 +11,7 @@ import { useComboboxNav } from "@/lib/use-combobox-nav";
 import { searchLittleWorld, type LocalHit } from "@/lib/search/local";
 import { scrapAge } from "@/lib/scraps";
 import { ITEM_TYPE_META } from "@/lib/types";
+import { trackProductEvent } from "@/lib/analytics-client";
 
 const LISTBOX_ID = "global-search-listbox";
 
@@ -136,6 +137,15 @@ export function GlobalSearch({ query, onQueryChange }: { query: string; onQueryC
   );
   const flat = useMemo(() => groups.flatMap((g) => g.hits), [groups]);
   const ids = useMemo(() => flat.map(optionId), [flat]);
+
+  // Emit once per settled (debounced) search, never the query text.
+  useEffect(() => {
+    if (debounced.trim() === "") return;
+    trackProductEvent("search_completed", {
+      resultCount: flat.length,
+      zeroResult: flat.length === 0,
+    });
+  }, [debounced, flat.length]);
 
   const activate = (hit: LocalHit) => {
     switch (hit.kind) {

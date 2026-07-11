@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { soonestUpcomingDay } from "@/lib/special-day";
 import { focusRing } from "@/lib/a11y";
+import { trackProductEvent, currentSessionId } from "@/lib/analytics-client";
 
 // localStorage via useSyncExternalStore, mirroring DemoBanner: the server
 // snapshot says "dismissed", so SSR/hydration render nothing and the banner
@@ -34,12 +35,20 @@ export function PersonDayNudge() {
   const dismissed = useSyncExternalStore(subscribe, () => readDismissed(key), serverSnapshot);
   const [hidden, setHidden] = useState(false);
 
+  useEffect(() => {
+    if (!upcoming || dismissed || hidden) return;
+    trackProductEvent("special_day_nudge_viewed", undefined, {
+      dedupeKey: `nudge:${upcoming.person.id}:${currentSessionId()}`,
+    });
+  }, [upcoming, dismissed, hidden]);
+
   if (!upcoming || dismissed || hidden) return null;
 
   const { person } = upcoming;
 
   const dismiss = () => {
     setHidden(true);
+    trackProductEvent("special_day_nudge_dismissed");
     try {
       if (key) localStorage.setItem(key, "1");
     } catch {
@@ -54,6 +63,7 @@ export function PersonDayNudge() {
     >
       <Link
         href={`/app/person/${person.id}`}
+        onClick={() => trackProductEvent("special_day_nudge_opened")}
         className={`min-w-0 flex-1 rounded-lg text-[0.85rem] leading-snug text-brown ${focusRing}`}
       >
         <span aria-hidden>{person.emoji}</span> {person.name}&apos;s day is coming up 🎂
