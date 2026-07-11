@@ -14,8 +14,14 @@ export function Privacy() {
           Private by default
         </h2>
         <p className="mx-auto mt-3 max-w-[34rem] text-[1.02rem] leading-relaxed text-ink-soft">
-          Your little lists are yours, full stop. Only you can see what you save. No public profiles, no feeds, no ads, and we never sell your taste to anyone.
+          Only you can see your lists and people notes. There are no public profiles, no sharing, and
+          no ads. Little Lists never sells your personal information.
         </p>
+        <ul className="mx-auto mt-6 grid max-w-lg gap-2 text-left text-[0.9rem] font-semibold text-ink sm:grid-cols-3 sm:text-center">
+          <li className="rounded-xl bg-paper/60 px-3 py-2.5 ring-1 ring-line/40">Only you can see it</li>
+          <li className="rounded-xl bg-paper/60 px-3 py-2.5 ring-1 ring-line/40">No social feed</li>
+          <li className="rounded-xl bg-paper/60 px-3 py-2.5 ring-1 ring-line/40">No advertising</li>
+        </ul>
         <Link
           href="/privacy"
           className={`mt-7 inline-flex items-center gap-1.5 rounded-pill bg-paper px-5 py-2.5 text-[0.9rem] font-bold text-ink shadow-soft ring-1 ring-line/60 transition-colors hover:bg-cream ${focusRing}`}

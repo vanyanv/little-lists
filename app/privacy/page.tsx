@@ -13,18 +13,32 @@ export default function PrivacyPage() {
       intro="The short version: your little lists are yours. Here is how we treat them, in plain language."
     >
       <InfoSection heading="Private by default">
-        Every list and note you make is visible only to you. Nothing you save is ever shown to anyone else.
+        Every list and note you make is visible only to you. There are no public profiles, no sharing,
+        and no social feed. We do not run ads, and nothing you save is ever sold. Everything travels
+        encrypted between your device and our servers.
       </InfoSection>
-      <InfoSection heading="Signing in">
-        We use Clerk to handle sign-in securely, so your account stays protected. We never see your
-        password.
-      </InfoSection>
-      <InfoSection heading="What we keep">
+      <InfoSection heading="What we keep, and for how long">
         Just the little lists you make: their titles, items, notes, and the details you jot about the
-        people you love, tied to your account so they are waiting for you next time.
+        people you love, tied to your account so they are waiting for you next time. Everything you save
+        stays until you delete it, whether that is a single item or your whole account. Account deletion
+        is immediate and erases all of it.
       </InfoSection>
-      <InfoSection heading="We do not sell your stuff">
-        Your lists are not for sale and not used for ads. They are a personal archive, not a product.
+      <InfoSection heading="Who helps us run this">
+        We rely on a small set of trusted services. Clerk handles sign-in, so we never see your password.
+        Neon hosts the database that stores your little world, and our app host keeps the site running.
+        When you search for a movie or book, we query TMDB and Open Library to find titles. Those queries
+        only fetch results and are never sold or mined.
+      </InfoSection>
+      <InfoSection heading="Take it with you">
+        Download everything you have saved as JSON or CSV anytime, right from your profile.
+      </InfoSection>
+      <InfoSection heading="Leaving">
+        You can delete your account from your profile, or through your account portal. Either way, your
+        data is wiped.
+      </InfoSection>
+      <InfoSection heading="Backups">
+        Our database provider keeps operational backups for reliability, but once something is deleted,
+        it is not recoverable.
       </InfoSection>
       <InfoSection heading="Reaching us">
         Questions about your data? Email{" "}
