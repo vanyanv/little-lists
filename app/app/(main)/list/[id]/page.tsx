@@ -144,7 +144,7 @@ export default function ListDetailScreen() {
 
   return (
     <div className={themeClass(list.theme)}>
-      <RevisitBeacon event="list_revisited" />
+      <RevisitBeacon key={list.id} event="list_revisited" />
       <DetailHeader
         emoji={list.emoji}
         title={list.title}

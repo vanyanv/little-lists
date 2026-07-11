@@ -86,7 +86,7 @@ export default function PersonDetailScreen() {
 
   return (
     <div className={themeClass(person.theme)}>
-      <RevisitBeacon event="person_revisited" />
+      <RevisitBeacon key={person.id} event="person_revisited" />
       <DetailHeader
         emoji={person.emoji}
         title={`Little things about ${person.name}`}
