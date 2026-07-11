@@ -145,9 +145,9 @@ function ItemEditor({
                 type="button"
                 aria-pressed={selected}
                 onClick={() => updateItem(listId, item.id, { status: s })}
-                className={`-my-0.5 flex min-h-11 items-center rounded-pill transition ${focusRing} ${selected ? "ring-2 ring-ink/20" : "opacity-55 hover:opacity-90"}`}
+                className={`-my-0.5 flex min-h-11 items-center rounded-pill transition ${focusRing} ${selected ? "" : "opacity-55 hover:opacity-90"}`}
               >
-                <StatusPill status={s} />
+                <StatusPill status={s} selected={selected} />
               </button>
             );
           })}

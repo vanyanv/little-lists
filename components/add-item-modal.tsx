@@ -579,9 +579,9 @@ function DetailsStep(props: {
               type="button"
               aria-pressed={status === s}
               onClick={() => setStatus(s)}
-              className={`-my-0.5 flex min-h-11 items-center rounded-pill transition ${focusRing} ${status === s ? "ring-2 ring-ink/20" : "opacity-55 hover:opacity-90"}`}
+              className={`-my-0.5 flex min-h-11 items-center rounded-pill transition ${focusRing} ${status === s ? "" : "opacity-55 hover:opacity-90"}`}
             >
-              <StatusPill status={s} />
+              <StatusPill status={s} selected={status === s} />
             </button>
           ))}
         </div>
