@@ -52,6 +52,11 @@ export async function createListAction(input: CreateListInput): Promise<List> {
     },
     include: { items: true },
   });
+  void recordProductEvent({
+    userId: clerkUserId,
+    name: "list_created",
+    properties: { template: input.template },
+  });
   return mapList(row);
 }
 
@@ -107,6 +112,11 @@ export async function deleteListAction(listId: string): Promise<void> {
   const { clerkUserId } = await requireUserProfile();
   // ListItem.list is onDelete: Cascade, so items go with it
   await prisma.list.deleteMany({ where: { id: listId, userId: clerkUserId } });
+  void recordProductEvent({
+    userId: clerkUserId,
+    name: "entity_deleted",
+    properties: { entity: "list" },
+  });
 }
 
 /* ── items ───────────────────────────────────────────────────────────── */
@@ -156,17 +166,48 @@ export async function createItemAction(listId: string, input: CreateItemInput): 
     where: { id: listId, userId: clerkUserId },
     select: { id: true },
   });
-  if (!list) throw new Error("createItemAction: list not found");
+  if (!list) {
+    void recordProductEvent({
+      userId: clerkUserId,
+      name: "operation_error",
+      properties: { action: "createItemAction", code: "list_not_found" },
+    });
+    throw new Error("createItemAction: list not found");
+  }
 
   if (input.personId) {
     const person = await prisma.person.findFirst({
       where: { id: input.personId, userId: clerkUserId },
       select: { id: true },
     });
-    if (!person) throw new Error("createItemAction: person not found");
+    if (!person) {
+      void recordProductEvent({
+        userId: clerkUserId,
+        name: "operation_error",
+        properties: { action: "createItemAction", code: "person_not_found" },
+      });
+      throw new Error("createItemAction: person not found");
+    }
   }
 
   const row = await prisma.listItem.create({ data: itemCreateData(clerkUserId, listId, input) });
+  const itemCount = await prisma.listItem.count({ where: { userId: clerkUserId } });
+  void recordProductEvent({
+    userId: clerkUserId,
+    name: "item_created",
+    properties: {
+      hasPerson: Boolean(input.personId),
+      hasNote: Boolean(input.note),
+      hasRating: typeof input.meta?.rating === "number",
+    },
+  });
+  if (itemCount === 1) {
+    void recordProductEvent({
+      userId: clerkUserId,
+      name: "onboarding_completed",
+      dedupeKey: `onboarding:${clerkUserId}`,
+    });
+  }
   return mapItem(row, input.type);
 }
 
@@ -195,7 +236,14 @@ export async function updateItemAction(itemId: string, patch: UpdateItemPatch): 
       where: { id: patch.personId, userId: clerkUserId },
       select: { id: true },
     });
-    if (!person) throw new Error("updateItemAction: person not found");
+    if (!person) {
+      void recordProductEvent({
+        userId: clerkUserId,
+        name: "operation_error",
+        properties: { action: "updateItemAction", code: "person_not_found" },
+      });
+      throw new Error("updateItemAction: person not found");
+    }
   }
 
   const data: Prisma.ListItemUpdateInput = {};
@@ -221,6 +269,11 @@ export async function updateItemAction(itemId: string, patch: UpdateItemPatch): 
 export async function deleteItemAction(itemId: string): Promise<void> {
   const { clerkUserId } = await requireUserProfile();
   await prisma.listItem.deleteMany({ where: { id: itemId, userId: clerkUserId } });
+  void recordProductEvent({
+    userId: clerkUserId,
+    name: "entity_deleted",
+    properties: { entity: "item" },
+  });
 }
 
 /* ── scraps ──────────────────────────────────────────────────────────── */
@@ -230,12 +283,18 @@ export async function createScrapAction(text: string): Promise<Scrap> {
   const trimmed = text.trim().slice(0, SCRAP_MAX_LENGTH);
   if (!trimmed) throw new Error("createScrapAction: empty text");
   const row = await prisma.scrap.create({ data: { userId: clerkUserId, text: trimmed } });
+  void recordProductEvent({ userId: clerkUserId, name: "pocket_captured" });
   return mapScrap(row);
 }
 
 export async function deleteScrapAction(scrapId: string): Promise<void> {
   const { clerkUserId } = await requireUserProfile();
   await prisma.scrap.deleteMany({ where: { id: scrapId, userId: clerkUserId } });
+  void recordProductEvent({
+    userId: clerkUserId,
+    name: "entity_deleted",
+    properties: { entity: "scrap" },
+  });
 }
 
 /** persist the enrichment guess (or a definitive "none") so detection runs once per scrap */
@@ -250,30 +309,57 @@ export async function saveScrapDetectionAction(scrapId: string, detection: Detec
 /** file a scrap: create the list item and retire the scrap in one transaction */
 export async function fileScrapAction(scrapId: string, listId: string, input: CreateItemInput): Promise<Item> {
   const { clerkUserId } = await requireUserProfile();
-  return prisma.$transaction(async (tx) => {
+  const item = await prisma.$transaction(async (tx) => {
     const scrap = await tx.scrap.findFirst({
       where: { id: scrapId, userId: clerkUserId },
       select: { id: true },
     });
-    if (!scrap) throw new Error("fileScrapAction: scrap not found");
+    if (!scrap) {
+      void recordProductEvent({
+        userId: clerkUserId,
+        name: "operation_error",
+        properties: { action: "fileScrapAction", code: "scrap_not_found" },
+      });
+      throw new Error("fileScrapAction: scrap not found");
+    }
     const list = await tx.list.findFirst({
       where: { id: listId, userId: clerkUserId },
       select: { id: true },
     });
-    if (!list) throw new Error("fileScrapAction: list not found");
+    if (!list) {
+      void recordProductEvent({
+        userId: clerkUserId,
+        name: "operation_error",
+        properties: { action: "fileScrapAction", code: "list_not_found" },
+      });
+      throw new Error("fileScrapAction: list not found");
+    }
 
     if (input.personId) {
       const person = await tx.person.findFirst({
         where: { id: input.personId, userId: clerkUserId },
         select: { id: true },
       });
-      if (!person) throw new Error("fileScrapAction: person not found");
+      if (!person) {
+        void recordProductEvent({
+          userId: clerkUserId,
+          name: "operation_error",
+          properties: { action: "fileScrapAction", code: "person_not_found" },
+        });
+        throw new Error("fileScrapAction: person not found");
+      }
     }
 
     const row = await tx.listItem.create({ data: itemCreateData(clerkUserId, listId, input) });
     await tx.scrap.delete({ where: { id: scrapId } });
     return mapItem(row, input.type);
   });
+  void recordProductEvent({
+    userId: clerkUserId,
+    name: "pocket_filed",
+    properties: { hasPerson: Boolean(input.personId) },
+  });
+  return item;
 }
 
 /* ── people ──────────────────────────────────────────────────────────── */
@@ -300,6 +386,7 @@ export async function createPersonAction(input: CreatePersonInput): Promise<Pers
     },
     include: { details: true },
   });
+  void recordProductEvent({ userId: clerkUserId, name: "person_created" });
   return mapPerson(row);
 }
 
@@ -336,6 +423,12 @@ export async function createPersonDetailAction(
     },
   });
 
+  void recordProductEvent({
+    userId: clerkUserId,
+    name: "person_detail_created",
+    properties: { kind: input.sectionId },
+  });
+
   return {
     sectionId: input.sectionId,
     entry: { id: row.id, title: row.title, note: row.note ?? undefined, tags: row.tags },
@@ -345,6 +438,11 @@ export async function createPersonDetailAction(
 export async function deletePersonDetailAction(detailId: string): Promise<void> {
   const { clerkUserId } = await requireUserProfile();
   await prisma.personDetail.deleteMany({ where: { id: detailId, userId: clerkUserId } });
+  void recordProductEvent({
+    userId: clerkUserId,
+    name: "entity_deleted",
+    properties: { entity: "detail" },
+  });
 }
 
 export interface UpdatePersonPatch {
@@ -393,6 +491,11 @@ export async function deletePersonAction(personId: string): Promise<void> {
   const { clerkUserId } = await requireUserProfile();
   // PersonDetail.person is onDelete: Cascade, so details go with it
   await prisma.person.deleteMany({ where: { id: personId, userId: clerkUserId } });
+  void recordProductEvent({
+    userId: clerkUserId,
+    name: "entity_deleted",
+    properties: { entity: "person" },
+  });
 }
 
 export interface UpdatePersonDetailPatch {

@@ -2,6 +2,7 @@ import "server-only";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { Prisma, type Profile } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { recordProductEvent } from "@/lib/analytics";
 
 /**
  * Idempotently ensure a Profile row exists for the signed-in Clerk user.
@@ -23,11 +24,17 @@ export async function ensureProfileForClerkUser(): Promise<Profile | null> {
     user?.firstName?.trim() || user?.username?.trim() || "friend";
 
   try {
-    return await prisma.profile.upsert({
+    const created = await prisma.profile.upsert({
       where: { clerkUserId: userId },
       update: {},
       create: { clerkUserId: userId, displayName },
     });
+    void recordProductEvent({
+      userId,
+      name: "sign_up_completed",
+      dedupeKey: `sign_up:${userId}`,
+    });
+    return created;
   } catch (err) {
     // A concurrent first request (a fresh signup fires several at once) can slip
     // a row in between our read above and this write — the unique clerkUserId
