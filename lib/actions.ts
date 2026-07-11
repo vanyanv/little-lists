@@ -191,7 +191,9 @@ export async function createItemAction(listId: string, input: CreateItemInput): 
   }
 
   const row = await prisma.listItem.create({ data: itemCreateData(clerkUserId, listId, input) });
-  const itemCount = await prisma.listItem.count({ where: { userId: clerkUserId } });
+  const itemCount = await prisma.listItem.count({
+    where: { userId: clerkUserId, NOT: { tags: { has: EXAMPLE_TAG } } },
+  });
   void recordProductEvent({
     userId: clerkUserId,
     name: "item_created",
@@ -426,7 +428,7 @@ export async function createPersonDetailAction(
   void recordProductEvent({
     userId: clerkUserId,
     name: "person_detail_created",
-    properties: { kind: input.sectionId },
+    properties: { kind: section },
   });
 
   return {

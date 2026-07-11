@@ -112,7 +112,7 @@ Notes:
 
 | Event | Call site | Properties | Dedupe |
 |---|---|---|---|
-| `search_completed` | `components/global-search.tsx` when results settle | `kind,resultCount,zeroResult` | — |
+| `search_completed` | `components/global-search.tsx` when results settle | `resultCount,zeroResult` | — |
 | `return_session` | analytics-client init (see below) | — | `return:{sessionId}` |
 | `list_revisited` | `app/app/(main)/list/[id]` view (client mount) | — | — |
 | `person_revisited` | person page view (client mount) | — | — |
@@ -122,11 +122,13 @@ Notes:
 | `feature_used` | helper; wired now to 1–2 obvious spots (e.g. list pin) | `feature` | — |
 
 Notes:
-- `search_completed`: emit `kind` (movies/books/music), `resultCount` (number),
-  `zeroResult` (boolean). **Never the query string.**
+- `search_completed`: emit `resultCount` (number) and a `zeroResult` boolean.
+  **Never the query string.** No `kind` — global search has no media-kind axis.
 - `list_revisited` / `person_revisited`: emit on client mount of the detail page.
   No dedupe — counts are views; analysis distinguishes create vs revisit by
-  cross-referencing `list_created`.
+  cross-referencing `list_created`. Onboarding starter lists are created via
+  `completeOnboardingAction` and do not emit `list_created`, so a starter list
+  shows `list_revisited` with no matching `list_created` — expected.
 - `feature_used` is the escape hatch for future adoption tracking; wire the
   helper + one real use so the pattern exists.
 

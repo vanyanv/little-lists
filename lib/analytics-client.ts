@@ -48,7 +48,7 @@ export function trackProductEvent(
     sessionId: sessionId(),
     path: opts?.path,
     dedupeKey: opts?.dedupeKey,
-  });
+  }).catch(() => {});
 }
 
 export { SESSION_KEY, LAST_ACTIVE_KEY };
