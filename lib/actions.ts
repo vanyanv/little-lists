@@ -2,7 +2,13 @@
 
 import { Prisma, type PersonDetail } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireUserProfile } from "@/lib/server/profile";
+import { requireUserProfile, getCurrentUserProfile } from "@/lib/server/profile";
+import {
+  recordProductEvent,
+  isProductEventName,
+  sanitizeAnalyticsProperties,
+  type AnalyticsProperties,
+} from "@/lib/analytics";
 import { DB_SECTION_TO_ID, ID_TO_DB_SECTION } from "@/lib/people";
 import { mapItem, mapList, mapPerson, mapProfile, mapScrap, templateToDb } from "@/lib/server/serialize";
 import { DEMO_PERSON, EXAMPLE_TAG, STARTER_OPTIONS } from "@/lib/onboarding";
@@ -553,4 +559,35 @@ export async function skipOnboardingAction(): Promise<void> {
     where: { clerkUserId },
     data: { onboardingCompleted: true },
   });
+}
+
+/* ── analytics ───────────────────────────────────────────────────────── */
+
+/**
+ * Client-emitted product events land here. Must never throw into a render:
+ * unknown names and unauthenticated callers are dropped silently, and any
+ * failure is swallowed.
+ */
+export async function trackProductEventAction(input: {
+  name: string;
+  properties?: AnalyticsProperties;
+  sessionId?: string;
+  path?: string;
+  dedupeKey?: string;
+}): Promise<void> {
+  try {
+    if (!isProductEventName(input.name)) return;
+    const profile = await getCurrentUserProfile();
+    if (!profile) return;
+    await recordProductEvent({
+      userId: profile.clerkUserId,
+      name: input.name,
+      properties: sanitizeAnalyticsProperties(input.properties),
+      sessionId: input.sessionId,
+      path: input.path,
+      dedupeKey: input.dedupeKey,
+    });
+  } catch (error) {
+    console.error("trackProductEventAction failed", error);
+  }
 }
