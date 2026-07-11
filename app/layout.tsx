@@ -75,24 +75,17 @@ export default function RootLayout({
         <head>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-          {/* color-emoji fallback for platforms without a native emoji font.
-              Non-blocking: fetched as media=print, then flipped to all so it
-              never stalls first paint. iOS/Android already have native color
-              emoji, so the network cost is pure fallback insurance. */}
-          <link
-            rel="preload"
-            as="style"
-            href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap"
-          />
-          <link
-            id="emoji-font"
-            rel="stylesheet"
-            media="print"
-            href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap"
-          />
+          {/* Color-emoji fallback for platforms without a native emoji font.
+              Injected client-side via createElement — NOT rendered by React —
+              so it loads non-blocking (media=print, flipped to all onload) AND
+              never causes a hydration mismatch (React neither renders nor
+              tracks this link, so there's no server/client attribute diff).
+              iOS/Android already have native color emoji, so it's pure
+              fallback insurance. */}
           <script
             dangerouslySetInnerHTML={{
-              __html: "var l=document.getElementById('emoji-font');if(l)l.media='all';",
+              __html:
+                "(function(){var l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap';l.media='print';l.onload=function(){this.media='all'};document.head.appendChild(l);})();",
             }}
           />
           <noscript>
