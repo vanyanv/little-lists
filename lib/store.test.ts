@@ -106,12 +106,22 @@ describe("store: actions/state context split", () => {
   });
 
   it("gives every useCallback action a dep array free of raw state (lists/people/scraps/profile/etc.)", () => {
-    const depArrayLines = [...source.matchAll(/^ {2}\}, (\[[^\]]*\])\);$/gm)].map((m) => m[1]);
-    // sanity: ListsProvider defines ~28 stable callbacks (fireCelebration,
-    // signalSaveError, and the 26 StoreValue actions) — if this drops much
-    // below that, the regex stopped matching real callbacks and the test
-    // would be vacuously true.
-    expect(depArrayLines.length).toBeGreaterThanOrEqual(26);
+    // useCallback closings appear in two shapes in this file:
+    //   inline:     `  }, [deps]);`
+    //   multi-line: `    },\n    [deps]\n  );` (used when the callback's own
+    //               signature spans multiple lines, e.g. addPersonDetail,
+    //               deletePersonDetail, updatePersonDetail). Both must be
+    //               captured, or a raw-state regression in one of the
+    //               multi-line callbacks would slip past this audit
+    //               undetected.
+    const inlineDeps = [...source.matchAll(/^ {2}\}, (\[[^\]]*\])\);$/gm)].map((m) => m[1]);
+    const multilineDeps = [...source.matchAll(/^ {4}\},\n {4}(\[[^\]]*\])\n {2}\);$/gm)].map((m) => m[1]);
+    const depArrayLines = [...inlineDeps, ...multilineDeps];
+    // sanity: ListsProvider defines exactly 29 stable callbacks
+    // (fireCelebration, signalSaveError, and the 27 StoreValue actions) — if
+    // this drops below that, the extraction stopped matching real
+    // useCallback closings and the test would be vacuously true.
+    expect(depArrayLines.length).toBeGreaterThanOrEqual(29);
     for (const depArray of depArrayLines) {
       assertNoStateField(depArray, `useCallback dep array ${depArray}`);
     }
