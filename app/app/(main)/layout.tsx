@@ -15,13 +15,8 @@ export const dynamic = "force-dynamic";
 // it never leaks a real-looking identity. A reload picks up the real profile.
 const FALLBACK_PROFILE: Profile = {
   name: "friend",
-  handle: "",
   avatarEmoji: "🌙",
-  bio: "",
   theme: "blush",
-  tags: [],
-  featuredListIds: [],
-  isPublic: false,
   demoSeeded: false,
   // don't flash the first-steps checklist while the real profile is unknown
   checklistDismissed: true,

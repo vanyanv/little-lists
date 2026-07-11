@@ -114,13 +114,8 @@ export function mapPerson(row: DbPerson & { details?: DbPersonDetail[] }): Perso
 export function mapProfile(row: DbProfile): Profile {
   return {
     name: row.displayName?.trim() || "friend",
-    handle: row.handle?.trim() || "",
     avatarEmoji: "🌙",
-    bio: row.bio?.trim() || "",
     theme: (row.themeColor as ThemeColor) ?? "blush",
-    tags: [],
-    featuredListIds: [],
-    isPublic: false,
     demoSeeded: row.demoSeeded,
     checklistDismissed: row.checklistDismissed,
   };

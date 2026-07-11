@@ -206,13 +206,8 @@ export interface Person {
 
 export interface Profile {
   name: string;
-  handle: string;
   avatarEmoji: string;
-  bio: string;
   theme: ThemeColor;
-  tags: string[];
-  featuredListIds: string[];
-  isPublic: boolean;
   /** onboarding seeded example content — drives the "make them yours" banner */
   demoSeeded: boolean;
   /** the Home first-steps checklist was hidden (or shouldn't be shown) */

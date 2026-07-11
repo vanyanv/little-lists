@@ -24,12 +24,6 @@ enum ViewMode {
   cozy
 }
 
-enum Visibility {
-  private
-  unlisted
-  public
-}
-
 enum PersonDetailSection {
   likes
   dislikes
@@ -45,9 +39,6 @@ model Profile {
   id                  String   @id @default(cuid())
   clerkUserId         String   @unique
   displayName         String
-  handle              String?
-  avatarUrl           String?
-  bio                 String?
   themeColor          String?
   onboardingCompleted Boolean  @default(false)
   demoSeeded          Boolean  @default(false)
@@ -71,7 +62,6 @@ model List {
   templateType    TemplateType
   themeColor      String
   defaultViewMode ViewMode     @default(cozy)
-  visibility      Visibility   @default(private)
   description     String?
   pinned          Boolean      @default(false)
   createdAt       DateTime     @default(now())

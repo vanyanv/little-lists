@@ -545,8 +545,6 @@ export async function updatePersonDetailAction(
 
 export interface UpdateProfilePatch {
   displayName?: string;
-  handle?: string;
-  bio?: string;
   themeColor?: ThemeColor;
   checklistDismissed?: boolean;
 }
@@ -557,8 +555,6 @@ export async function updateProfileAction(patch: UpdateProfilePatch): Promise<Pr
     where: { clerkUserId },
     data: {
       ...(patch.displayName !== undefined ? { displayName: patch.displayName } : {}),
-      ...(patch.handle !== undefined ? { handle: patch.handle } : {}),
-      ...(patch.bio !== undefined ? { bio: patch.bio } : {}),
       ...(patch.themeColor !== undefined ? { themeColor: patch.themeColor } : {}),
       ...(patch.checklistDismissed !== undefined ? { checklistDismissed: patch.checklistDismissed } : {}),
     },
