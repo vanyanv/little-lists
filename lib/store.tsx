@@ -33,6 +33,7 @@ import {
   deletePersonAction,
   deletePersonDetailAction,
   deleteScrapAction,
+  duplicateListAction,
   fileScrapAction,
   moveItemAction,
   reorderItemsAction,
@@ -133,6 +134,7 @@ interface StoreValue {
   /** pin a list to the top of Home (or unpin it) */
   setListPinned: (listId: string, pinned: boolean) => void;
   deleteList: (listId: string) => DeleteHandle;
+  duplicateList: (listId: string) => Promise<List | null>;
   updatePerson: (personId: string, patch: Partial<Pick<Person, "name" | "emoji" | "theme" | "note" | "specialDay">>) => void;
   deletePerson: (personId: string) => DeleteHandle;
   updatePersonDetail: (
@@ -341,6 +343,32 @@ export function ListsProvider({
       },
     };
   }, [signalSaveError]);
+
+  const duplicateList = useCallback<StoreValue["duplicateList"]>(async (listId) => {
+    const source = lists.find((l) => l.id === listId);
+    if (!source || isTempId(listId)) return null;
+    const tempId = makeId("list");
+    const optimistic: List = {
+      ...source,
+      id: tempId,
+      title: `${source.title} (copy)`,
+      pinned: false,
+      items: source.items.map((i) => ({ ...i })),
+    };
+    setLists((prev) => [optimistic, ...prev]);
+    trackProductEvent("feature_used", { feature: "list_duplicated" });
+    try {
+      const created = await duplicateListAction(listId);
+      if (!created) throw new Error("duplicateList: no row");
+      setLists((prev) => prev.map((l) => (l.id === tempId ? created : l)));
+      return created;
+    } catch (err) {
+      console.error("duplicateList failed", err);
+      setLists((prev) => prev.filter((l) => l.id !== tempId));
+      signalSaveError();
+      return null;
+    }
+  }, [lists, signalSaveError]);
 
   /* ── items ─────────────────────────────────────────────────────── */
 
@@ -951,6 +979,7 @@ export function ListsProvider({
       updateList,
       setListPinned,
       deleteList,
+      duplicateList,
       addPerson,
       addPersonDetail,
       deletePersonDetail,
@@ -986,6 +1015,7 @@ export function ListsProvider({
       updateList,
       setListPinned,
       deleteList,
+      duplicateList,
       addPerson,
       addPersonDetail,
       deletePersonDetail,

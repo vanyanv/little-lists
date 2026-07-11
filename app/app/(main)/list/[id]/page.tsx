@@ -55,7 +55,7 @@ function defaultSortFor(list?: Pick<List, "defaultSort">): SortMode {
 export default function ListDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const list = useList(id);
-  const { setListView, setListSort, reorderItems, deleteList } = useStore();
+  const { setListView, setListSort, reorderItems, deleteList, duplicateList } = useStore();
   const people = useStore().people;
   const { openItemSheet, openEditList, openConfirm, showToast } = useUi();
   const router = useRouter();
@@ -164,6 +164,19 @@ export default function ListDetailScreen() {
       ariaLabel="List options"
       items={[
         { label: "Edit list", onSelect: () => openEditList(list.id) },
+        {
+          label: "Duplicate list",
+          onSelect: () => {
+            void duplicateList(list.id).then((created) => {
+              if (created) {
+                showToast("Copied your little list ✨");
+                router.push(`/app/list/${created.id}`);
+              } else {
+                showToast("That didn't save. Let's try again 🌿");
+              }
+            });
+          },
+        },
         {
           label: "Delete list",
           tone: "danger",

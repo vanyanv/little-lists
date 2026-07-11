@@ -13,6 +13,7 @@ import {
   type StatusId,
 } from "@/lib/types";
 import type { SearchHit } from "@/lib/search/types";
+import { isDuplicateTitle } from "@/lib/sort";
 import { themeClass } from "@/lib/visual";
 import { staggerContainer, riseItem, softSpring, tap } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
@@ -63,7 +64,7 @@ function AddItemFlow({
   onClose: () => void;
 }) {
   const { lists, people, addItem, addList, addPerson, fileScrap, fireCelebration } = useStore();
-  const { showToast } = useUi();
+  const { showToast, openConfirm } = useUi();
   const presetList = lists.find((l) => l.id === presetListId);
 
   const [step, setStep] = useState<Step>("compose");
@@ -205,7 +206,7 @@ function AddItemFlow({
     }
   };
 
-  const save = async () => {
+  const persist = async () => {
     const listId = targetListId ?? lists[0]?.id;
     if (!listId || saving) return;
     const input = {
@@ -247,6 +248,24 @@ function AddItemFlow({
       setSaving(false);
       showToast("That didn't save. Let's try again 🌿");
     }
+  };
+
+  const save = () => {
+    const listId = targetListId ?? lists[0]?.id;
+    if (!listId || saving) return;
+    const targetItems = lists.find((l) => l.id === listId)?.items ?? [];
+    if (isDuplicateTitle(title, targetItems)) {
+      openConfirm({
+        title: "Already in this list",
+        body: `"${title.trim()}" is already here. Add it again anyway?`,
+        confirmLabel: "Add anyway",
+        onConfirm: () => {
+          void persist();
+        },
+      });
+      return;
+    }
+    void persist();
   };
 
   return (
