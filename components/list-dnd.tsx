@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -19,7 +20,7 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
-import type { Item, List } from "@/lib/types";
+import type { Item, List, StatusId } from "@/lib/types";
 import { statusesForList } from "@/lib/types";
 import { ItemCard } from "@/components/item-card";
 import { focusRing } from "@/lib/a11y";
@@ -53,6 +54,10 @@ export function ListDnd({
     onReorder(arrayMove(ids, oldIndex, newIndex));
   };
 
+  // Stable reference for ItemCard's `statuses` prop — statusesForList returns a
+  // fresh array each call, which would defeat ItemCard's memo every render.
+  const statuses = useMemo(() => statusesForList(list), [list]);
+
   return (
     <DndContext
       sensors={sensors}
@@ -63,7 +68,7 @@ export function ListDnd({
       <SortableContext items={items.map((i) => i.id)} strategy={view === "grid" ? rectSortingStrategy : verticalListSortingStrategy}>
         <div className={layoutClass}>
           {items.map((item) => (
-            <SortableItemRow key={item.id} list={list} item={item} view={view} />
+            <SortableItemRow key={item.id} list={list} item={item} view={view} statuses={statuses} />
           ))}
         </div>
       </SortableContext>
@@ -71,7 +76,17 @@ export function ListDnd({
   );
 }
 
-function SortableItemRow({ list, item, view }: { list: List; item: Item; view: ViewMode }) {
+function SortableItemRow({
+  list,
+  item,
+  view,
+  statuses,
+}: {
+  list: List;
+  item: Item;
+  view: ViewMode;
+  statuses: StatusId[];
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -99,7 +114,7 @@ function SortableItemRow({ list, item, view }: { list: List; item: Item; view: V
         </button>
       )}
       <div className="min-w-0 flex-1">
-        <ItemCard listId={list.id} item={item} view={view} statuses={statusesForList(list)} />
+        <ItemCard listId={list.id} item={item} view={view} statuses={statuses} />
       </div>
     </div>
   );

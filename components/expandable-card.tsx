@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { CSSProperties, ReactNode } from "react";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { softSpring, tap } from "@/lib/motion";
 import { focusRingInset } from "@/lib/a11y";
 
@@ -18,7 +18,7 @@ interface ExpandableCardProps {
 }
 
 /** Cult-UI-style soft card: tap the summary to gently expand inline detail. */
-export function ExpandableCard({
+export const ExpandableCard = memo(function ExpandableCard({
   summary,
   detail,
   onActivate,
@@ -68,4 +68,4 @@ export function ExpandableCard({
       </AnimatePresence>
     </motion.div>
   );
-}
+});

@@ -123,6 +123,11 @@ export default function ListDetailScreen() {
     return sortItems(rows, sort, statusesForList(list));
   }, [list, filter, tagFilter, personFilter, query, sort]);
 
+  // Stable reference for ItemCard's `statuses` prop — statusesForList returns a
+  // fresh array each call, which would defeat ItemCard's memo every render.
+  // Called unconditionally (hooks rule); guards internally for the pre-load state.
+  const statuses = useMemo(() => (list ? statusesForList(list) : []), [list]);
+
   const dragEnabled =
     !!list &&
     sort === "custom" &&
@@ -381,7 +386,7 @@ export default function ListDetailScreen() {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={reduce ? softSpring : { ...softSpring, delay: Math.min(i, 8) * 0.04 }}
                 >
-                  <ItemCard listId={list.id} item={item} view={view} statuses={statusesForList(list)} />
+                  <ItemCard listId={list.id} item={item} view={view} statuses={statuses} />
                 </motion.div>
               ))}
             </motion.div>

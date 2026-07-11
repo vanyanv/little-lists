@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Item, StatusId } from "@/lib/types";
 import { ITEM_TYPE_META, TEMPLATE_META } from "@/lib/types";
 import { EXAMPLE_TAG, isExample } from "@/lib/onboarding";
@@ -322,13 +322,7 @@ function GridTile({ item }: { item: Item }) {
   );
 }
 
-export function ItemCard({
-  listId,
-  item,
-  view,
-  statuses,
-  hideSubtitle,
-}: {
+interface ItemCardProps {
   listId: string;
   item: Item;
   view: ViewMode;
@@ -337,7 +331,15 @@ export function ItemCard({
    *  card's subtitle is that same person's denormalized name and would just
    *  echo the section heading. Display-only: the picker/link is untouched. */
   hideSubtitle?: boolean;
-}) {
+}
+
+export const ItemCard = memo(function ItemCard({
+  listId,
+  item,
+  view,
+  statuses,
+  hideSubtitle,
+}: ItemCardProps) {
   const isMedia = ITEM_TYPE_META[item.type].aspect !== "note";
   const [sparkle, setSparkle] = useState(Boolean(item.fresh));
 
@@ -399,4 +401,4 @@ export function ItemCard({
       />
     </div>
   );
-}
+});

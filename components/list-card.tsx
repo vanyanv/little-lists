@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { memo } from "react";
 import { motion } from "motion/react";
 import type { List } from "@/lib/types";
 import { TEMPLATE_META } from "@/lib/types";
@@ -35,7 +36,12 @@ function ListMeta({ list, size = "normal" }: { list: List; size?: "hero" | "norm
   );
 }
 
-export function ListCard({ list, variant = "normal" }: { list: List; variant?: "hero" | "normal" }) {
+interface ListCardProps {
+  list: List;
+  variant?: "hero" | "normal";
+}
+
+export const ListCard = memo(function ListCard({ list, variant = "normal" }: ListCardProps) {
   const hero = variant === "hero";
   const { deleteList, setListPinned } = useStoreActions();
   const { openEditList, openConfirm, showToast } = useUi();
@@ -137,4 +143,4 @@ export function ListCard({ list, variant = "normal" }: { list: List; variant?: "
       {menu}
     </motion.div>
   );
-}
+});

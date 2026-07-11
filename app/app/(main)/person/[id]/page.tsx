@@ -8,7 +8,7 @@ import { usePerson, useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { themeClass } from "@/lib/visual";
 import { staggerContainer, riseItem } from "@/lib/motion";
-import { statusesForList } from "@/lib/types";
+import { statusesForList, type StatusId } from "@/lib/types";
 import { linkedItemsByPerson } from "@/lib/store-helpers";
 import { DetailHeader } from "@/components/detail-header";
 import { PersonDetailSection } from "@/components/person-detail-section";
@@ -41,6 +41,14 @@ export default function PersonDetailScreen() {
     () => (person ? linkedItemsByPerson(lists, person.id) : []),
     [lists, person]
   );
+
+  // Stable per-list `statuses` reference for ItemCard's memo — statusesForList
+  // returns a fresh array each call, which would defeat the memo every render.
+  const statusesByListId = useMemo(() => {
+    const map = new Map<string, StatusId[]>();
+    for (const { list } of linked) map.set(list.id, statusesForList(list));
+    return map;
+  }, [linked]);
 
   if (!person) {
     return (
@@ -170,7 +178,14 @@ export default function PersonDetailScreen() {
                 </Link>
                 <div className="mt-2 flex flex-col gap-2.5">
                   {items.map((item) => (
-                    <ItemCard key={item.id} listId={list.id} item={item} view="cozy" statuses={statusesForList(list)} hideSubtitle />
+                    <ItemCard
+                      key={item.id}
+                      listId={list.id}
+                      item={item}
+                      view="cozy"
+                      statuses={statusesByListId.get(list.id)!}
+                      hideSubtitle
+                    />
                   ))}
                 </div>
               </div>

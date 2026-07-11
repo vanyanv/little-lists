@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { memo } from "react";
 import { motion } from "motion/react";
 import type { Person } from "@/lib/types";
 import { themeClass } from "@/lib/visual";
@@ -12,7 +13,11 @@ import { OverflowMenu } from "./overflow-menu";
 import { CategoryIcon } from "./icons/category-icon";
 import { StickerBadge } from "./icons/sticker-badge";
 
-export function PersonCard({ person }: { person: Person }) {
+interface PersonCardProps {
+  person: Person;
+}
+
+export const PersonCard = memo(function PersonCard({ person }: PersonCardProps) {
   const chips = person.sections.filter((s) => s.entries.length > 0).slice(0, 5);
   const { deletePerson } = useStoreActions();
   const { openEditPerson, openConfirm, showToast } = useUi();
@@ -81,4 +86,4 @@ export function PersonCard({ person }: { person: Person }) {
       </div>
     </motion.div>
   );
-}
+});

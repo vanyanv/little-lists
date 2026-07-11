@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import { memo } from "react";
 import { motion } from "motion/react";
 import { STATUS_META, type StatusId, type StatusTone } from "@/lib/types";
 import { tap } from "@/lib/motion";
@@ -25,7 +26,7 @@ interface StatusPillProps {
   style?: CSSProperties;
 }
 
-export function StatusPill({ status, size = "sm", selected = false, onClick, className = "", style }: StatusPillProps) {
+export const StatusPill = memo(function StatusPill({ status, size = "sm", selected = false, onClick, className = "", style }: StatusPillProps) {
   const meta = STATUS_META[status];
   const tone = TONE[meta.tone];
   const pad = size === "md" ? "px-3 py-1.5 text-[0.8rem]" : "px-2.5 py-1 text-[0.75rem]";
@@ -69,4 +70,4 @@ export function StatusPill({ status, size = "sm", selected = false, onClick, cla
       {inner}
     </span>
   );
-}
+});
