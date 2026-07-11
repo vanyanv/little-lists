@@ -60,6 +60,7 @@ model Profile {
   people        Person[]
   personDetails PersonDetail[]
   scraps        Scrap[]
+  analyticsEvents AnalyticsEvent[]
 }
 
 model List {
@@ -95,6 +96,7 @@ model ListItem {
   tags      String[] @default([])
   metadata  Json     @default("{}")
   position  Int?
+  pinned    Boolean  @default(false)
   personId  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -106,6 +108,24 @@ model ListItem {
   @@index([listId])
   @@index([userId])
   @@index([personId])
+}
+
+/** First-party, privacy-conscious product events. Properties must never contain
+ * free-form user content such as titles, notes, names, or search text. */
+model AnalyticsEvent {
+  id         String   @id @default(cuid())
+  userId     String
+  name       String
+  properties Json     @default("{}")
+  sessionId  String?
+  path       String?
+  dedupeKey  String?  @unique
+  createdAt  DateTime @default(now())
+
+  user Profile @relation(fields: [userId], references: [clerkUserId], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([name, createdAt])
 }
 
 model Person {
