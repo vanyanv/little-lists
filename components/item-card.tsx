@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Item, StatusId } from "@/lib/types";
 import { ITEM_TYPE_META, TEMPLATE_META } from "@/lib/types";
 import { EXAMPLE_TAG, isExample } from "@/lib/onboarding";
@@ -24,10 +24,14 @@ function ItemEditor({
   listId,
   item,
   statuses,
+  onLiveEdit,
 }: {
   listId: string;
   item: Item;
   statuses: StatusId[];
+  /** Local-only echo of an in-progress edit, so the parent card's summary
+   *  tracks the live text without touching the store (see ItemCard). */
+  onLiveEdit: (patch: Partial<Item>) => void;
 }) {
   const { lists, people, addItem, addPerson, updateItem, deleteItem, setItemPinned } = useStore();
   const { showToast, openMoveItem } = useUi();
@@ -38,7 +42,7 @@ function ItemEditor({
   const personField = list ? TEMPLATE_META[list.template].personField ?? false : false;
 
   // Local state for the free-text fields so typing stays snappy. Each keystroke
-  // updates the store optimistically (so the card summary tracks live) but the
+  // echoes into the parent card's overlay (so the summary tracks live) but the
   // server write is debounced to a single trailing call — see queueEdit/flush.
   const [title, setTitle] = useState(item.title);
   const [note, setNote] = useState(item.note ?? "");
@@ -62,12 +66,12 @@ function ItemEditor({
 
   const queueEdit = useCallback(
     (patch: Partial<Item>) => {
-      updateItem(listId, item.id, patch, { persist: false }); // optimistic, no write yet
+      onLiveEdit(patch); // local-only echo for the summary, no store touch
       pendingRef.current = { ...pendingRef.current, ...patch };
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(flush, 600);
     },
-    [listId, item.id, updateItem, flush]
+    [onLiveEdit, flush]
   );
 
   // flush any pending trailing write when the editor closes / unmounts
@@ -342,15 +346,31 @@ export function ItemCard({
     return () => clearTimeout(t);
   }, [item.fresh]);
 
+  // Live, local-only echo of an in-progress edit in the (open) ItemEditor below.
+  // Typing updates this overlay — not the store — so only this card's subtree
+  // re-renders per keystroke; the summary reads `displayItem` to stay live.
+  const [overlay, setOverlay] = useState<Partial<Pick<Item, "title" | "note" | "tags">>>({});
+  const displayItem = useMemo(() => ({ ...item, ...overlay }), [item, overlay]);
+  const onLiveEdit = useCallback((patch: Partial<Item>) => {
+    setOverlay((prev) => ({ ...prev, ...patch }));
+  }, []);
+
+  // Once the persisted item's own text changes (the debounced flush landed, or
+  // a server swap arrived), the overlay is redundant — clear it so display
+  // reads straight from `item` again and a later external update isn't masked.
+  useEffect(() => {
+    setOverlay({});
+  }, [item.title, item.note, item.tags]);
+
   let summary;
   let chrome = "";
   if (view === "grid") {
-    summary = isMedia ? <PosterCard item={item} /> : <GridTile item={item} />;
+    summary = isMedia ? <PosterCard item={displayItem} /> : <GridTile item={displayItem} />;
   } else if (view === "list") {
-    summary = <CompactRow item={item} />;
+    summary = <CompactRow item={displayItem} />;
     chrome = "rounded-2xl bg-paper px-3 py-2 shadow-soft ring-1 ring-line/30";
   } else {
-    summary = <NoteCard item={item} hideSubtitle={hideSubtitle} />;
+    summary = <NoteCard item={displayItem} hideSubtitle={hideSubtitle} />;
     chrome = "rounded-2xl bg-paper p-3.5 shadow-soft ring-1 ring-line/30";
   }
 
@@ -369,7 +389,9 @@ export function ItemCard({
       <ExpandableCard
         className={chrome}
         summary={summary}
-        detail={<ItemEditor listId={listId} item={item} statuses={statuses} />}
+        detail={
+          <ItemEditor listId={listId} item={displayItem} statuses={statuses} onLiveEdit={onLiveEdit} />
+        }
       />
     </div>
   );
