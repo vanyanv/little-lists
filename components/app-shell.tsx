@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import { UiProvider } from "@/lib/ui";
@@ -17,10 +18,16 @@ import { EditPersonSheet } from "./edit-person-sheet";
 import { EditDetailSheet } from "./edit-detail-sheet";
 import { ConfirmSheet } from "./confirm-sheet";
 import { MoveItemSheet } from "./move-item-sheet";
-import { Celebration } from "./celebration";
 import { Toast } from "./toast";
 import { SaveErrorToast } from "./save-error-toast";
 import { InstallAppProvider } from "./install-app-row";
+
+// Confetti physics (canvas-confetti) is only needed for the rare milestone
+// celebration — load it lazily so it stays out of the initial bundle.
+const Celebration = dynamic(
+  () => import("./celebration").then((m) => m.Celebration),
+  { ssr: false }
+);
 
 function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
