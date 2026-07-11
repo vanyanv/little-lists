@@ -33,8 +33,10 @@ import {
   deletePersonDetailAction,
   deleteScrapAction,
   fileScrapAction,
+  reorderItemsAction,
   saveScrapDetectionAction,
   setListPinnedAction,
+  setListSortAction,
   setListViewAction,
   updateItemAction,
   updateListAction,
@@ -47,6 +49,8 @@ import {
 } from "./actions";
 import { deriveListMeta, insertDetail, moveDetailBetweenSections, removeDetail, renamePersonInItems, replaceDetail } from "./store-helpers";
 import { SCRAP_MAX_LENGTH, type DetectionResult } from "./scraps";
+import { trackProductEvent } from "./analytics-client";
+import type { SortMode } from "./sort";
 
 let _seq = 0;
 function makeId(prefix = "x"): string {
@@ -105,6 +109,8 @@ interface StoreValue {
   ) => void;
   deleteItem: (listId: string, itemId: string) => Promise<void>;
   setListView: (listId: string, view: ViewMode) => void;
+  setListSort: (listId: string, sort: SortMode) => void;
+  reorderItems: (listId: string, orderedIds: string[]) => void;
   addScrap: (text: string) => Promise<void>;
   deleteScrap: (scrapId: string) => DeleteHandle;
   setScrapDetection: (scrapId: string, detection: DetectionResult) => void;
@@ -193,6 +199,51 @@ export function ListsProvider({
       console.error("setListView failed", err);
       const snap = before;
       if (snap) setLists((prev) => prev.map((l) => (l.id === listId ? snap : l)));
+      signalSaveError();
+    });
+  }, [signalSaveError]);
+
+  const setListSort = useCallback<StoreValue["setListSort"]>((listId, sort) => {
+    let before: List | undefined;
+    setLists((prev) =>
+      prev.map((l) => {
+        if (l.id !== listId) return l;
+        before = l;
+        return { ...l, defaultSort: sort };
+      })
+    );
+    if (isTempId(listId)) return;
+    void setListSortAction(listId, sort).catch((err) => {
+      console.error("setListSort failed", err);
+      const snap = before;
+      if (snap) setLists((prev) => prev.map((l) => (l.id === listId ? snap : l)));
+      signalSaveError();
+    });
+  }, [signalSaveError]);
+
+  const reorderItems = useCallback<StoreValue["reorderItems"]>((listId, orderedIds) => {
+    let before: Item[] | undefined;
+    setLists((prev) =>
+      prev.map((l) => {
+        if (l.id !== listId) return l;
+        before = l.items;
+        const byId = new Map(l.items.map((i) => [i.id, i]));
+        // reflect the new order AND stamp concrete positions so custom sort holds
+        const items = orderedIds
+          .map((id, index): Item | null => {
+            const it = byId.get(id);
+            return it ? { ...it, position: index } : null;
+          })
+          .filter((i): i is Item => i !== null);
+        return { ...l, items };
+      })
+    );
+    trackProductEvent("feature_used", { feature: "items_reordered" });
+    if (isTempId(listId)) return;
+    void reorderItemsAction(listId, orderedIds).catch((err) => {
+      console.error("reorderItems failed", err);
+      const snap = before;
+      if (snap) setLists((prev) => prev.map((l) => (l.id === listId ? { ...l, items: snap } : l)));
       signalSaveError();
     });
   }, [signalSaveError]);
@@ -781,6 +832,8 @@ export function ListsProvider({
       updateItem,
       deleteItem,
       setListView,
+      setListSort,
+      reorderItems,
       addScrap,
       deleteScrap,
       setScrapDetection,
@@ -811,6 +864,8 @@ export function ListsProvider({
       updateItem,
       deleteItem,
       setListView,
+      setListSort,
+      reorderItems,
       addScrap,
       deleteScrap,
       setScrapDetection,

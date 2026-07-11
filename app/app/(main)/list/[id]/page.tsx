@@ -19,6 +19,26 @@ import { Button } from "@/components/button";
 import { PeopleTemplateNudge } from "@/components/people-template-nudge";
 import { RevisitBeacon } from "@/components/revisit-beacon";
 import { filterItemsByStatus } from "@/lib/store-helpers";
+import { SortControl } from "@/components/sort-control";
+import { sortItems, isSortMode, type SortMode } from "@/lib/sort";
+import {
+  DndContext,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
+import { CSS } from "@dnd-kit/utilities";
 
 /** the list's saved view, falling back to its template default */
 function defaultViewFor(list?: Pick<List, "template" | "defaultView">): ViewMode {
@@ -26,14 +46,20 @@ function defaultViewFor(list?: Pick<List, "template" | "defaultView">): ViewMode
   return list.defaultView ?? TEMPLATE_META[list.template].defaultView;
 }
 
+/** the list's saved sort, falling back to recently-added */
+function defaultSortFor(list?: Pick<List, "defaultSort">): SortMode {
+  return list?.defaultSort && isSortMode(list.defaultSort) ? list.defaultSort : "recent";
+}
+
 export default function ListDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const list = useList(id);
-  const { setListView, deleteList } = useStore();
+  const { setListView, setListSort, reorderItems, deleteList } = useStore();
   const { openItemSheet, openEditList, openConfirm, showToast } = useUi();
   const router = useRouter();
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState<ViewMode>(() => defaultViewFor(list));
+  const [sort, setSort] = useState<SortMode>(() => defaultSortFor(list));
   const [query, setQuery] = useState("");
   const reduce = useReducedMotion();
 
@@ -41,6 +67,11 @@ export default function ListDetailScreen() {
   const changeView = (next: ViewMode) => {
     setView(next);
     if (list) setListView(list.id, next);
+  };
+
+  const changeSort = (next: SortMode) => {
+    setSort(next);
+    if (list) setListSort(list.id, next);
   };
 
   // The saved per-list view must win over the template default. Derive it once
@@ -54,6 +85,7 @@ export default function ListDetailScreen() {
     setFilter("all");
     setQuery("");
     setView(defaultViewFor(list));
+    setSort(defaultSortFor(list));
   }, [list]);
 
   const options = useMemo<FilterOption[]>(() => {
@@ -73,11 +105,31 @@ export default function ListDetailScreen() {
     if (!list) return [];
     const byStatus = filterItemsByStatus(list.items, filter);
     const q = query.trim().toLowerCase();
-    if (!q) return byStatus;
-    return byStatus.filter(
-      (i) => i.title.toLowerCase().includes(q) || (i.note ?? "").toLowerCase().includes(q)
-    );
-  }, [list, filter, query]);
+    const filtered = !q
+      ? byStatus
+      : byStatus.filter(
+          (i) => i.title.toLowerCase().includes(q) || (i.note ?? "").toLowerCase().includes(q)
+        );
+    return sortItems(filtered, sort, statusesForList(list));
+  }, [list, filter, query, sort]);
+
+  const dragEnabled =
+    !!list && sort === "custom" && filter === "all" && query.trim().length === 0;
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!list || !over || active.id === over.id) return;
+    const ids = visible.map((i) => i.id);
+    const oldIndex = ids.indexOf(String(active.id));
+    const newIndex = ids.indexOf(String(over.id));
+    if (oldIndex === -1 || newIndex === -1) return;
+    reorderItems(list.id, arrayMove(ids, oldIndex, newIndex));
+  };
 
   const listMenu = list ? (
     <OverflowMenu
@@ -203,6 +255,7 @@ export default function ListDetailScreen() {
                 )}
               </div>
             )}
+            <SortControl value={sort} onChange={changeSort} />
             <ViewToggle value={view} onChange={changeView} />
           </div>
           <FilterChips options={options} active={filter} onChange={setFilter} />
@@ -245,6 +298,21 @@ export default function ListDetailScreen() {
               }
             />
           )
+        ) : dragEnabled ? (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+            onDragEnd={onDragEnd}
+          >
+            <SortableContext items={visible.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+              <div className={layoutClass}>
+                {visible.map((item) => (
+                  <SortableItemRow key={item.id} list={list} item={item} view={view} />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         ) : (
           <AnimatePresence mode="wait">
             <motion.div
@@ -270,6 +338,49 @@ export default function ListDetailScreen() {
             </motion.div>
           </AnimatePresence>
         )}
+      </div>
+    </div>
+  );
+}
+
+function SortableItemRow({
+  list,
+  item,
+  view,
+}: {
+  list: List;
+  item: import("@/lib/types").Item;
+  view: ViewMode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 20 : undefined,
+    opacity: isDragging ? 0.9 : 1,
+  };
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-start gap-1.5">
+      <button
+        type="button"
+        aria-label={`Reorder ${item.title}`}
+        {...attributes}
+        {...listeners}
+        className={`mt-1 grid h-9 w-6 shrink-0 touch-none cursor-grab place-items-center rounded-md text-brown-soft/70 transition-colors hover:bg-cream-deep hover:text-ink active:cursor-grabbing ${focusRing}`}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <circle cx="9" cy="6" r="1.6" />
+          <circle cx="15" cy="6" r="1.6" />
+          <circle cx="9" cy="12" r="1.6" />
+          <circle cx="15" cy="12" r="1.6" />
+          <circle cx="9" cy="18" r="1.6" />
+          <circle cx="15" cy="18" r="1.6" />
+        </svg>
+      </button>
+      <div className="min-w-0 flex-1">
+        <ItemCard listId={list.id} item={item} view={view} statuses={statusesForList(list)} />
       </div>
     </div>
   );
