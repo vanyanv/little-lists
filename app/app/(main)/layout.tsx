@@ -6,6 +6,7 @@ import { AnalyticsBoot } from "@/components/analytics-boot";
 import { ensureProfileForClerkUser } from "@/lib/server/profile";
 import { getInitialData } from "@/lib/server/data";
 import type { Profile } from "@/lib/types";
+import type { Profile as ProfileRow } from "@prisma/client";
 
 // Every screen here depends on the signed-in user (Clerk reads headers), so the
 // whole segment is rendered per-request rather than prerendered at build time.
@@ -28,8 +29,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // down the app.
   let hasProfile = false;
   let onboardingCompleted = false;
+  let profileRow: ProfileRow | null = null;
   try {
-    const profileRow = await ensureProfileForClerkUser();
+    profileRow = await ensureProfileForClerkUser();
     hasProfile = !!profileRow;
     onboardingCompleted = !!profileRow?.onboardingCompleted;
   } catch (err) {
@@ -46,7 +48,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // data would see a false fresh-start, the most trust-breaking screen this
   // app can show. Throwing reaches app/app/error.tsx, which promises their
   // little worlds are safe and offers a retry.
-  const data = await getInitialData();
+  const data = await getInitialData({ profile: profileRow ?? undefined });
   const seed: StoreSeed = {
     lists: data.lists,
     people: data.people,

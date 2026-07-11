@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserProfile } from "@/lib/server/profile";
 import type { List, Person, Profile, Scrap } from "@/lib/types";
+import type { Profile as ProfileRow } from "@prisma/client";
 import { mapList, mapPerson, mapProfile, mapScrap } from "@/lib/server/serialize";
 
 export interface InitialData {
@@ -17,8 +18,8 @@ export interface InitialData {
  * (and a null profile) when there's no session or the profile row hasn't been
  * created yet — the (app) layout's ensureProfile call normally precedes this.
  */
-export async function getInitialData(): Promise<InitialData> {
-  const profile = await getCurrentUserProfile();
+export async function getInitialData(opts?: { profile?: ProfileRow }): Promise<InitialData> {
+  const profile = opts?.profile ?? (await getCurrentUserProfile());
   if (!profile) return { lists: [], people: [], scraps: [], profile: null };
 
   const userId = profile.clerkUserId;
