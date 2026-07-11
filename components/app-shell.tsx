@@ -8,16 +8,6 @@ import { UiProvider } from "@/lib/ui";
 import { useStore } from "@/lib/store";
 import { BottomNav } from "./bottom-nav";
 import { FloatingAddButton } from "./floating-add-button";
-import { AddItemModal } from "./add-item-modal";
-import { PocketSheet } from "./pocket-sheet";
-import { AddDetailSheet } from "./add-detail-sheet";
-import { CreateListSheet } from "./create-list-sheet";
-import { CreatePersonSheet } from "./create-person-sheet";
-import { EditListSheet } from "./edit-list-sheet";
-import { EditPersonSheet } from "./edit-person-sheet";
-import { EditDetailSheet } from "./edit-detail-sheet";
-import { ConfirmSheet } from "./confirm-sheet";
-import { MoveItemSheet } from "./move-item-sheet";
 import { Toast } from "./toast";
 import { SaveErrorToast } from "./save-error-toast";
 import { InstallAppProvider } from "./install-app-row";
@@ -28,6 +18,19 @@ const Celebration = dynamic(
   () => import("./celebration").then((m) => m.Celebration),
   { ssr: false }
 );
+
+// Modal sheets are only needed once the user opens one — load each lazily
+// so they stay out of the initial bundle.
+const AddItemModal = dynamic(() => import("./add-item-modal").then((m) => m.AddItemModal), { ssr: false });
+const PocketSheet = dynamic(() => import("./pocket-sheet").then((m) => m.PocketSheet), { ssr: false });
+const AddDetailSheet = dynamic(() => import("./add-detail-sheet").then((m) => m.AddDetailSheet), { ssr: false });
+const CreateListSheet = dynamic(() => import("./create-list-sheet").then((m) => m.CreateListSheet), { ssr: false });
+const CreatePersonSheet = dynamic(() => import("./create-person-sheet").then((m) => m.CreatePersonSheet), { ssr: false });
+const EditListSheet = dynamic(() => import("./edit-list-sheet").then((m) => m.EditListSheet), { ssr: false });
+const EditPersonSheet = dynamic(() => import("./edit-person-sheet").then((m) => m.EditPersonSheet), { ssr: false });
+const EditDetailSheet = dynamic(() => import("./edit-detail-sheet").then((m) => m.EditDetailSheet), { ssr: false });
+const ConfirmSheet = dynamic(() => import("./confirm-sheet").then((m) => m.ConfirmSheet), { ssr: false });
+const MoveItemSheet = dynamic(() => import("./move-item-sheet").then((m) => m.MoveItemSheet), { ssr: false });
 
 function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
