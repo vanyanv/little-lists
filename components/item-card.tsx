@@ -7,6 +7,7 @@ import { EXAMPLE_TAG, isExample } from "@/lib/onboarding";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { focusRing } from "@/lib/a11y";
+import { reconcileOverlay } from "@/lib/item-overlay";
 import { ExampleChip } from "./chip";
 import { PersonPicker } from "./person-picker";
 import { ExpandableCard } from "./expandable-card";
@@ -356,10 +357,13 @@ export function ItemCard({
   }, []);
 
   // Once the persisted item's own text changes (the debounced flush landed, or
-  // a server swap arrived), the overlay is redundant — clear it so display
-  // reads straight from `item` again and a later external update isn't masked.
+  // a server swap arrived), any overlay key whose value now matches the
+  // persisted item is redundant — drop it so display reads straight from
+  // `item` again. Keys with a still-newer pending value (a same-field edit
+  // that raced the flush, or an unrelated field's still-pending edit) are
+  // kept — see reconcileOverlay for the per-key rationale.
   useEffect(() => {
-    setOverlay({});
+    setOverlay((prev) => reconcileOverlay(prev, item));
   }, [item.title, item.note, item.tags]);
 
   let summary;
