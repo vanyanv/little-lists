@@ -353,7 +353,7 @@ export function ListsProvider({
       id: tempId,
       title: `${source.title} (copy)`,
       pinned: false,
-      items: source.items.map((i) => ({ ...i })),
+      items: source.items.map((i) => ({ ...i, id: makeId("item") })),
     };
     setLists((prev) => [optimistic, ...prev]);
     trackProductEvent("feature_used", { feature: "list_duplicated" });
