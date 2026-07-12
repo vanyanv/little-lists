@@ -72,6 +72,8 @@ export function DetailHeader({ emoji, title, subtitle, sticker = "sparkle", menu
         <div className="relative flex items-end gap-3">
           <StickerBadge emoji={emoji} size={40} className="-rotate-3" />
           <div className="min-w-0 pb-0.5">
+            {/* detail-title has no CSS rule yet: reserved hook for Fraunces
+                SOFT/WONK variation settings if the axes are ever loaded */}
             <h1 className="detail-title font-display text-[2.1rem] font-semibold leading-[1.08] text-[var(--t-ink)]">
               {title}
             </h1>

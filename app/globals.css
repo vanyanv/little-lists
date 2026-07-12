@@ -193,6 +193,12 @@ h1, h2, h3, h4 {
 
 /* pinned-chrome surface: opaque tint mixed toward paper.
    Base = surface always on (browsers without scroll timelines). */
+/* enforce the geometry --strip-h promises: if the button size or padding
+   ever drifts, the strip grows to keep the controls docking flush */
+.detail-strip {
+  min-height: var(--strip-h);
+}
+
 .detail-strip,
 .detail-controls {
   --strip-surface: color-mix(in oklab, var(--t-bg) 60%, var(--color-paper));
@@ -221,7 +227,7 @@ h1, h2, h3, h4 {
     translate: 0 4px;
     animation: detail-strip-title-in linear both;
     animation-timeline: scroll(root);
-    animation-range: 90px 170px;
+    animation-range: 140px 200px;
   }
 }
 
