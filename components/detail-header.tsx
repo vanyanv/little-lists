@@ -40,7 +40,7 @@ export function DetailHeader({ emoji, title, subtitle, sticker = "sparkle", menu
           whileTap={tap}
           onClick={() => router.back()}
           aria-label="Back"
-          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper/80 text-ink shadow-soft backdrop-blur-sm ${focusRing}`}
+          className={`grid h-11 w-11 shrink-0 place-items-center rounded-full bg-paper/80 text-ink shadow-soft ${focusRing}`}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />

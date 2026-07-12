@@ -177,9 +177,9 @@ h1, h2, h3, h4 {
    from scroll zero; the controls bar docks beneath it. The themed title
    field is content and scrolls away. Chrome surfaces are opaque tint,
    never glass. --strip-h must equal the strip's rendered height:
-   0.5rem pad + 2.5rem button + 0.5rem pad + safe-area.               */
+   0.5rem pad + 2.75rem button + 0.5rem pad + safe-area.              */
 :root {
-  --strip-h: calc(env(safe-area-inset-top) + 3.5rem);
+  --strip-h: calc(env(safe-area-inset-top) + 3.75rem);
 }
 
 /* themed field behind the title block: bleeds up under the status bar
