@@ -221,6 +221,83 @@ export default function ListDetailScreen() {
         subtitle={listCountLabel(list)}
         sticker={TEMPLATE_META[list.template].sticker}
         menu={listMenu}
+        controls={
+          list.items.length > 0 ? (
+            <>
+              <div className="mb-2 flex items-center justify-end gap-2">
+                {showSearch && (
+                  <div className="relative flex-1">
+                    <span aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-brown-soft/70">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                        <path d="M20 20l-3.2-3.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
+                    </span>
+                    <input
+                      type="text"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Find a little thing…"
+                      aria-label="Find a little thing in this list"
+                      className={`min-h-11 w-full rounded-pill border border-line bg-paper/90 pl-9 pr-10 text-[1rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
+                    />
+                    {searching && (
+                      <button
+                        type="button"
+                        onClick={() => setQuery("")}
+                        aria-label="Clear search"
+                        className={`absolute right-1 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-brown-soft transition-colors hover:bg-cream-deep hover:text-ink ${focusRing}`}
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                <SortControl value={sort} onChange={changeSort} />
+                <ViewToggle value={view} onChange={changeView} />
+              </div>
+              <FilterChips options={options} active={filter} onChange={setFilter} />
+              {(tagOptions.length > 0 || personOptions.length > 0) && (
+                <div className="no-scrollbar fade-x -mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1">
+                  {personOptions.map((p) => {
+                    const active = personFilter === p.id;
+                    return (
+                      <button
+                        key={`person-${p.id}`}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => setPersonFilter(active ? null : p.id)}
+                        className={`flex min-h-11 shrink-0 items-center gap-1 rounded-pill px-3.5 text-[0.8rem] font-bold transition ${focusRing} ${
+                          active ? "bg-ink text-cream shadow-soft" : "bg-paper text-brown ring-1 ring-line/70"
+                        }`}
+                      >
+                        <span aria-hidden>◍</span> {p.name}
+                      </button>
+                    );
+                  })}
+                  {tagOptions.map((t) => {
+                    const active = tagFilter === t;
+                    return (
+                      <button
+                        key={`tag-${t}`}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => setTagFilter(active ? null : t)}
+                        className={`flex min-h-11 shrink-0 items-center gap-1 rounded-pill px-3.5 text-[0.8rem] font-bold transition ${focusRing} ${
+                          active ? "bg-ink text-cream shadow-soft" : "bg-paper text-brown ring-1 ring-line/70"
+                        }`}
+                      >
+                        <span aria-hidden>#</span> {t}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          ) : null
+        }
       />
 
       {/* grandfathered "People notes" lists: the template is retired from
@@ -229,90 +306,6 @@ export default function ListDetailScreen() {
       {list.template === "people" && (
         <div className="px-4">
           <PeopleTemplateNudge />
-        </div>
-      )}
-
-      {list.items.length > 0 && (
-        <div
-          className="sticky top-0 z-10 px-4 pt-3 pb-2 backdrop-blur-md"
-          style={{
-            // fade from the themed header wash into cream, so the sticky bar
-            // hands off continuously instead of jumping to a flat panel
-            background:
-              "linear-gradient(to bottom, color-mix(in oklab, var(--t-bg) 88%, transparent), color-mix(in oklab, var(--color-cream) 88%, transparent))",
-          }}
-        >
-          <div className="mb-2 flex items-center justify-end gap-2">
-            {showSearch && (
-              <div className="relative flex-1">
-                <span aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-brown-soft/70">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-                    <path d="M20 20l-3.2-3.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </span>
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Find a little thing…"
-                  aria-label="Find a little thing in this list"
-                  className={`min-h-11 w-full rounded-pill border border-line bg-paper/90 pl-9 pr-10 text-[1rem] text-ink placeholder:text-brown-soft/70 focus:border-brown-soft/50 focus:outline-none ${focusRing}`}
-                />
-                {searching && (
-                  <button
-                    type="button"
-                    onClick={() => setQuery("")}
-                    aria-label="Clear search"
-                    className={`absolute right-1 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-brown-soft transition-colors hover:bg-cream-deep hover:text-ink ${focusRing}`}
-                  >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            )}
-            <SortControl value={sort} onChange={changeSort} />
-            <ViewToggle value={view} onChange={changeView} />
-          </div>
-          <FilterChips options={options} active={filter} onChange={setFilter} />
-          {(tagOptions.length > 0 || personOptions.length > 0) && (
-            <div className="no-scrollbar fade-x -mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1">
-              {personOptions.map((p) => {
-                const active = personFilter === p.id;
-                return (
-                  <button
-                    key={`person-${p.id}`}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => setPersonFilter(active ? null : p.id)}
-                    className={`flex min-h-11 shrink-0 items-center gap-1 rounded-pill px-3.5 text-[0.8rem] font-bold transition ${focusRing} ${
-                      active ? "bg-ink text-cream shadow-soft" : "bg-paper text-brown ring-1 ring-line/70"
-                    }`}
-                  >
-                    <span aria-hidden>◍</span> {p.name}
-                  </button>
-                );
-              })}
-              {tagOptions.map((t) => {
-                const active = tagFilter === t;
-                return (
-                  <button
-                    key={`tag-${t}`}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => setTagFilter(active ? null : t)}
-                    className={`flex min-h-11 shrink-0 items-center gap-1 rounded-pill px-3.5 text-[0.8rem] font-bold transition ${focusRing} ${
-                      active ? "bg-ink text-cream shadow-soft" : "bg-paper text-brown ring-1 ring-line/70"
-                    }`}
-                  >
-                    <span aria-hidden>#</span> {t}
-                  </button>
-                );
-              })}
-            </div>
-          )}
         </div>
       )}
 
