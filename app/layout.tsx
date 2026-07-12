@@ -40,6 +40,7 @@ const fraunces = Fraunces({
   subsets: ["latin"],
   style: ["normal", "italic"],
   display: "swap",
+  axes: ["opsz"],
 });
 
 const nunito = Nunito({
