@@ -55,7 +55,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       <InstallAppProvider>
         <MotionConfig reducedMotion="user">
           <div className="flex min-h-dvh w-full justify-center bg-cream-deep">
-            <div className="paper-grain relative min-h-dvh w-full max-w-[440px] overflow-x-hidden bg-cream shadow-frame">
+            {/* overflow-x-CLIP, not -hidden: hidden would force overflow-y to compute
+                to auto, making this an unintended scroll container that sticky
+                descendants (list detail's .detail-strip) bind to instead of the
+                document. clip clips identically without creating a scroll container. */}
+            <div className="paper-grain relative min-h-dvh w-full max-w-[440px] overflow-x-clip bg-cream shadow-frame">
               <main className="relative z-[1] min-h-dvh pb-36">
                 <PageTransition>{children}</PageTransition>
               </main>

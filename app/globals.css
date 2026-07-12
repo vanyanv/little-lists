@@ -182,23 +182,6 @@ h1, h2, h3, h4 {
   --strip-h: calc(env(safe-area-inset-top) + 3.5rem);
 }
 
-/* The app-shell's overflow-x-hidden wrapper (components/app-shell.tsx) forces
-   overflow-y to compute as `auto` per the CSS overflow spec ("if one axis is
-   `visible` and the other isn't, the visible one becomes `auto`"), which makes
-   the wrapper an unintended scroll container — position:sticky descendants
-   (like .detail-strip/.detail-controls) then bind to IT instead of the
-   document, and since the wrapper itself never actually scrolls (its box
-   grows to fit content), they never appear stuck; they just scroll away.
-   `overflow: clip` clips identically but, per spec, never registers as a
-   scroll container, so sticky descendants correctly bind to the document.
-   Same pattern already used deliberately on the landing page (see
-   components/landing/landing-header.tsx's comment) — there the sticky header
-   is kept outside the overflow-x-hidden ancestor entirely; here that's not
-   viable without restructuring app-shell.tsx, so the ancestor is fixed here. */
-.paper-grain.overflow-x-hidden {
-  overflow: clip;
-}
-
 /* themed field behind the title block: bleeds up under the status bar
    (negative top offset in the JSX) and mask-fades into cream, so the
    grain + tint dissolve together instead of ending in a card edge */
