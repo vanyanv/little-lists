@@ -172,6 +172,83 @@ h1, h2, h3, h4 {
   );
 }
 
+/* ── List detail header ────────────────────────────────────────
+   One chrome layer: the strip (back / compact title / menu) is sticky
+   from scroll zero; the controls bar docks beneath it. The themed title
+   field is content and scrolls away. Chrome surfaces are opaque tint,
+   never glass. --strip-h must equal the strip's rendered height:
+   0.5rem pad + 2.5rem button + 0.5rem pad + safe-area.               */
+:root {
+  --strip-h: calc(env(safe-area-inset-top) + 3.5rem);
+}
+
+/* themed field behind the title block: bleeds up under the status bar
+   (negative top offset in the JSX) and mask-fades into cream, so the
+   grain + tint dissolve together instead of ending in a card edge */
+.detail-field {
+  background: var(--t-bg);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 2.5rem), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 2.5rem), transparent 100%);
+}
+
+/* pinned-chrome surface: opaque tint mixed toward paper.
+   Base = surface always on (browsers without scroll timelines). */
+.detail-strip,
+.detail-controls {
+  --strip-surface: color-mix(in oklab, var(--t-bg) 60%, var(--color-paper));
+  background-color: var(--strip-surface);
+}
+
+/* compact strip title only exists where the collapse choreography does */
+.detail-strip-title {
+  display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  /* at rest the chrome floats transparent over the themed field; the
+     surface fades up 1:1 with scroll (scroll(root): the window scrolls
+     this app — nearest would bind to the overflow-x-hidden shell) */
+  .detail-strip,
+  .detail-controls {
+    background-color: transparent;
+    animation: detail-surface-in linear both;
+    animation-timeline: scroll(root);
+    animation-range: 24px 140px;
+  }
+  .detail-strip-title {
+    display: block;
+    opacity: 0;
+    translate: 0 4px;
+    animation: detail-strip-title-in linear both;
+    animation-timeline: scroll(root);
+    animation-range: 90px 170px;
+  }
+}
+
+/* scroll-driven progress ignores animation-duration, so the global
+   reduced-motion rule can't soften this one; collapsing the range makes
+   the surface swap effectively instant instead of scroll-coupled */
+@media (prefers-reduced-motion: reduce) {
+  .detail-strip,
+  .detail-controls,
+  .detail-strip-title {
+    animation-range: 0px 1px;
+  }
+}
+
+@keyframes detail-surface-in {
+  to {
+    background-color: var(--strip-surface);
+  }
+}
+
+@keyframes detail-strip-title-in {
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
 ::selection {
   background: var(--color-blush);
   color: var(--color-ink);
