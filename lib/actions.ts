@@ -137,6 +137,8 @@ export interface CreateItemInput {
   meta?: Record<string, unknown>;
   /** links this item to a person (e.g. a gift idea for someone) */
   personId?: string;
+  /** which add flow produced this — analytics only, never persisted to the row */
+  flow?: "quick" | "detailed";
 }
 
 function itemCreateData(clerkUserId: string, listId: string, input: CreateItemInput) {
@@ -203,6 +205,7 @@ export async function createItemAction(listId: string, input: CreateItemInput): 
       hasPerson: Boolean(input.personId),
       hasNote: Boolean(input.note),
       hasRating: typeof input.meta?.rating === "number",
+      flow: input.flow ?? "detailed",
     },
   });
   if (itemCount === 1) {
