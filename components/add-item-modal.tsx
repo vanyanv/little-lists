@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useStore } from "@/lib/store";
+import type { CreateItemInput } from "@/lib/actions";
 import { useUi, type ScrapRef } from "@/lib/ui";
 import {
   ITEM_TYPE_META,
@@ -63,7 +64,7 @@ function AddItemFlow({
   scrap?: ScrapRef;
   onClose: () => void;
 }) {
-  const { lists, people, addItem, addList, addPerson, fileScrap, fireCelebration } = useStore();
+  const { lists, people, addItem, addList, addPerson, fileScrap, deleteItem, fireCelebration } = useStore();
   const { showToast, openConfirm } = useUi();
   const presetList = lists.find((l) => l.id === presetListId);
 
@@ -204,23 +205,7 @@ function AddItemFlow({
     }
   };
 
-  const persist = async () => {
-    const listId = targetListId ?? lists[0]?.id;
-    if (!listId || saving) return;
-    const input = {
-      type,
-      title: title.trim(),
-      subtitle: subtitle.trim() || undefined,
-      note: note.trim() || undefined,
-      status,
-      tags: tag.trim() ? [tag.trim()] : undefined,
-      emoji: meta.aspect === "note" ? emoji : undefined,
-      seed: seed || title,
-      imageUrl,
-      meta: pickedMeta,
-      personId: effectivePersonId,
-    };
-
+  const persist = async (input: CreateItemInput, listId: string) => {
     if (scrap) {
       setSaving(true);
       // deferred file: optimistic now, one transaction on toast expiry, undo restores
@@ -237,33 +222,57 @@ function AddItemFlow({
     const wasEmpty = (lists.find((l) => l.id === listId)?.items.length ?? 0) === 0;
     setSaving(true);
     try {
-      await addItem(listId, input);
+      const created = await addItem(listId, input);
       // rare milestone: this list just came alive
       if (wasEmpty) fireCelebration("confetti");
       onClose();
-      showToast("Saved to your little world ✨");
+      if (input.flow === "quick" && created) {
+        const listTitle = lists.find((l) => l.id === listId)?.title ?? "your list";
+        showToast(`Saved to ${listTitle} ✨`, {
+          action: { label: "Undo", onAction: () => void deleteItem(listId, created.id) },
+        });
+      } else {
+        showToast("Saved to your little world ✨");
+      }
     } catch {
       setSaving(false);
       showToast("That didn't save. Let's try again 🌿");
     }
   };
 
-  const save = () => {
-    const listId = targetListId ?? lists[0]?.id;
-    if (!listId || saving) return;
+  const saveItem = (input: CreateItemInput, opts?: { listId?: string }) => {
+    const listId = opts?.listId ?? targetListId ?? lists[0]?.id;
+    if (!listId || saving || !input.title.trim()) return;
     const targetItems = lists.find((l) => l.id === listId)?.items ?? [];
-    if (isDuplicateTitle(title, targetItems)) {
+    if (isDuplicateTitle(input.title, targetItems)) {
       openConfirm({
         title: "Already in this list",
-        body: `"${title.trim()}" is already here. Add it again anyway?`,
+        body: `"${input.title.trim()}" is already here. Add it again anyway?`,
         confirmLabel: "Add anyway",
         onConfirm: () => {
-          void persist();
+          void persist(input, listId);
         },
       });
       return;
     }
-    void persist();
+    void persist(input, listId);
+  };
+
+  const save = () => {
+    saveItem({
+      type,
+      title: title.trim(),
+      subtitle: subtitle.trim() || undefined,
+      note: note.trim() || undefined,
+      status,
+      tags: tag.trim() ? [tag.trim()] : undefined,
+      emoji: meta.aspect === "note" ? emoji : undefined,
+      seed: seed || title,
+      imageUrl,
+      meta: pickedMeta,
+      personId: effectivePersonId,
+      flow: "detailed",
+    });
   };
 
   return (
