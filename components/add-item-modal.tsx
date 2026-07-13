@@ -269,7 +269,7 @@ function AddItemFlow({
   // save on first intent: a picked hit becomes an item immediately (the details
   // screen only appears when it has something essential to ask — see gift below)
   const quickPick = (r: SearchHit) => {
-    if (searching || picked) return; // stale hit, or a pick is already pending — ignore
+    if (searching || picked || confirm) return; // stale hit, or a pick is already pending, or a confirm sheet is open — ignore
     setPicked(`${searchKind}:${r.sourceId}`);
     // let the chosen row glow for a beat before the sheet slides away
     setTimeout(() => {
