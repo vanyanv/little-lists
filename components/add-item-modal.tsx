@@ -66,7 +66,7 @@ function AddItemFlow({
   onClose: () => void;
 }) {
   const { lists, people, addItem, addList, addPerson, fileScrap, deleteItem, fireCelebration } = useStore();
-  const { showToast, openConfirm } = useUi();
+  const { showToast, openConfirm, confirm } = useUi();
   const presetList = lists.find((l) => l.id === presetListId);
 
   const [step, setStep] = useState<Step>("compose");
@@ -242,10 +242,17 @@ function AddItemFlow({
   };
 
   const saveItem = (input: CreateItemInput, opts?: { listId?: string }) => {
+    // a duplicate confirm is already open — don't re-detect and clobber its onConfirm
+    // closure with this call's (e.g. a held Enter key repeating past the first detection).
+    if (confirm) return;
     const listId = opts?.listId ?? targetListId ?? lists[0]?.id;
     if (!listId || saving || !input.title.trim()) return;
     const targetItems = lists.find((l) => l.id === listId)?.items ?? [];
     if (isDuplicateTitle(input.title, targetItems)) {
+      // clear any pending quick-pick now: the confirm sheet itself blocks re-taps on the
+      // results list while it's open, and there's no cancel callback to clear this from
+      // later, so it must not be left set regardless of how the confirm gets dismissed.
+      setPicked(null);
       openConfirm({
         title: "Already in this list",
         body: `"${input.title.trim()}" is already here. Add it again anyway?`,
@@ -262,7 +269,7 @@ function AddItemFlow({
   // save on first intent: a picked hit becomes an item immediately (the details
   // screen only appears when it has something essential to ask — see gift below)
   const quickPick = (r: SearchHit) => {
-    if (searching) return; // stale hit from the superseded query — ignore
+    if (searching || picked) return; // stale hit, or a pick is already pending — ignore
     setPicked(`${searchKind}:${r.sourceId}`);
     // let the chosen row glow for a beat before the sheet slides away
     setTimeout(() => {
@@ -383,97 +390,97 @@ function AddItemFlow({
 
             {searchable ? (
               <>
-              <div className="mt-4 min-h-[8rem]">
-                {searching && results.length === 0 ? (
-                  <SoftDotLoader />
-                ) : (
-                  <motion.div
-                    role="listbox"
-                    aria-label="Search results"
-                    variants={staggerContainer}
-                    initial="hidden"
-                    animate="show"
-                    className={`flex flex-col gap-2 transition-opacity ${searching ? "pointer-events-none opacity-60" : ""}`}
-                  >
-                    {results.map((r) => {
-                      const chosen = picked === `${searchKind}:${r.sourceId}`;
-                      return (
-                        <motion.button
-                          key={r.sourceId}
-                          variants={riseItem}
-                          type="button"
-                          role="option"
-                          aria-selected={chosen}
-                          tabIndex={searching ? -1 : undefined}
-                          onClick={() => (personField ? pickResult(r) : quickPick(r))}
-                          whileTap={tap}
-                          animate={{ scale: chosen ? 1.015 : 1 }}
-                          transition={{ ...softSpring }}
-                          className={`flex items-center gap-3 rounded-xl p-2 text-left transition ${focusRing} ${
-                            chosen
-                              ? "bg-cream-deep ring-2 ring-ink/15"
-                              : "bg-cream-deep/40 hover:bg-cream-deep/70"
-                          }`}
-                        >
-                          <div className="w-11 shrink-0">
-                            <Cover
-                              item={{ id: r.sourceId, type, title: r.title, subtitle: r.subtitle, seed: r.title, imageUrl: r.imageUrl }}
-                              rounded="rounded-md"
-                              className="ring-1 ring-ink/8"
-                            />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate font-display text-[0.98rem] font-semibold text-ink">{r.title}</p>
-                            <p className="text-[0.82rem] font-medium text-brown">{r.subtitle}</p>
-                          </div>
-                          {chosen && (
-                            <motion.span
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              transition={softSpring}
-                              className="mr-1 text-ink"
-                              aria-hidden
-                            >
-                              <LittleIcon name="check" size={15} />
-                            </motion.span>
-                          )}
-                        </motion.button>
-                      );
-                    })}
-                    {results.length === 0 && query.trim().length === 0 && (
-                      <p className="px-1 py-6 text-center text-[0.9rem] text-brown">
-                        Start typing to find it ✨
-                      </p>
-                    )}
-                    {results.length === 0 && query.trim().length > 0 && !searching && (
-                      <div className="flex flex-col items-center gap-3 px-1 py-6 text-center">
-                        <p className="text-[0.9rem] text-brown">
-                          {searchError
-                            ? "Search is napping. Add it by hand below 🌿"
-                            : "No match out there. Tuck it in by hand?"}
+                <div className="mt-4 min-h-[8rem]">
+                  {searching && results.length === 0 ? (
+                    <SoftDotLoader />
+                  ) : (
+                    <motion.div
+                      role="listbox"
+                      aria-label="Search results"
+                      variants={staggerContainer}
+                      initial="hidden"
+                      animate="show"
+                      className={`flex flex-col gap-2 transition-opacity ${searching || picked ? "pointer-events-none opacity-60" : ""}`}
+                    >
+                      {results.map((r) => {
+                        const chosen = picked === `${searchKind}:${r.sourceId}`;
+                        return (
+                          <motion.button
+                            key={r.sourceId}
+                            variants={riseItem}
+                            type="button"
+                            role="option"
+                            aria-selected={chosen}
+                            tabIndex={searching || picked ? -1 : undefined}
+                            onClick={() => (personField ? pickResult(r) : quickPick(r))}
+                            whileTap={tap}
+                            animate={{ scale: chosen ? 1.015 : 1 }}
+                            transition={{ ...softSpring }}
+                            className={`flex items-center gap-3 rounded-xl p-2 text-left transition ${focusRing} ${
+                              chosen
+                                ? "bg-cream-deep ring-2 ring-ink/15"
+                                : "bg-cream-deep/40 hover:bg-cream-deep/70"
+                            }`}
+                          >
+                            <div className="w-11 shrink-0">
+                              <Cover
+                                item={{ id: r.sourceId, type, title: r.title, subtitle: r.subtitle, seed: r.title, imageUrl: r.imageUrl }}
+                                rounded="rounded-md"
+                                className="ring-1 ring-ink/8"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate font-display text-[0.98rem] font-semibold text-ink">{r.title}</p>
+                              <p className="text-[0.82rem] font-medium text-brown">{r.subtitle}</p>
+                            </div>
+                            {chosen && (
+                              <motion.span
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={softSpring}
+                                className="mr-1 text-ink"
+                                aria-hidden
+                              >
+                                <LittleIcon name="check" size={15} />
+                              </motion.span>
+                            )}
+                          </motion.button>
+                        );
+                      })}
+                      {results.length === 0 && query.trim().length === 0 && (
+                        <p className="px-1 py-6 text-center text-[0.9rem] text-brown">
+                          Start typing to find it ✨
                         </p>
-                        <Button
-                          variant="soft"
-                          size="md"
-                          className="min-h-11"
-                          onClick={() => (personField ? continueManual(query) : quickManual(query))}
-                        >
-                          Add &quot;{query.trim()}&quot; anyway
-                        </Button>
-                      </div>
-                    )}
-                  </motion.div>
+                      )}
+                      {results.length === 0 && query.trim().length > 0 && !searching && (
+                        <div className="flex flex-col items-center gap-3 px-1 py-6 text-center">
+                          <p className="text-[0.9rem] text-brown">
+                            {searchError
+                              ? "Search is napping. Add it by hand below 🌿"
+                              : "No match out there. Tuck it in by hand?"}
+                          </p>
+                          <Button
+                            variant="soft"
+                            size="md"
+                            className="min-h-11"
+                            onClick={() => (personField ? continueManual(query) : quickManual(query))}
+                          >
+                            Add &quot;{query.trim()}&quot; anyway
+                          </Button>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </div>
+                {query.trim().length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => continueManual(query)}
+                    className={`mx-auto mt-3 block rounded-pill text-[0.86rem] font-bold text-brown ${focusRing}`}
+                  >
+                    add details first ›
+                  </button>
                 )}
-              </div>
-              {query.trim().length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => continueManual(query)}
-                  className={`mx-auto mt-3 block rounded-pill text-[0.86rem] font-bold text-brown ${focusRing}`}
-                >
-                  add details first ›
-                </button>
-              )}
               </>
             ) : (
               <div className="mt-4">
