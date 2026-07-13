@@ -14,27 +14,7 @@ import { trackProductEvent } from "@/lib/analytics-client";
 import { CardStack } from "./card-stack";
 import { Sticker } from "./sticker";
 import { StickerBadge } from "./icons/sticker-badge";
-import { ViewIcon } from "./view-toggle";
 import { OverflowMenu } from "./overflow-menu";
-
-/** template label + the list's default-view glyph, the "what kind of world is this" line */
-function ListMeta({ list, size = "normal" }: { list: List; size?: "hero" | "normal" }) {
-  const meta = TEMPLATE_META[list.template];
-  const view = list.defaultView ?? meta.defaultView;
-  return (
-    <div className={`flex items-center gap-1.5 ${size === "hero" ? "mt-2" : "mt-1.5"}`}>
-      <span
-        className="rounded-pill px-2.5 py-1 text-[0.7rem] font-bold text-[var(--t-ink)]"
-        style={{ background: "var(--t-wash)" }}
-      >
-        {meta.label}
-      </span>
-      <span className="text-[var(--t-ink)] opacity-70" title={`${view} view`}>
-        <ViewIcon mode={view} size={13} />
-      </span>
-    </div>
-  );
-}
 
 interface ListCardProps {
   list: List;
@@ -106,7 +86,7 @@ export const ListCard = memo(function ListCard({ list, variant = "normal" }: Lis
         <div className="relative flex items-end justify-between gap-3 p-5">
           <div className="min-w-0 flex-1">
             <StickerBadge emoji={list.emoji} size={52} rounded="rounded-xl" />
-            <h2 className="mt-3 font-display text-[1.4rem] font-semibold leading-[1.12] text-[var(--t-ink)]">
+            <h2 className="mt-3 line-clamp-2 font-display text-[1.65rem] font-semibold leading-[1.1] text-[var(--t-ink)]">
               {/* stretched link: covers the whole card via ::after, so the ⋯ menu
                   (a sibling, not a descendant) stays valid, separately-focusable HTML */}
               <Link href={`/app/list/${list.id}`} className={focusRingStretched}>
@@ -114,7 +94,6 @@ export const ListCard = memo(function ListCard({ list, variant = "normal" }: Lis
               </Link>
             </h2>
             <p className="mt-1 text-[0.9rem] font-semibold text-brown">{listCountLabel(list)}</p>
-            <ListMeta list={list} size="hero" />
           </div>
           <div className="shrink-0 pb-1">
             <CardStack items={list.items} kind={list.kind} size="lg" />
@@ -122,20 +101,19 @@ export const ListCard = memo(function ListCard({ list, variant = "normal" }: Lis
         </div>
       ) : (
         <div className="relative p-4">
-          <div className="flex items-start justify-between gap-2">
-            <StickerBadge emoji={list.emoji} size={46} rounded="rounded-xl" />
-            {/* pr-8 keeps the collage clear of the absolute ⋯ menu in the corner */}
-            <div className="pt-0.5 pr-8">
-              <CardStack items={list.items.slice(0, 3)} kind={list.kind} size="sm" />
-            </div>
-          </div>
-          <h2 className="mt-3 font-display text-[1.12rem] font-semibold leading-tight text-[var(--t-ink)]">
+          <StickerBadge emoji={list.emoji} size={46} rounded="rounded-xl" />
+          {/* the ⋯ menu sits beside the badge, above where the title starts, so
+              the title can run the full card width */}
+          <h2 className="mt-3 line-clamp-2 font-display text-[1.3rem] font-semibold leading-[1.15] text-[var(--t-ink)]">
             <Link href={`/app/list/${list.id}`} className={focusRingStretched}>
               {list.title}
             </Link>
           </h2>
           <p className="mt-0.5 text-[0.82rem] font-semibold text-brown">{listCountLabel(list)}</p>
-          <ListMeta list={list} />
+          {/* the peek is the card's subject now: a full row of covers under the title */}
+          <div className="mt-3">
+            <CardStack items={list.items.slice(0, 3)} kind={list.kind} size="md" />
+          </div>
         </div>
       )}
       {/* menu renders after the link in source order, so keyboard/SR users reach the

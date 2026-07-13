@@ -192,7 +192,11 @@ export default function ListDetailScreen() {
   const activeLabel = options.find((o) => o.id === filter)?.label ?? "this";
   const layoutClass =
     view === "grid"
-      ? "grid grid-cols-2 gap-x-3 gap-y-4"
+      ? // browsing gets poster-wall density; custom (arranging) keeps two
+        // columns so the grip handles and drag targets stay comfortable
+        sort === "custom"
+        ? "grid grid-cols-2 gap-x-3 gap-y-4"
+        : "grid grid-cols-3 gap-x-2 gap-y-3.5"
       : view === "list"
         ? "flex flex-col gap-2.5"
         : "flex flex-col gap-3";
