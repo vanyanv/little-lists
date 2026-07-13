@@ -363,10 +363,18 @@ export const ItemCard = memo(function ItemCard({
   // persisted item is redundant — drop it so display reads straight from
   // `item` again. Keys with a still-newer pending value (a same-field edit
   // that raced the flush, or an unrelated field's still-pending edit) are
-  // kept — see reconcileOverlay for the per-key rationale.
-  useEffect(() => {
+  // kept — see reconcileOverlay for the per-key rationale. Adjusted during
+  // render (the store-prev-state pattern) rather than in an effect, so the
+  // reconciled overlay paints in the same pass as the item change.
+  const [prevPersisted, setPrevPersisted] = useState<Pick<Item, "title" | "note" | "tags">>(item);
+  if (
+    prevPersisted.title !== item.title ||
+    prevPersisted.note !== item.note ||
+    prevPersisted.tags !== item.tags
+  ) {
+    setPrevPersisted(item);
     setOverlay((prev) => reconcileOverlay(prev, item));
-  }, [item.title, item.note, item.tags]);
+  }
 
   let summary;
   let chrome = "";

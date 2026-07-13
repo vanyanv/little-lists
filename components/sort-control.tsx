@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { tap } from "@/lib/motion";
 import { focusRing, focusRingInset } from "@/lib/a11y";
 import { SORT_MODES, type SortMode } from "@/lib/sort";
+import { useHydrated } from "@/lib/use-hydrated";
 
 /** A labeled trigger that opens an anchored popover of the five sort modes. */
 export function SortControl({
@@ -16,12 +17,10 @@ export function SortControl({
   onChange: (v: SortMode) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHydrated();
   const [rect, setRect] = useState<DOMRect | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => setMounted(true), []);
 
   // return focus to the trigger on close (Escape / select / tap-away)
   const wasOpen = useRef(false);

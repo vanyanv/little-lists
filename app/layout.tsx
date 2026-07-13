@@ -91,6 +91,7 @@ export default function RootLayout({
           />
           <noscript>
             {/* no-JS fallback: apply the stylesheet normally */}
+            {/* eslint-disable-next-line @next/next/no-page-custom-font -- app-router root layout (rule assumes pages/_document); the real load is the non-blocking injected link above */}
             <link
               rel="stylesheet"
               href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap"

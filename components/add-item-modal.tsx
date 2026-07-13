@@ -70,7 +70,8 @@ function AddItemFlow({
   const [step, setStep] = useState<Step>("compose");
   const [type, setType] = useState<ItemType>(presetList?.kind ?? scrap?.kind ?? "movie");
   const [query, setQuery] = useState(scrap?.text ?? "");
-  const [searching, setSearching] = useState(false);
+  // namespaced by search kind so a stale pick can never highlight a
+  // colliding sourceId after a movie ↔ book ↔ music switch
   const [picked, setPicked] = useState<string | null>(null);
 
   // chosen thing
@@ -105,8 +106,22 @@ function AddItemFlow({
   const searchable = meta.searchable;
   const searchKind = type === "movie" || type === "book" || type === "music" ? type : null;
 
-  const [results, setResults] = useState<SearchHit[]>([]);
-  const [searchError, setSearchError] = useState(false);
+  // Search results settle as one atom keyed by (kind, term). Everything the
+  // UI needs — results, in-flight, error — derives from how that key compares
+  // to the current input, so no effect ever resets state by hand: an empty
+  // box or a kind switch clears instantly, while stale same-kind hits stay
+  // visible (dimmed) until the next response lands.
+  const [settled, setSettled] = useState<{
+    kind: string;
+    term: string;
+    hits: SearchHit[];
+    error: boolean;
+  }>({ kind: "", term: "", hits: [], error: false });
+  const term = query.trim();
+  const settledCurrent = settled.kind === searchKind && settled.term === term;
+  const results = searchKind && term && settled.kind === searchKind ? settled.hits : [];
+  const searching = Boolean(searchKind && term) && !settledCurrent;
+  const searchError = settledCurrent && settled.error;
   // carry the picked hit's cover + metadata into save()
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
   const [pickedMeta, setPickedMeta] = useState<Record<string, unknown> | undefined>(undefined);
@@ -114,13 +129,7 @@ function AddItemFlow({
   useEffect(() => {
     if (!searchKind) return;
     const term = query.trim();
-    if (!term) {
-      setResults([]);
-      setSearching(false);
-      setSearchError(false);
-      return;
-    }
-    setSearching(true);
+    if (!term) return;
     const controller = new AbortController();
     const t = setTimeout(async () => {
       try {
@@ -130,15 +139,11 @@ function AddItemFlow({
         );
         if (!res.ok) throw new Error("search failed");
         const hits: SearchHit[] = await res.json();
-        setResults(hits);
-        setSearchError(false);
+        setSettled({ kind: searchKind, term, hits, error: false });
       } catch {
         if (!controller.signal.aborted) {
-          setResults([]);
-          setSearchError(true);
+          setSettled({ kind: searchKind, term, hits: [], error: true });
         }
-      } finally {
-        if (!controller.signal.aborted) setSearching(false);
       }
     }, 350);
     return () => {
@@ -146,13 +151,6 @@ function AddItemFlow({
       clearTimeout(t);
     };
   }, [query, searchKind]);
-
-  // clear stale results immediately when the search kind changes (movie ↔ book ↔ music)
-  useEffect(() => {
-    setResults([]);
-    setPicked(null);
-    setSearchError(false);
-  }, [searchKind]);
 
   // auto-pick a sensible destination list when type changes (scrap/global entry).
   // Deferred commits/undos churn `lists` identity mid-flow — never clobber a
@@ -169,7 +167,7 @@ function AddItemFlow({
 
   const pickResult = (r: SearchHit) => {
     if (searching) return; // stale hit from the superseded query — ignore
-    setPicked(r.sourceId);
+    setPicked(`${searchKind}:${r.sourceId}`);
     setTitle(r.title);
     setSubtitle(r.subtitle);
     setSeed(r.title);
@@ -340,7 +338,7 @@ function AddItemFlow({
                     className={`flex flex-col gap-2 transition-opacity ${searching ? "pointer-events-none opacity-60" : ""}`}
                   >
                     {results.map((r) => {
-                      const chosen = picked === r.sourceId;
+                      const chosen = picked === `${searchKind}:${r.sourceId}`;
                       return (
                         <motion.button
                           key={r.sourceId}

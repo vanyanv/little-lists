@@ -9,14 +9,14 @@ import * as Store from "./store";
 // This repo's vitest runs with `environment: "node"` (no DOM) and doesn't
 // have @testing-library/react as a dependency, so ListsProvider can't be
 // mounted with a real renderer. Instead we swap in slot-based stand-ins for
-// useState/useCallback/useMemo/useRef (keeping every other React export,
-// including createContext, real) that behave exactly like React's for a
-// single component instance with no conditional hook calls — which is all
+// useState/useCallback/useMemo/useRef/useEffect (keeping every other React
+// export, including createContext, real) that behave exactly like React's for
+// a single component instance with no conditional hook calls — which is all
 // ListsProvider is. This lets us call `ListsProvider(...)` directly, twice
 // (an initial "render" and one after a real state mutation), and assert on
 // the actual object identities React's memoization would produce, instead
 // of just asserting on the source text.
-const { hookState, mockUseState, mockUseCallback, mockUseMemo, mockUseRef } = vi.hoisted(() => {
+const { hookState, mockUseState, mockUseCallback, mockUseMemo, mockUseRef, mockUseEffect } = vi.hoisted(() => {
   const hookState = { cells: [] as Array<{ value?: unknown; fn?: unknown; deps?: unknown[]; current?: unknown }>, index: 0 };
 
   function depsEqual(a: unknown[] | undefined, b: unknown[]) {
@@ -59,7 +59,19 @@ const { hookState, mockUseState, mockUseCallback, mockUseMemo, mockUseRef } = vi
     return hookState.cells[idx];
   }
 
-  return { hookState, mockUseState, mockUseCallback, mockUseMemo, mockUseRef };
+  // Runs the effect synchronously when its deps change (real React defers to
+  // after commit; for this renderer-less harness "immediately" is the closest
+  // faithful point). Cleanups are ignored — ListsProvider's only effect (the
+  // listsRef sync) has none.
+  function mockUseEffect(fn: () => void | (() => void), deps?: unknown[]) {
+    const idx = hookState.index++;
+    const cell = hookState.cells[idx];
+    if (cell && deps && depsEqual(cell.deps, deps)) return;
+    hookState.cells[idx] = { deps };
+    fn();
+  }
+
+  return { hookState, mockUseState, mockUseCallback, mockUseMemo, mockUseRef, mockUseEffect };
 });
 
 vi.mock("react", async (importOriginal) => {
@@ -70,6 +82,7 @@ vi.mock("react", async (importOriginal) => {
     useCallback: mockUseCallback,
     useMemo: mockUseMemo,
     useRef: mockUseRef,
+    useEffect: mockUseEffect,
   };
 });
 

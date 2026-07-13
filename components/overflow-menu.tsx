@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { tap } from "@/lib/motion";
 import { focusRing, focusRingInset } from "@/lib/a11y";
+import { useHydrated } from "@/lib/use-hydrated";
 
 interface OverflowMenuItem {
   label: string;
@@ -21,14 +22,10 @@ interface OverflowMenuProps {
 /** A ⋯ trigger that opens a cozy anchored popover of actions. */
 export function OverflowMenu({ items, ariaLabel = "More options", stopPropagation }: OverflowMenuProps) {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHydrated();
   const [rect, setRect] = useState<DOMRect | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Return focus to the trigger when the menu closes (Escape, selection, or
   // tap-away), per the WAI-ARIA menu-button pattern.

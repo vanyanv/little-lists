@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -175,9 +176,11 @@ export function ListsProvider({
   // Actions must keep a stable identity across data mutations (see the
   // actions useMemo below), so any action that needs to read current state
   // outside of a setState updater reads it from a ref instead of closing
-  // over the state value directly.
+  // over the state value directly. The ref syncs in an effect (refs can't be
+  // written during render); actions only read it from event handlers and
+  // after awaits, by which point the commit's effects have run.
   const listsRef = useRef(lists);
-  listsRef.current = lists;
+  useEffect(() => { listsRef.current = lists; }, [lists]);
 
   const fireCelebration = useCallback((variant: CelebrationVariant = "confetti") => {
     setCelebration({ id: makeId("celebrate"), variant });
