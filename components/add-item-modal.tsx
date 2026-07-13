@@ -9,6 +9,7 @@ import {
   ITEM_TYPE_META,
   TEMPLATE_META,
   statusesForList,
+  captureStatusFor,
   type ItemType,
   type ListTemplate,
   type StatusId,
@@ -258,6 +259,39 @@ function AddItemFlow({
     void persist(input, listId);
   };
 
+  // save on first intent: a picked hit becomes an item immediately (the details
+  // screen only appears when it has something essential to ask — see gift below)
+  const quickPick = (r: SearchHit) => {
+    if (searching) return; // stale hit from the superseded query — ignore
+    setPicked(`${searchKind}:${r.sourceId}`);
+    // let the chosen row glow for a beat before the sheet slides away
+    setTimeout(() => {
+      saveItem({
+        type,
+        title: r.title,
+        subtitle: r.subtitle || undefined,
+        status: captureStatusFor(effectiveTemplate),
+        seed: r.title,
+        imageUrl: r.imageUrl,
+        meta: r.meta,
+        flow: "quick",
+      });
+    }, 260);
+  };
+
+  const quickManual = (text: string) => {
+    const value = text.trim();
+    if (!value) return;
+    saveItem({
+      type,
+      title: value,
+      status: captureStatusFor(effectiveTemplate),
+      emoji: meta.aspect === "note" ? emoji : undefined,
+      seed: value,
+      flow: "quick",
+    });
+  };
+
   const save = () => {
     saveItem({
       type,
@@ -305,6 +339,20 @@ function AddItemFlow({
                 setQuery(e.target.value);
                 if (!searchable) setTitle(e.target.value);
               }}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
+                e.preventDefault();
+                if (personField) {
+                  if ((query || title).trim()) continueManual();
+                  return;
+                }
+                if (searchable) {
+                  if (results.length > 0 && !searching) quickPick(results[0]);
+                  else if (query.trim() && !searching) quickManual(query);
+                  return;
+                }
+                quickManual(query || title);
+              }}
               placeholder={searchable ? "Search a title…" : "Give it a name…"}
               className={`mt-4 ${inputPrimary}`}
             />
@@ -334,6 +382,7 @@ function AddItemFlow({
             )}
 
             {searchable ? (
+              <>
               <div className="mt-4 min-h-[8rem]">
                 {searching && results.length === 0 ? (
                   <SoftDotLoader />
@@ -356,7 +405,7 @@ function AddItemFlow({
                           role="option"
                           aria-selected={chosen}
                           tabIndex={searching ? -1 : undefined}
-                          onClick={() => pickResult(r)}
+                          onClick={() => (personField ? pickResult(r) : quickPick(r))}
                           whileTap={tap}
                           animate={{ scale: chosen ? 1.015 : 1 }}
                           transition={{ ...softSpring }}
@@ -407,7 +456,7 @@ function AddItemFlow({
                           variant="soft"
                           size="md"
                           className="min-h-11"
-                          onClick={() => continueManual(query)}
+                          onClick={() => (personField ? continueManual(query) : quickManual(query))}
                         >
                           Add &quot;{query.trim()}&quot; anyway
                         </Button>
@@ -416,13 +465,39 @@ function AddItemFlow({
                   </motion.div>
                 )}
               </div>
+              {query.trim().length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => continueManual(query)}
+                  className={`mx-auto mt-3 block rounded-pill text-[0.86rem] font-bold text-brown ${focusRing}`}
+                >
+                  add details first ›
+                </button>
+              )}
+              </>
             ) : (
               <div className="mt-4">
                 <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wide text-brown-soft">pick a little icon</p>
                 <EmojiPicker choices={EMOJI_CHOICES} value={emoji} onChange={setEmoji} />
-                <Button block size="lg" onClick={() => continueManual()} disabled={!(query || title).trim()} className="mt-4">
-                  Continue
+                <Button
+                  block
+                  size="lg"
+                  onClick={() => (personField ? continueManual() : quickManual(query || title))}
+                  disabled={!(query || title).trim() || saving}
+                  className="mt-4"
+                >
+                  {personField ? "Continue" : "Save it ✨"}
                 </Button>
+                {!personField && (
+                  <button
+                    type="button"
+                    onClick={() => continueManual()}
+                    disabled={!(query || title).trim()}
+                    className={`mx-auto mt-3 block rounded-pill text-[0.86rem] font-bold text-brown disabled:opacity-50 ${focusRing}`}
+                  >
+                    add details first ›
+                  </button>
+                )}
               </div>
             )}
           </motion.div>
