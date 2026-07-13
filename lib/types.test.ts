@@ -3,6 +3,7 @@ import {
   NEW_LIST_TEMPLATES,
   STATUS_META,
   TEMPLATE_META,
+  captureStatusFor,
   statusesForList,
   templateRailOrder,
   type ListTemplate,
@@ -83,5 +84,22 @@ describe("TEMPLATE_META.food.statuses", () => {
     for (const s of ["hate", "never-again"] as const) {
       expect(statuses, `negative status "${s}"`).toContain(s);
     }
+  });
+});
+
+describe("captureStatusFor", () => {
+  it("uses the first status where it is already capture-shaped", () => {
+    expect(captureStatusFor("movie")).toBe("want-to-watch");
+    expect(captureStatusFor("book")).toBe("want-to-read");
+    expect(captureStatusFor("place")).toBe("want-to-go");
+    expect(captureStatusFor("gift")).toBe("idea");
+  });
+
+  it("overrides food to need-to-try (first status is 'love')", () => {
+    expect(captureStatusFor("food")).toBe("need-to-try");
+  });
+
+  it("returns undefined for custom lists (no honest default)", () => {
+    expect(captureStatusFor("custom")).toBeUndefined();
   });
 });

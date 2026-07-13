@@ -251,6 +251,8 @@ export interface TemplateMeta {
   descriptor: string;
   /** status/category set; first entry is the default */
   statuses: StatusId[];
+  /** status a quick capture saves with; null = save without a status; unset = statuses[0] */
+  captureStatus?: StatusId | null;
   /** default cute noun for the count label */
   noun: string;
   /** singular form of `noun` for count === 1 */
@@ -329,6 +331,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     defaultView: "cozy",
     descriptor: "Dishes, snacks, strong opinions.",
     statuses: ["love", "hate", "maybe", "never-again", "need-to-try"],
+    captureStatus: "need-to-try",
     noun: "little tastes noted",
     nounSingular: "little taste noted",
     sticker: "leaf",
@@ -408,6 +411,7 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
     defaultView: "cozy",
     descriptor: "Any shape you like. Start from a blank page.",
     statuses: ["love", "maybe", "favorite", "need-to-try"],
+    captureStatus: null,
     noun: "little things",
     nounSingular: "little thing",
     sticker: "sparkle",
@@ -420,6 +424,13 @@ export const TEMPLATE_META: Record<ListTemplate, TemplateMeta> = {
 /** the status/category set a list offers, derived from its template */
 export function statusesForList(list: Pick<List, "template">): StatusId[] {
   return TEMPLATE_META[list.template].statuses;
+}
+
+/** the status a quick capture ("save on first intent") applies for a template */
+export function captureStatusFor(template: ListTemplate): StatusId | undefined {
+  const meta = TEMPLATE_META[template];
+  if (meta.captureStatus === null) return undefined;
+  return meta.captureStatus ?? meta.statuses[0];
 }
 
 /**
