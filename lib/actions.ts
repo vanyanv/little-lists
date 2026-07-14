@@ -138,7 +138,7 @@ export interface CreateItemInput {
   /** links this item to a person (e.g. a gift idea for someone) */
   personId?: string;
   /** which add flow produced this — analytics only, never persisted to the row */
-  flow?: "quick" | "detailed";
+  flow?: "quick" | "detailed" | "import";
 }
 
 function itemCreateData(clerkUserId: string, listId: string, input: CreateItemInput) {
@@ -216,6 +216,57 @@ export async function createItemAction(listId: string, input: CreateItemInput): 
     });
   }
   return mapItem(row, input.type);
+}
+
+/** Transactional bulk create for paste-to-import. Rows get descending-offset
+ *  createdAt so paste order reads top-down in the default recently-added sort
+ *  (line 1 newest). Caps at 50 inputs; analytics: one summary event + one
+ *  item_created per row with flow "import". */
+export async function importItemsAction(listId: string, inputs: CreateItemInput[]): Promise<Item[]> {
+  const { clerkUserId } = await requireUserProfile();
+  const list = await prisma.list.findFirst({
+    where: { id: listId, userId: clerkUserId },
+    select: { id: true },
+  });
+  if (!list) {
+    void recordProductEvent({
+      userId: clerkUserId,
+      name: "operation_error",
+      properties: { action: "importItemsAction", code: "list_not_found" },
+    });
+    throw new Error("importItemsAction: list not found");
+  }
+  const batch = inputs.slice(0, 50);
+  const base = Date.now();
+  const rows = await prisma.$transaction(
+    batch.map((input, i) =>
+      prisma.listItem.create({
+        data: {
+          ...itemCreateData(clerkUserId, listId, input),
+          createdAt: new Date(base + (batch.length - i)),
+        },
+      })
+    )
+  );
+  const matched = batch.filter((i) => i.imageUrl).length;
+  void recordProductEvent({
+    userId: clerkUserId,
+    name: "feature_used",
+    properties: { feature: "paste_import", lines: batch.length, matched },
+  });
+  for (const input of batch) {
+    void recordProductEvent({
+      userId: clerkUserId,
+      name: "item_created",
+      properties: {
+        hasPerson: false,
+        hasNote: Boolean(input.note),
+        hasRating: false,
+        flow: "import",
+      },
+    });
+  }
+  return rows.map((row, i) => mapItem(row, batch[i].type));
 }
 
 export interface UpdateItemPatch {

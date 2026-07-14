@@ -37,6 +37,7 @@ import {
   deleteScrapAction,
   duplicateListAction,
   fileScrapAction,
+  importItemsAction,
   moveItemAction,
   reorderItemsAction,
   saveScrapDetectionAction,
@@ -100,6 +101,8 @@ interface StoreValue {
   saveError: SaveErrorSignal | null;
   addList: (input: CreateListInput) => Promise<List>;
   addItem: (listId: string, item: CreateItemInput) => Promise<Item | null>;
+  /** transactional bulk create for paste-to-import; rows land in paste order */
+  importItems: (listId: string, inputs: CreateItemInput[]) => Promise<Item[] | null>;
   /**
    * Optimistically patch an item. By default the change is also persisted to
    * the server; pass `{ persist: false }` to update local state only (used by
@@ -419,6 +422,50 @@ export function ListsProvider({
       setLists((prev) =>
         prev.map((l) =>
           l.id === listId ? { ...l, items: l.items.filter((i) => i.id !== tempId) } : l
+        )
+      );
+      throw err;
+    }
+  }, []);
+
+  const importItems = useCallback<StoreValue["importItems"]>(async (listId, inputs) => {
+    const tempIds = inputs.map(() => makeId("item"));
+    const optimistic: Item[] = inputs.map((input, i) => ({
+      id: tempIds[i],
+      fresh: true,
+      type: input.type,
+      title: input.title,
+      subtitle: input.subtitle,
+      note: input.note,
+      status: input.status,
+      tags: input.tags,
+      emoji: input.emoji,
+      seed: input.seed,
+      personId: input.personId,
+    }));
+    setLists((prev) =>
+      prev.map((l) => (l.id === listId ? { ...l, items: [...optimistic, ...l.items] } : l))
+    );
+    try {
+      const created = await importItemsAction(listId, inputs);
+      setLists((prev) =>
+        prev.map((l) => {
+          if (l.id !== listId) return l;
+          const byTempId = new Map(tempIds.map((tempId, i) => [tempId, created[i]]));
+          return {
+            ...l,
+            items: l.items.map((i) => {
+              const match = byTempId.get(i.id);
+              return match ? { ...match, fresh: true } : i;
+            }),
+          };
+        })
+      );
+      return created;
+    } catch (err) {
+      setLists((prev) =>
+        prev.map((l) =>
+          l.id === listId ? { ...l, items: l.items.filter((i) => !tempIds.includes(i.id)) } : l
         )
       );
       throw err;
@@ -973,6 +1020,7 @@ export function ListsProvider({
     () => ({
       addList,
       addItem,
+      importItems,
       updateItem,
       deleteItem,
       setItemPinned,
@@ -1003,6 +1051,7 @@ export function ListsProvider({
     [
       addList,
       addItem,
+      importItems,
       updateItem,
       deleteItem,
       setItemPinned,
