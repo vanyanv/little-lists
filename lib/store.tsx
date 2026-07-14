@@ -102,7 +102,7 @@ interface StoreValue {
   addList: (input: CreateListInput) => Promise<List>;
   addItem: (listId: string, item: CreateItemInput) => Promise<Item | null>;
   /** transactional bulk create for paste-to-import; rows land in paste order */
-  importItems: (listId: string, inputs: CreateItemInput[]) => Promise<Item[] | null>;
+  importItems: (listId: string, inputs: CreateItemInput[]) => Promise<Item[]>;
   /**
    * Optimistically patch an item. By default the change is also persisted to
    * the server; pass `{ persist: false }` to update local state only (used by

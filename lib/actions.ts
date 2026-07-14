@@ -237,6 +237,23 @@ export async function importItemsAction(listId: string, inputs: CreateItemInput[
     throw new Error("importItemsAction: list not found");
   }
   const batch = inputs.slice(0, 50);
+
+  const personIds = [...new Set(batch.map((input) => input.personId).filter((id): id is string => Boolean(id)))];
+  if (personIds.length > 0) {
+    const people = await prisma.person.findMany({
+      where: { id: { in: personIds }, userId: clerkUserId },
+      select: { id: true },
+    });
+    if (people.length !== personIds.length) {
+      void recordProductEvent({
+        userId: clerkUserId,
+        name: "operation_error",
+        properties: { action: "importItemsAction", code: "person_not_found" },
+      });
+      throw new Error("importItemsAction: person not found");
+    }
+  }
+
   const base = Date.now();
   const rows = await prisma.$transaction(
     batch.map((input, i) =>
