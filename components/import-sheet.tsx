@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { CreateItemInput } from "@/lib/actions";
 import type { List } from "@/lib/types";
 import { captureStatusFor } from "@/lib/types";
@@ -9,6 +10,7 @@ import { isDuplicateTitle } from "@/lib/sort";
 import type { SearchHit } from "@/lib/search/types";
 import { useStoreActions } from "@/lib/store";
 import { useUi } from "@/lib/ui";
+import { useHydrated } from "@/lib/use-hydrated";
 import { BottomSheet } from "./bottom-sheet";
 import { Button } from "./button";
 import { Cover } from "./cover";
@@ -23,6 +25,7 @@ type RowState =
 export function ImportSheet({ list, open, onClose }: { list: List; open: boolean; onClose: () => void }) {
   const { importItems, deleteItem } = useStoreActions();
   const { showToast } = useUi();
+  const hydrated = useHydrated();
   const [text, setText] = useState("");
   const [rows, setRows] = useState<RowState[] | null>(null); // null = compose step
   const [busy, setBusy] = useState(false);
@@ -131,7 +134,16 @@ export function ImportSheet({ list, open, onClose }: { list: List; open: boolean
   const lineCount = parsedNow.lines.length;
   const truncated = parsedNow.truncated;
 
-  return (
+  // This sheet is mounted inside the list page, which renders inside
+  // app-shell's <main class="relative z-[1] …">. That z-index creates a
+  // stacking context that traps this sheet's fixed z-50 below it, so the
+  // root-level bottom nav (fixed z-30) paints over the sheet's lower region.
+  // Portal to document.body so it competes in the root stacking context,
+  // same as the other sheets (pocket, add-item) which are mounted in
+  // app-shell outside main and never had this problem.
+  if (!hydrated) return null;
+
+  return createPortal(
     <BottomSheet open={open} onClose={close} ariaLabel="Paste a list in">
       {rows === null ? (
         <div>
@@ -190,6 +202,7 @@ export function ImportSheet({ list, open, onClose }: { list: List; open: boolean
           </div>
         </div>
       )}
-    </BottomSheet>
+    </BottomSheet>,
+    document.body
   );
 }
