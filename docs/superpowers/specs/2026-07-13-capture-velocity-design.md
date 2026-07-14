@@ -98,9 +98,10 @@ free (it is the same modal).
 ## Edge cases
 
 - Enter during IME composition: ignored (`isComposing`).
-- Enter while `searching` with stale results visible: results are dimmed and
-  `pickResult` already ignores stale hits; Enter follows the same guard (falls
-  back to save-as-typed).
+- Enter while `searching` (debounce or fetch in flight): a deliberate no-op —
+  press again once results settle. (Amended at final review: the original
+  fallback-to-save-as-typed would mint a manual item milliseconds before the
+  real catalog hit lands, which is worse than asking for a second Enter.)
 - Scrap filing (`ScrapRef` present): quick save routes through `fileScrap`'s
   deferred transaction exactly as the details-step save does today.
 - Duplicate check compares trimmed, case-folded titles; subtitle differences do
