@@ -27,6 +27,9 @@ import { sortItems, isSortMode, type SortMode } from "@/lib/sort";
 // The drag engine (@dnd-kit, ~4 packages) is only used in custom-sort mode;
 // load it lazily so ordinary list views don't pay for it.
 const ListDnd = dynamic(() => import("@/components/list-dnd").then((m) => m.ListDnd), { ssr: false });
+// The import sheet's matching stream is only needed once someone reaches for
+// it; load it lazily like ListDnd rather than paying for it on every visit.
+const ImportSheet = dynamic(() => import("@/components/import-sheet").then((m) => m.ImportSheet), { ssr: false });
 
 /** the list's saved view, falling back to its template default */
 function defaultViewFor(list?: Pick<List, "template" | "defaultView">): ViewMode {
@@ -52,6 +55,7 @@ export default function ListDetailScreen() {
   const [view, setView] = useState<ViewMode>(() => defaultViewFor(list));
   const [sort, setSort] = useState<SortMode>(() => defaultSortFor(list));
   const [query, setQuery] = useState("");
+  const [importOpen, setImportOpen] = useState(false);
   const reduce = useReducedMotion();
 
   // change the view here AND remember it on the list for next time
@@ -141,6 +145,7 @@ export default function ListDetailScreen() {
       ariaLabel="List options"
       items={[
         { label: "Edit list", onSelect: () => openEditList(list.id) },
+        { label: "Paste a list in", onSelect: () => setImportOpen(true) },
         {
           label: "Duplicate list",
           onSelect: () => {
@@ -320,9 +325,18 @@ export default function ListDetailScreen() {
             title="Nothing here yet"
             hint="Add the first little thing and watch your collection begin ✨"
             action={
-              <Button size="sm" onClick={() => openItemSheet(list.id)}>
-                Add the first little thing
-              </Button>
+              <div className="flex flex-col items-center gap-2">
+                <Button size="sm" onClick={() => openItemSheet(list.id)}>
+                  Add the first little thing
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setImportOpen(true)}
+                  className={`rounded-pill text-[0.86rem] font-bold text-brown ${focusRing}`}
+                >
+                  or paste a whole list in ›
+                </button>
+              </div>
             }
           />
         ) : visible.length === 0 ? (
@@ -390,6 +404,10 @@ export default function ListDetailScreen() {
           </AnimatePresence>
         )}
       </div>
+
+      {importOpen && (
+        <ImportSheet list={list} open={importOpen} onClose={() => setImportOpen(false)} />
+      )}
     </div>
   );
 }
