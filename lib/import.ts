@@ -3,9 +3,10 @@ import type { SearchHit } from "./search/types";
 export const IMPORT_MAX_LINES = 50;
 export const IMPORT_LINE_MAX = 200;
 
-/** leading list decorations Notes-style pastes carry: bullets, numbering, checkboxes */
+/** leading list decorations Notes-style pastes carry: bullets, numbering, checkboxes.
+ *  Wrapped in a repeating group so stacked markers ("- [ ] Dune") strip fully in one pass. */
 const LINE_MARKER =
-  /^(?:[-*•·–—]|\d+[.)]|\[[ xX]?\]|[☐☑☒])\s*/;
+  /^(?:(?:[-*•·–—]|\d+[.)]|\[[ xX]?\]|[☐☑☒])\s*)+/;
 
 export function parsePastedList(text: string): { lines: string[]; truncated: boolean } {
   const seen = new Set<string>();

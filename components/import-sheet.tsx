@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CreateItemInput } from "@/lib/actions";
 import type { List } from "@/lib/types";
@@ -30,6 +30,10 @@ export function ImportSheet({ list, open, onClose }: { list: List; open: boolean
   const [rows, setRows] = useState<RowState[] | null>(null); // null = compose step
   const [busy, setBusy] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+
+  // unmount = dismiss = abort: browser/gesture back can unmount without close(), which would
+  // otherwise let start()'s closure keep matching and save onto whatever page the user landed on
+  useEffect(() => () => { abortRef.current?.abort(); }, []);
 
   const kind = list.kind;
   const searchable = kind === "movie" || kind === "book" || kind === "music";
@@ -70,7 +74,12 @@ export function ImportSheet({ list, open, onClose }: { list: List; open: boolean
           onAction: () => {
             void Promise.allSettled(created.map((item) => deleteItem(list.id, item.id))).then((results) => {
               const failed = results.filter((r) => r.status === "rejected").length;
-              if (failed > 0) showToast(`${failed} wouldn't undo. Give those a tap to remove them 🌿`);
+              if (failed > 0)
+                showToast(
+                  failed === 1
+                    ? "One wouldn't undo. Give it a tap to remove it 🌿"
+                    : `${failed} wouldn't undo. Give those a tap to remove them 🌿`
+                );
             });
           },
         },

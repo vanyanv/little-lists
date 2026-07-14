@@ -56,6 +56,14 @@ export default function ListDetailScreen() {
   const [sort, setSort] = useState<SortMode>(() => defaultSortFor(list));
   const [query, setQuery] = useState("");
   const [importOpen, setImportOpen] = useState(false);
+  // Once opened, stay mounted so BottomSheet's spring-down exit can play (matching
+  // every other sheet's toggle-open pattern); the dynamic import still defers the
+  // bundle until the first open.
+  const [importEverOpened, setImportEverOpened] = useState(false);
+  const openImport = () => {
+    setImportEverOpened(true);
+    setImportOpen(true);
+  };
   const reduce = useReducedMotion();
 
   // change the view here AND remember it on the list for next time
@@ -145,7 +153,7 @@ export default function ListDetailScreen() {
       ariaLabel="List options"
       items={[
         { label: "Edit list", onSelect: () => openEditList(list.id) },
-        { label: "Paste a list in", onSelect: () => setImportOpen(true) },
+        { label: "Paste a list in", onSelect: openImport },
         {
           label: "Duplicate list",
           onSelect: () => {
@@ -331,7 +339,7 @@ export default function ListDetailScreen() {
                 </Button>
                 <button
                   type="button"
-                  onClick={() => setImportOpen(true)}
+                  onClick={openImport}
                   className={`rounded-pill text-[0.86rem] font-bold text-brown ${focusRing}`}
                 >
                   or paste a whole list in ›
@@ -405,7 +413,7 @@ export default function ListDetailScreen() {
         )}
       </div>
 
-      {importOpen && (
+      {importEverOpened && (
         <ImportSheet list={list} open={importOpen} onClose={() => setImportOpen(false)} />
       )}
     </div>

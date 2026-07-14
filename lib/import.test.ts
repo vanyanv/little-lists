@@ -22,6 +22,10 @@ describe("parsePastedList", () => {
     ]);
   });
 
+  it("strips stacked markers (bullet + checkbox) in one pass", () => {
+    expect(parsePastedList("- [ ] Dune\n* [x] Heat").lines).toEqual(["Dune", "Heat"]);
+  });
+
   it("preserves real titles that begin with a parenthesized number", () => {
     expect(parsePastedList("(500) Days of Summer").lines).toEqual(["(500) Days of Summer"]);
   });

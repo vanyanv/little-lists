@@ -428,7 +428,10 @@ export function ListsProvider({
     }
   }, []);
 
-  const importItems = useCallback<StoreValue["importItems"]>(async (listId, inputs) => {
+  const importItems = useCallback<StoreValue["importItems"]>(async (listId, rawInputs) => {
+    // server caps at 50 (see importItemsAction); slice here too so the index-wise
+    // optimistic swap below never strands phantom temp items past the cap
+    const inputs = rawInputs.slice(0, 50);
     const tempIds = inputs.map(() => makeId("item"));
     const optimistic: Item[] = inputs.map((input, i) => ({
       id: tempIds[i],

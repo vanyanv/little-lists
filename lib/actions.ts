@@ -276,7 +276,7 @@ export async function importItemsAction(listId: string, inputs: CreateItemInput[
       userId: clerkUserId,
       name: "item_created",
       properties: {
-        hasPerson: false,
+        hasPerson: Boolean(input.personId),
         hasNote: Boolean(input.note),
         hasRating: false,
         flow: "import",
