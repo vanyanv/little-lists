@@ -63,4 +63,9 @@ describe("pickBestHit", () => {
   it("returns undefined for no hits", () => {
     expect(pickBestHit("dune", [])).toBeUndefined();
   });
+
+  it("folds diacritics so 'amelie' exact-matches 'Amélie'", () => {
+    const hits = [hit("Amelie or The Time to Love"), hit("Amélie")];
+    expect(pickBestHit("amelie", hits)?.title).toBe("Amélie");
+  });
 });

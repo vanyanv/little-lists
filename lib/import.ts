@@ -22,7 +22,7 @@ export function parsePastedList(text: string): { lines: string[]; truncated: boo
 }
 
 const normalize = (s: string) =>
-  s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
+  s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
 
 /** the line's best match: exact normalized title, then prefix either way, then provider order */
 export function pickBestHit(line: string, hits: SearchHit[]): SearchHit | undefined {
