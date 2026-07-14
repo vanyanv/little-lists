@@ -10,6 +10,11 @@ const isPublicRoute = createRouteMatcher([
   "/privacy",
   "/terms",
   "/api/webhooks/clerk",
+  // Generated OG/Twitter card images have no file extension in their route
+  // path, so the matcher below can't exempt them like it does icon.png —
+  // social crawlers hit this signed-out and must not be bounced to sign-in.
+  "/opengraph-image(.*)",
+  "/twitter-image(.*)",
 ]);
 
 // The entry screens a signed-in user should skip past, straight to their world.

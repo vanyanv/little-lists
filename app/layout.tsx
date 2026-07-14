@@ -52,6 +52,15 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   title: "Little Lists · your little world",
   description: "Beautiful lists for your taste, plans, and people.",
+  openGraph: {
+    title: "Little Lists · your little world",
+    description: "Beautiful lists for your taste, plans, and people.",
+    siteName: "Little Lists",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export const viewport: Viewport = {
