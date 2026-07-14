@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 // Image metadata
-export const alt = "Little Lists — remember what you love and what they love";
+export const alt = "Little Lists: remember what you love and what they love";
 export const size = {
   width: 1200,
   height: 630,
@@ -60,7 +60,7 @@ function StackCard({
         background: color,
         transform: `rotate(${rotate}deg)`,
         boxShadow: "0 24px 48px rgba(47, 39, 34, 0.16)",
-        border: `1px solid rgba(47, 39, 34, 0.06)`,
+        border: "1px solid rgba(47, 39, 34, 0.06)",
       }}
     />
   );
