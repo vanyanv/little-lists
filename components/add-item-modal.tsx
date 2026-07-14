@@ -237,6 +237,7 @@ function AddItemFlow({
       }
     } catch {
       setSaving(false);
+      setPicked(null); // a failed quick-pick save must not leave the results list permanently inert
       showToast("That didn't save. Let's try again 🌿");
     }
   };
@@ -246,6 +247,8 @@ function AddItemFlow({
     // closure with this call's (e.g. a held Enter key repeating past the first detection).
     if (confirm) return;
     const listId = opts?.listId ?? targetListId ?? lists[0]?.id;
+    // guards direct quick-save callers (quickPick/quickManual); the details step's own
+    // Save button is already disabled-gated on !title.trim(), so this reads as dead code there
     if (!listId || saving || !input.title.trim()) return;
     const targetItems = lists.find((l) => l.id === listId)?.items ?? [];
     if (isDuplicateTitle(input.title, targetItems)) {
@@ -268,11 +271,13 @@ function AddItemFlow({
 
   // save on first intent: a picked hit becomes an item immediately (the details
   // screen only appears when it has something essential to ask — see gift below)
+  const quickPickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const quickPick = (r: SearchHit) => {
     if (searching || picked || confirm) return; // stale hit, or a pick is already pending, or a confirm sheet is open — ignore
     setPicked(`${searchKind}:${r.sourceId}`);
     // let the chosen row glow for a beat before the sheet slides away
-    setTimeout(() => {
+    quickPickTimer.current = setTimeout(() => {
+      quickPickTimer.current = null;
       saveItem({
         type,
         title: r.title,
@@ -285,6 +290,15 @@ function AddItemFlow({
       });
     }, 260);
   };
+
+  // dismiss aborts the glow-save: AddItemFlow unmounts when the sheet closes
+  // (it's keyed inside BottomSheet), so this cleanup cancels a pending quick
+  // save when Escape/scrim/drag closes the sheet mid-glow.
+  useEffect(() => {
+    return () => {
+      if (quickPickTimer.current) clearTimeout(quickPickTimer.current);
+    };
+  }, []);
 
   const quickManual = (text: string) => {
     const value = text.trim();
@@ -476,7 +490,8 @@ function AddItemFlow({
                   <button
                     type="button"
                     onClick={() => continueManual(query)}
-                    className={`mx-auto mt-3 block rounded-pill text-[0.86rem] font-bold text-brown ${focusRing}`}
+                    disabled={Boolean(picked) || saving}
+                    className={`mx-auto mt-3 block rounded-pill text-[0.86rem] font-bold text-brown disabled:opacity-50 ${focusRing}`}
                   >
                     add details first ›
                   </button>

@@ -102,4 +102,9 @@ describe("captureStatusFor", () => {
   it("returns undefined for custom lists (no honest default)", () => {
     expect(captureStatusFor("custom")).toBeUndefined();
   });
+
+  it("falls back to statuses[0] for templates with no explicit captureStatus override", () => {
+    expect(captureStatusFor("date")).toBe("want-to-do");
+    expect(captureStatusFor("music")).toBe("want-to-listen");
+  });
 });
