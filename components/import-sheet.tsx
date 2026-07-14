@@ -25,6 +25,7 @@ export function ImportSheet({ list, open, onClose }: { list: List; open: boolean
   const { showToast } = useUi();
   const [text, setText] = useState("");
   const [rows, setRows] = useState<RowState[] | null>(null); // null = compose step
+  const [busy, setBusy] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   const kind = list.kind;
@@ -35,6 +36,7 @@ export function ImportSheet({ list, open, onClose }: { list: List; open: boolean
     abortRef.current = null;
     setRows(null);
     setText("");
+    setBusy(false);
   };
   const close = () => {
     reset(); // dismiss aborts: nothing saves before the single transaction
@@ -63,22 +65,29 @@ export function ImportSheet({ list, open, onClose }: { list: List; open: boolean
         action: {
           label: "Undo",
           onAction: () => {
-            for (const item of created) void deleteItem(list.id, item.id);
+            void Promise.allSettled(created.map((item) => deleteItem(list.id, item.id))).then((results) => {
+              const failed = results.filter((r) => r.status === "rejected").length;
+              if (failed > 0) showToast(`${failed} wouldn't undo. Give those a tap to remove them 🌿`);
+            });
           },
         },
       });
     } catch {
       setRows(null); // back to compose with the paste intact for a retry
+      setBusy(false);
       showToast("That didn't save. Let's try again 🌿");
     }
   };
 
   const start = async () => {
+    if (busy) return;
+    setBusy(true);
     const parsed = parsePastedList(text);
     // lines already in the list are skipped automatically, reported in the toast
     const fresh = parsed.lines.filter((l) => !isDuplicateTitle(l, list.items));
     const skipped = parsed.lines.length - fresh.length;
     if (fresh.length === 0) {
+      setBusy(false); // nothing to save, no compose→save round-trip is starting
       showToast(skipped > 0 ? "All of those are already here ✨" : "Nothing to tuck in yet");
       return;
     }
@@ -144,8 +153,8 @@ export function ImportSheet({ list, open, onClose }: { list: List; open: boolean
               {IMPORT_MAX_LINES} at a time for now, paste the rest after ✨
             </p>
           )}
-          <Button block size="lg" onClick={() => void start()} disabled={lineCount === 0} className="mt-4">
-            {lineCount > 0 ? `Tuck ${lineCount} in ✨` : "Tuck them in ✨"}
+          <Button block size="lg" onClick={() => void start()} disabled={lineCount === 0 || busy} className="mt-4">
+            {busy ? "Tucking in…" : lineCount > 0 ? `Tuck ${lineCount} in ✨` : "Tuck them in ✨"}
           </Button>
         </div>
       ) : (
