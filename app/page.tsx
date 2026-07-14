@@ -4,6 +4,7 @@ import { LandingHeader } from "@/components/landing/landing-header";
 import { LandingHero } from "@/components/landing/landing-hero";
 import { PeopleMemory } from "@/components/landing/people-memory";
 import { PocketCapture } from "@/components/landing/pocket-capture";
+import { BringYourLists } from "@/components/landing/bring-your-lists";
 import { UseCases } from "@/components/landing/use-cases";
 import { Privacy } from "@/components/landing/privacy";
 import { LandingFaq } from "@/components/landing/landing-faq";
@@ -28,6 +29,7 @@ export default async function LandingPage() {
         <LandingHero movies={movies} books={books} />
         <PeopleMemory />
         <PocketCapture />
+        <BringYourLists movies={showcaseMovies} />
         <UseCases movies={showcaseMovies} books={showcaseBooks} />
         <Privacy />
         <LandingFaq />

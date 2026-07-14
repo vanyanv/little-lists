@@ -15,6 +15,11 @@ const FAQS = [
     answer: "Yes. Little Lists works in the browser, and your saved world follows your account when you sign in.",
   },
   {
+    question: "Can I bring lists I already keep in Notes?",
+    answer:
+      "Yes. Open any little list, choose “Paste a list in”, and paste straight from Notes or anywhere else. Movies, books, and music find their own covers as they arrive, and one tap undoes the whole batch.",
+  },
+  {
     question: "What can I keep in it?",
     answer: "Movies, books, music, food, places, gift ideas, date ideas, people notes, and custom lists for anything completely yours.",
   },
