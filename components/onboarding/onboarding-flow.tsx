@@ -277,6 +277,9 @@ export function OnboardingFlow() {
             <p className="mt-3 max-w-[19rem] text-[0.98rem] leading-relaxed text-brown">
               Everything&apos;s tucked into place. Add little things whenever a thought strikes.
             </p>
+            <p className="mt-4 max-w-[18rem] text-[0.85rem] leading-relaxed text-brown-soft">
+              Already keep lists in Notes? Open any little list and paste the whole thing in 📋
+            </p>
             <div className="mt-8 w-full max-w-[17rem]">
               <Button size="lg" block onClick={finish}>
                 {/* one span: Button is inline-flex, which swallows whitespace between flex items */}

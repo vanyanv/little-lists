@@ -160,10 +160,13 @@ export const DEMO_PERSON = {
 } as const;
 
 export interface ChecklistItem {
-  id: "first-list" | "first-item" | "first-person-detail";
+  id: "first-list" | "first-item" | "filled-list" | "first-person-detail";
   label: string;
   done: boolean;
 }
+
+/** a list counts as "filled" once this many of your own things live in it */
+export const FILLED_LIST_MIN = 3;
 
 /**
  * First-steps checklist, derived purely from what the user already has —
@@ -181,6 +184,14 @@ export function deriveChecklist(lists: List[], people: Person[]): ChecklistItem[
       // seeded examples don't count — the point is to add something of your own
       label: "Add your first little thing",
       done: lists.some((l) => l.items.some((i) => !isExample(i.tags))),
+    },
+    {
+      id: "filled-list",
+      // the checklist derives from data, not events, so "pasted" is a proxy:
+      // any list holding FILLED_LIST_MIN of your own things counts, however
+      // they arrived — the goal (a list with real content) is the same
+      label: "Paste in a list you already keep somewhere",
+      done: lists.some((l) => l.items.filter((i) => !isExample(i.tags)).length >= FILLED_LIST_MIN),
     },
     {
       id: "first-person-detail",

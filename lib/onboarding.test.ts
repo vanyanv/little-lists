@@ -62,29 +62,34 @@ function person(entries: { id: string; title: string; tags: string[] }[]): Perso
 
 describe("deriveChecklist", () => {
   it("marks nothing done for a brand-new user", () => {
-    expect(deriveChecklist([], []).map((c) => c.done)).toEqual([false, false, false]);
+    expect(deriveChecklist([], []).map((c) => c.done)).toEqual([false, false, false, false]);
   });
 
   it("marks only the list step done when lists are empty of items", () => {
-    expect(deriveChecklist([list([])], []).map((c) => c.done)).toEqual([true, false, false]);
+    expect(deriveChecklist([list([])], []).map((c) => c.done)).toEqual([true, false, false, false]);
   });
 
   it("marks the item step done once any list has an item", () => {
     const withItem = list([{ id: "i1", type: "movie", title: "Coraline" }]);
-    expect(deriveChecklist([withItem], []).map((c) => c.done)).toEqual([true, true, false]);
+    expect(deriveChecklist([withItem], []).map((c) => c.done)).toEqual([true, true, false, false]);
   });
 
   it("requires a person to have at least one entry, not just exist", () => {
-    expect(deriveChecklist([], [person([])]).map((c) => c.done)).toEqual([false, false, false]);
+    expect(deriveChecklist([], [person([])]).map((c) => c.done)).toEqual([
+      false,
+      false,
+      false,
+      false,
+    ]);
     expect(
       deriveChecklist([], [person([{ id: "e1", title: "matcha", tags: [] }])]).map((c) => c.done)
-    ).toEqual([false, false, true]);
+    ).toEqual([false, false, false, true]);
   });
 
   it("does not count example-tagged items toward the first-item step", () => {
     const seeded = list([{ id: "i1", type: "movie", title: "Coraline", tags: ["example"] }]);
     // list exists (done), but its only item is a seeded example (not done)
-    expect(deriveChecklist([seeded], []).map((c) => c.done)).toEqual([true, false, false]);
+    expect(deriveChecklist([seeded], []).map((c) => c.done)).toEqual([true, false, false, false]);
   });
 
   it("counts a real item alongside example items", () => {
@@ -92,7 +97,43 @@ describe("deriveChecklist", () => {
       { id: "i1", type: "movie", title: "Coraline", tags: ["example"] },
       { id: "i2", type: "movie", title: "Past Lives" },
     ]);
-    expect(deriveChecklist([mixed], []).map((c) => c.done)).toEqual([true, true, false]);
+    expect(deriveChecklist([mixed], []).map((c) => c.done)).toEqual([true, true, false, false]);
+  });
+
+  it("marks the filled-list step done at three of your own things in one list", () => {
+    const twoOwn = list([
+      { id: "i1", type: "movie", title: "Coraline" },
+      { id: "i2", type: "movie", title: "Past Lives" },
+    ]);
+    expect(deriveChecklist([twoOwn], []).map((c) => c.done)).toEqual([true, true, false, false]);
+
+    const threeOwn = list([
+      { id: "i1", type: "movie", title: "Coraline" },
+      { id: "i2", type: "movie", title: "Past Lives" },
+      { id: "i3", type: "movie", title: "Aftersun" },
+    ]);
+    expect(deriveChecklist([threeOwn], []).map((c) => c.done)).toEqual([true, true, true, false]);
+  });
+
+  it("does not let examples pad a list toward the filled-list step", () => {
+    const padded = list([
+      { id: "i1", type: "movie", title: "Coraline", tags: ["example"] },
+      { id: "i2", type: "movie", title: "Spirited Away", tags: ["example"] },
+      { id: "i3", type: "movie", title: "Past Lives" },
+    ]);
+    expect(deriveChecklist([padded], []).map((c) => c.done)).toEqual([true, true, false, false]);
+  });
+
+  it("requires the three own things to share one list, not spread across lists", () => {
+    const a = list([{ id: "i1", type: "movie", title: "Coraline" }]);
+    const b = {
+      ...list([
+        { id: "i2", type: "book", title: "Piranesi" },
+        { id: "i3", type: "book", title: "Circe" },
+      ]),
+      id: "l2",
+    };
+    expect(deriveChecklist([a, b], []).map((c) => c.done)).toEqual([true, true, false, false]);
   });
 
   it("does not count example-tagged person entries toward the detail step", () => {
@@ -100,7 +141,7 @@ describe("deriveChecklist", () => {
       deriveChecklist([], [person([{ id: "e1", title: "farmers markets", tags: ["example"] }])]).map(
         (c) => c.done
       )
-    ).toEqual([false, false, false]);
+    ).toEqual([false, false, false, false]);
   });
 });
 

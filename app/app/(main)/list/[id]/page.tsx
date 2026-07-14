@@ -10,7 +10,7 @@ import { listCountLabel, themeClass } from "@/lib/visual";
 import { softSpring } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
 import { STATUS_META, TEMPLATE_META, statusesForList, type List } from "@/lib/types";
-import { EXAMPLE_TAG } from "@/lib/onboarding";
+import { EXAMPLE_TAG, isExample } from "@/lib/onboarding";
 import { DetailHeader } from "@/components/detail-header";
 import { ItemCard } from "@/components/item-card";
 import { FilterChips, type FilterOption } from "@/components/filter-chips";
@@ -410,6 +410,21 @@ export default function ListDetailScreen() {
               ))}
             </motion.div>
           </AnimatePresence>
+        )}
+
+        {/* seeded examples fill the list, which hides the empty state and its
+            paste invitation right when a new user's real list is still in
+            Notes — so example-only lists keep the invitation visible */}
+        {visible.length > 0 && list.items.every((i) => isExample(i.tags)) && (
+          <div className="mt-7 pb-2 text-center">
+            <button
+              type="button"
+              onClick={openImport}
+              className={`rounded-pill text-[0.86rem] font-bold text-brown ${focusRing}`}
+            >
+              Have this list somewhere already? Paste it in ›
+            </button>
+          </div>
         )}
       </div>
 
