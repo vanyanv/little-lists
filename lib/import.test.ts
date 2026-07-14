@@ -16,10 +16,14 @@ describe("parsePastedList", () => {
   });
 
   it("strips bullets, numbering, and checkbox markers", () => {
-    const text = "- Dune\n* Heat\n• Arrival\n1. Tenet\n2) Alien\n(3) Up\n[ ] Coco\n[x] Ponyo\n☐ Brave";
+    const text = "- Dune\n* Heat\n• Arrival\n1. Tenet\n2) Alien\n[ ] Coco\n[x] Ponyo\n☐ Brave";
     expect(parsePastedList(text).lines).toEqual([
-      "Dune", "Heat", "Arrival", "Tenet", "Alien", "Up", "Coco", "Ponyo", "Brave",
+      "Dune", "Heat", "Arrival", "Tenet", "Alien", "Coco", "Ponyo", "Brave",
     ]);
+  });
+
+  it("preserves real titles that begin with a parenthesized number", () => {
+    expect(parsePastedList("(500) Days of Summer").lines).toEqual(["(500) Days of Summer"]);
   });
 
   it("dedupes case-insensitively within the paste", () => {
