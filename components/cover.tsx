@@ -27,14 +27,16 @@ export function Cover({
   sizes?: string;
 }) {
   const [errored, setErrored] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const seed = item.seed || item.title;
   const shape = ITEM_TYPE_META[item.type].aspect === "square" ? "square" : "poster";
+  const fallbackEmoji = item.emoji || ITEM_TYPE_META[item.type].emoji;
 
   if (!item.imageUrl || errored) {
     return (
       <PlaceholderPoster
         seed={seed}
-        title={item.title}
+        emoji={fallbackEmoji}
         badge={badge}
         aspect={shape}
         rounded={rounded}
@@ -45,16 +47,30 @@ export function Cover({
 
   return (
     <div className={`relative overflow-hidden bg-cream-deep ${ASPECT_CLASS[shape]} ${rounded} ${className}`}>
+      {/* the placeholder stays underneath so the real art can fade in over it */}
+      <PlaceholderPoster
+        seed={seed}
+        emoji={fallbackEmoji}
+        aspect={shape}
+        rounded={rounded}
+        className="absolute inset-0 h-full w-full"
+      />
       <Image
         src={item.imageUrl}
         alt={item.title}
         fill
         sizes={sizes}
-        className="object-cover"
+        className={`object-cover transition-opacity duration-200 ease-out ${loaded ? "opacity-100" : "opacity-0"}`}
         loading="lazy"
         // local first-party .svg art (the landing preview covers) skips the
         // optimizer, which refuses SVG by default
         unoptimized={item.imageUrl.endsWith(".svg")}
+        onLoad={() => setLoaded(true)}
+        // cached images can finish before hydration attaches onLoad — the ref
+        // callback runs post-commit and catches that case
+        ref={(img) => {
+          if (img?.complete && img.naturalWidth > 0) setLoaded(true);
+        }}
         onError={() => setErrored(true)}
       />
       <span className={`pointer-events-none absolute inset-0 ${rounded} ring-1 ring-inset ring-line/40`} />

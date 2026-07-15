@@ -23,7 +23,7 @@ import { inputPrimary, inputField, textareaField, sheetTitle, sheetTitleSm } fro
 import { Button } from "./button";
 import { BottomSheet } from "./bottom-sheet";
 import { EmojiPicker } from "./emoji-picker";
-import { SoftDotLoader } from "./soft-dot-loader";
+import { ResultListSkeleton } from "./skeletons";
 import { Cover } from "./cover";
 import { StatusPill } from "./status-pill";
 import { AnimatedCategoryIcon } from "./icons/animated-category-icon";
@@ -406,7 +406,7 @@ function AddItemFlow({
               <>
                 <div className="mt-4 min-h-[8rem]">
                   {searching && results.length === 0 ? (
-                    <SoftDotLoader />
+                    <ResultListSkeleton rows={4} aspect={meta.aspect === "square" ? "square" : "poster"} />
                   ) : (
                     <motion.div
                       role="listbox"

@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
-import { initialOf, posterGradient, posterInk } from "@/lib/visual";
+import { hashString } from "@/lib/visual";
+import { STICKER_HALO } from "@/components/icons/little-icon";
 
 interface PlaceholderPosterProps {
   seed: string;
-  title: string;
+  /** the item's own emoji, or its category's — the placeholder's "key art" */
+  emoji: string;
   /** small accent shown in the corner (emoji or glyph) */
   badge?: ReactNode;
   aspect?: "poster" | "square" | "wide";
@@ -17,47 +19,41 @@ const ASPECT: Record<NonNullable<PlaceholderPosterProps["aspect"]>, string> = {
   wide: "aspect-[4/3]",
 };
 
-/** A designed, offline "cover": muted duotone, a soft monogram, framed like a poster. */
+/** A designed, offline "cover": warm tinted paper with the item's emoji as a die-cut sticker. */
 export function PlaceholderPoster({
   seed,
-  title,
+  emoji,
   badge,
   aspect = "poster",
   rounded = "rounded-xl",
   className = "",
 }: PlaceholderPosterProps) {
-  const ink = posterInk(seed);
+  const h = hashString(seed);
+  const hue = h % 360;
+  const tilt = (h % 13) - 6; // stable lazy tilt, -6°..+6°
   return (
     <div
-      className={`relative overflow-hidden ${ASPECT[aspect]} ${rounded} ${className}`}
-      style={{ ...posterGradient(seed), containerType: "inline-size" }}
+      className={`paper-grain relative overflow-hidden ${ASPECT[aspect]} ${rounded} ${className}`}
+      style={{
+        background: `linear-gradient(155deg, oklch(0.945 0.02 ${hue}), oklch(0.885 0.036 ${(hue + 30) % 360}))`,
+        containerType: "inline-size",
+      }}
     >
-      {/* soft key light, gives the flat duotone some depth */}
-      <span
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(120% 75% at 26% 12%, oklch(1 0 0 / 0.22), transparent 60%)",
-        }}
-      />
-      {/* centered serif monogram, the "key art" */}
       <span className="absolute inset-0 grid place-items-center">
         <span
-          className="font-display font-semibold italic leading-none"
+          aria-hidden
+          className="select-none leading-none"
           style={{
-            fontSize: "clamp(2.4rem, 56cqw, 9rem)",
-            color: ink,
-            opacity: 0.5,
-            textShadow: "0 2px 10px oklch(0.3 0.04 60 / 0.18)",
+            fontSize: "clamp(1.25rem, 34cqw, 4.5rem)",
+            transform: `rotate(${tilt}deg)`,
+            filter: STICKER_HALO,
           }}
         >
-          {initialOf(title)}
+          {emoji}
         </span>
       </span>
-      {/* grounding shadow at the foot, like a poster title block */}
-      <span className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-[oklch(0.3_0.03_60/0.2)] via-[oklch(0.3_0.03_60/0.05)] to-transparent" />
       {/* poster frame / matte */}
-      <span className={`pointer-events-none absolute inset-0 ${rounded} ring-1 ring-inset ring-[oklch(0.99_0.006_78/0.15)]`} />
+      <span className={`pointer-events-none absolute inset-0 ${rounded} ring-1 ring-inset ring-line/40`} />
       {badge && (
         <span className="absolute left-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-paper/85 text-[0.95rem] shadow-soft backdrop-blur-[1px]">
           {badge}

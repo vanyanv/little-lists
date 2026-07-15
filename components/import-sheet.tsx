@@ -14,7 +14,7 @@ import { useHydrated } from "@/lib/use-hydrated";
 import { BottomSheet } from "./bottom-sheet";
 import { Button } from "./button";
 import { Cover } from "./cover";
-import { SoftDotLoader } from "./soft-dot-loader";
+import { CoverSkeleton } from "./skeletons";
 import { sheetTitle, textareaField } from "@/lib/field";
 
 type RowState =
@@ -183,7 +183,7 @@ export function ImportSheet({ list, open, onClose }: { list: List; open: boolean
           <h2 className={sheetTitle}>Finding your things…</h2>
           <p className="mt-1 text-[0.92rem] text-brown">Covers appear as we find them.</p>
           <div className="mt-4 flex max-h-[50dvh] flex-col gap-2 overflow-y-auto">
-            {rows.map((row) => (
+            {rows.map((row, i) => (
               <div key={row.line} className="flex items-center gap-3 rounded-xl bg-cream-deep/40 p-2">
                 <div className="w-11 shrink-0">
                   {row.state === "matched" ? (
@@ -193,7 +193,7 @@ export function ImportSheet({ list, open, onClose }: { list: List; open: boolean
                       className="ring-1 ring-ink/8"
                     />
                   ) : row.state === "waiting" ? (
-                    <SoftDotLoader />
+                    <CoverSkeleton delay={(i % 6) * 0.14} />
                   ) : (
                     <span aria-hidden className="grid h-11 place-items-center text-lg">✨</span>
                   )}

@@ -25,13 +25,28 @@ export function parsePastedList(text: string): { lines: string[]; truncated: boo
 const normalize = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
 
-/** the line's best match: exact normalized title, then prefix either way, then provider order */
+/** editions ABOUT a work, not the work itself — providers sometimes rank these
+ *  first (Open Library returns only a Gale study guide for "Kafka on the Shore")
+ *  and a wrong cover is worse than none */
+const DERIVATIVE_TITLE =
+  /\bstudy guide\b|\bsparknotes\b|\bcliffs?notes\b|\bsummary (?:of|and analysis)\b|\bworkbook\b/i;
+
+/**
+ * The line's best match: exact normalized title, then prefix either way, then
+ * the least-decorated title containing the line, then provider order. Titles
+ * that are merely about the work are skipped entirely (unless the user
+ * literally pasted one) — no match beats a wrong match.
+ */
 export function pickBestHit(line: string, hits: SearchHit[]): SearchHit | undefined {
-  if (hits.length === 0) return undefined;
+  const pool = DERIVATIVE_TITLE.test(line) ? hits : hits.filter((h) => !DERIVATIVE_TITLE.test(h.title));
+  if (pool.length === 0) return undefined;
   const q = normalize(line);
-  return (
-    hits.find((h) => normalize(h.title) === q) ??
-    hits.find((h) => normalize(h.title).startsWith(q) || q.startsWith(normalize(h.title))) ??
-    hits[0]
-  );
+  const exact = pool.find((h) => normalize(h.title) === q);
+  if (exact) return exact;
+  const prefix = pool.find((h) => normalize(h.title).startsWith(q) || q.startsWith(normalize(h.title)));
+  if (prefix) return prefix;
+  const containing = pool
+    .filter((h) => normalize(h.title).includes(q))
+    .sort((a, b) => a.title.length - b.title.length);
+  return containing[0] ?? pool[0];
 }

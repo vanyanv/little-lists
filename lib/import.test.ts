@@ -73,4 +73,24 @@ describe("pickBestHit", () => {
     const hits = [hit("Amelie or The Time to Love"), hit("Amélie")];
     expect(pickBestHit("amelie", hits)?.title).toBe("Amélie");
   });
+
+  it("picks the least-decorated title containing the line", () => {
+    const hits = [hit("The Great Gatsby: The Authorized Text Edition"), hit("The Great Gatsby")];
+    expect(pickBestHit("gatsby", hits)?.title).toBe("The Great Gatsby");
+  });
+
+  it("never auto-matches a study guide the user didn't ask for", () => {
+    const hits = [hit('A Study Guide for Haruki Murakami\'s "Kafka on the Shore"')];
+    expect(pickBestHit("Kafka on the Shore", hits)).toBeUndefined();
+  });
+
+  it("skips derivative titles but still matches the real work behind them", () => {
+    const hits = [hit("SparkNotes: The Great Gatsby"), hit("The Great Gatsby")];
+    expect(pickBestHit("the great gatsby", hits)?.title).toBe("The Great Gatsby");
+  });
+
+  it("allows derivative titles when the user literally pasted one", () => {
+    const guide = hit('A Study Guide for Haruki Murakami\'s "Kafka on the Shore"');
+    expect(pickBestHit("study guide kafka on the shore", [guide])).toBe(guide);
+  });
 });
