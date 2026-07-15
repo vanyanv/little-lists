@@ -9,7 +9,7 @@ import {
   bestListForKind, detectScrap, isTempScrapId, scrapAge,
 } from "@/lib/scraps";
 import { TEMPLATE_META, type ListTemplate } from "@/lib/types";
-import type { Scrap } from "@/lib/types";
+import type { List, Scrap } from "@/lib/types";
 import { softSpring } from "@/lib/motion";
 import { inputPrimary, sheetTitle } from "@/lib/field";
 import { BottomSheet } from "./bottom-sheet";
@@ -23,6 +23,11 @@ const inFlightDetections = new Set<string>();
 
 // One-tap chips: a second tap during the exit animation would file twice.
 const filingScraps = new Set<string>();
+
+// One list create per kind, shared: two same-kind chips tapped while the
+// first create is in flight join the same new list instead of racing two
+// into existence.
+const pendingListCreates = new Map<string, Promise<List>>();
 
 export function PocketSheet() {
   const { sheet, closeSheet } = useUi();
@@ -88,13 +93,20 @@ function PocketInside() {
     let target = bestListForKind(lists, d.kind);
     if (!target) {
       try {
-        target = await addList({
-          title: tm.label,
-          emoji: tm.emoji,
-          theme: tm.theme,
-          template,
-          defaultView: tm.defaultView,
-        });
+        let creating = pendingListCreates.get(d.kind);
+        if (!creating) {
+          creating = addList({
+            title: tm.label,
+            emoji: tm.emoji,
+            theme: tm.theme,
+            template,
+            defaultView: tm.defaultView,
+          });
+          pendingListCreates.set(d.kind, creating);
+          const clear = () => pendingListCreates.delete(d.kind);
+          creating.then(clear, clear);
+        }
+        target = await creating;
       } catch {
         showToast("That didn't save. Let's try again 🌿");
         filingScraps.delete(scrap.id);
@@ -205,7 +217,7 @@ function PocketInside() {
                         kind: s.detection && !("none" in s.detection) ? s.detection.kind : undefined,
                       })
                     }
-                    className="min-w-0 flex-1 text-left"
+                    className="min-w-0 flex-1 text-left transition-opacity disabled:opacity-55"
                   >
                     <p className="truncate text-[0.95rem] font-semibold text-ink">{s.text}</p>
                     <p className="text-[0.78rem] font-medium text-brown-soft">{scrapAge(s.createdAt, now)}</p>

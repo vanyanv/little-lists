@@ -11,6 +11,7 @@ import {
   statusesForList,
   captureStatusFor,
   type ItemType,
+  type List,
   type ListTemplate,
   type StatusId,
 } from "@/lib/types";
@@ -191,26 +192,29 @@ function AddItemFlow({
     setStep("details");
   };
 
-  const createTargetList = async () => {
-    if (creatingList) return;
+  const createTargetList = async (): Promise<List | null> => {
+    if (creatingList) return null;
     setCreatingList(true);
     try {
       const t = template; // presetList?.template ?? (type as ListTemplate), already derived above
       const m = TEMPLATE_META[t];
       const created = await addList({ title: m.label, emoji: m.emoji, theme: m.theme, template: t, defaultView: m.defaultView });
       setTargetListId(created.id);
+      return created;
     } catch {
       showToast("That didn't save. Let's try again 🌿");
+      return null;
     } finally {
       setCreatingList(false);
     }
   };
 
-  const persist = async (input: CreateItemInput, listId: string) => {
+  // destTitle covers a just-created destination the stale `lists` closure can't name
+  const persist = async (input: CreateItemInput, listId: string, destTitle?: string) => {
     if (scrap) {
       setSaving(true);
       // deferred file: optimistic now, one transaction on toast expiry, undo restores
-      const listTitle = lists.find((l) => l.id === listId)?.title ?? "your list";
+      const listTitle = destTitle ?? lists.find((l) => l.id === listId)?.title ?? "your list";
       const handle = fileScrap(scrap.id, listId, input);
       onClose();
       showToast(`Filed into ${listTitle} ✨`, {
@@ -228,7 +232,7 @@ function AddItemFlow({
       if (wasEmpty) fireCelebration("confetti");
       onClose();
       if (input.flow === "quick" && created) {
-        const listTitle = lists.find((l) => l.id === listId)?.title ?? "your list";
+        const listTitle = destTitle ?? lists.find((l) => l.id === listId)?.title ?? "your list";
         showToast(`Saved to ${listTitle} ✨`, {
           action: { label: "Undo", onAction: () => void deleteItem(listId, created.id) },
         });
@@ -242,11 +246,34 @@ function AddItemFlow({
     }
   };
 
-  const saveItem = (input: CreateItemInput, opts?: { listId?: string }) => {
+  const saveItem = async (input: CreateItemInput, opts?: { listId?: string }) => {
     // a duplicate confirm is already open — don't re-detect and clobber its onConfirm
     // closure with this call's (e.g. a held Enter key repeating past the first detection).
     if (confirm) return;
-    const listId = opts?.listId ?? targetListId ?? lists[0]?.id;
+    let listId = opts?.listId ?? targetListId ?? lists[0]?.id;
+    let destTitle: string | undefined;
+    // A quick save never shows its destination, so it must never land in a
+    // wrong-kind list (the auto-pick's lists[0] fallback): match the kind, or
+    // quietly start that list — the same move as the pocket chip. A brand-new
+    // world (zero lists) gets its first list this way instead of a silent no-op.
+    if (input.flow === "quick" && !presetListId && !opts?.listId) {
+      if (saving || !input.title.trim()) return;
+      const match = lists.find((l) => l.kind === type); // store order is pinned-first
+      if (match) {
+        listId = match.id;
+        destTitle = match.title;
+        input = { ...input, status: captureStatusFor(match.template) };
+      } else {
+        const created = await createTargetList();
+        if (!created || !alive.current) {
+          setPicked(null); // a failed create must not leave the results list inert
+          return;
+        }
+        listId = created.id;
+        destTitle = created.title;
+        input = { ...input, status: captureStatusFor(template) };
+      }
+    }
     // guards direct quick-save callers (quickPick/quickManual); the details step's own
     // Save button is already disabled-gated on !title.trim(), so this reads as dead code there
     if (!listId || saving || !input.title.trim()) return;
@@ -256,17 +283,19 @@ function AddItemFlow({
       // results list while it's open, and there's no cancel callback to clear this from
       // later, so it must not be left set regardless of how the confirm gets dismissed.
       setPicked(null);
+      const finalInput = input;
+      const finalListId = listId;
       openConfirm({
         title: "Already in this list",
         body: `"${input.title.trim()}" is already here. Add it again anyway?`,
         confirmLabel: "Add anyway",
         onConfirm: () => {
-          void persist(input, listId);
+          void persist(finalInput, finalListId, destTitle);
         },
       });
       return;
     }
-    void persist(input, listId);
+    void persist(input, listId, destTitle);
   };
 
   // save on first intent: a picked hit becomes an item immediately (the details
@@ -278,7 +307,7 @@ function AddItemFlow({
     // let the chosen row glow for a beat before the sheet slides away
     quickPickTimer.current = setTimeout(() => {
       quickPickTimer.current = null;
-      saveItem({
+      void saveItem({
         type,
         title: r.title,
         subtitle: r.subtitle || undefined,
@@ -293,9 +322,12 @@ function AddItemFlow({
 
   // dismiss aborts the glow-save: AddItemFlow unmounts when the sheet closes
   // (it's keyed inside BottomSheet), so this cleanup cancels a pending quick
-  // save when Escape/scrim/drag closes the sheet mid-glow.
+  // save when Escape/scrim/drag closes the sheet mid-glow. `alive` extends the
+  // same abort across saveItem's awaited first-list create.
+  const alive = useRef(true);
   useEffect(() => {
     return () => {
+      alive.current = false;
       if (quickPickTimer.current) clearTimeout(quickPickTimer.current);
     };
   }, []);
@@ -303,7 +335,7 @@ function AddItemFlow({
   const quickManual = (text: string) => {
     const value = text.trim();
     if (!value) return;
-    saveItem({
+    void saveItem({
       type,
       title: value,
       status: captureStatusFor(effectiveTemplate),
@@ -314,7 +346,7 @@ function AddItemFlow({
   };
 
   const save = () => {
-    saveItem({
+    void saveItem({
       type,
       title: title.trim(),
       subtitle: subtitle.trim() || undefined,

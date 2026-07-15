@@ -33,9 +33,12 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(new URL("/app", req.url));
   }
 
-  // Signed-out users hitting a protected route are sent to sign in.
+  // Signed-out users hitting a protected route are sent to sign in, carrying
+  // their destination along so a shared deep link survives the auth hop.
   if (!userId && !isPublicRoute(req)) {
-    return NextResponse.redirect(new URL("/sign-in", req.url));
+    const signIn = new URL("/sign-in", req.url);
+    signIn.searchParams.set("redirect_url", req.nextUrl.pathname + req.nextUrl.search);
+    return NextResponse.redirect(signIn);
   }
 });
 

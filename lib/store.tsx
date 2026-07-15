@@ -85,6 +85,39 @@ export interface DeleteHandle {
   commit: () => void;
 }
 
+// Deferred handles hold their server write hostage to a ~6s Undo toast, so a
+// reload/navigation inside that window would silently drop the write. Every
+// unsettled commit registers here and pagehide flushes them. Best-effort: the
+// browser may still cancel the in-flight request, but the loss window shrinks
+// from seconds to almost nothing.
+const pendingCommits = new Set<() => void>();
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", () => {
+    for (const commit of Array.from(pendingCommits)) commit();
+  });
+}
+
+/** one-shot undo/commit pair; whichever runs first wins, the other no-ops */
+function deferredHandle(restore: () => void, persist: () => void): DeleteHandle {
+  let settled = false;
+  const commit = () => {
+    if (settled) return;
+    settled = true;
+    pendingCommits.delete(commit);
+    persist();
+  };
+  pendingCommits.add(commit);
+  return {
+    commit,
+    undo: () => {
+      if (settled) return;
+      settled = true;
+      pendingCommits.delete(commit);
+      restore();
+    },
+  };
+}
+
 /** what the add-a-detail flow hands the store */
 export interface PersonDetailDraft {
   title: string;
@@ -342,24 +375,14 @@ export function ListsProvider({
         return next;
       });
     };
-    let settled = false;
-    return {
-      undo: () => {
-        if (settled) return;
-        settled = true;
+    return deferredHandle(restore, () => {
+      if (isTempId(listId)) return;
+      void deleteListAction(listId).catch((err) => {
+        console.error("deleteList failed", err);
         restore();
-      },
-      commit: () => {
-        if (settled) return;
-        settled = true;
-        if (isTempId(listId)) return;
-        void deleteListAction(listId).catch((err) => {
-          console.error("deleteList failed", err);
-          restore();
-          signalSaveError();
-        });
-      },
-    };
+        signalSaveError();
+      });
+    });
   }, [signalSaveError]);
 
   const duplicateList = useCallback<StoreValue["duplicateList"]>(async (listId) => {
@@ -691,24 +714,14 @@ export function ListsProvider({
         return next;
       });
     };
-    let settled = false;
-    return {
-      undo: () => {
-        if (settled) return;
-        settled = true;
+    return deferredHandle(restore, () => {
+      if (isTempId(scrapId)) return;
+      void deleteScrapAction(scrapId).catch((err) => {
+        console.error("deleteScrap failed", err);
         restore();
-      },
-      commit: () => {
-        if (settled) return;
-        settled = true;
-        if (isTempId(scrapId)) return;
-        void deleteScrapAction(scrapId).catch((err) => {
-          console.error("deleteScrap failed", err);
-          restore();
-          signalSaveError();
-        });
-      },
-    };
+        signalSaveError();
+      });
+    });
   }, [signalSaveError]);
 
   const setScrapDetection = useCallback<StoreValue["setScrapDetection"]>((scrapId, detection) => {
@@ -762,37 +775,27 @@ export function ListsProvider({
         prev.map((l) => (l.id === listId ? { ...l, items: l.items.filter((i) => i.id !== tempItemId) } : l))
       );
     };
-    let settled = false;
-    return {
-      undo: () => {
-        if (settled) return;
-        settled = true;
-        restore();
-      },
-      commit: () => {
-        if (settled) return;
-        settled = true;
-        // an unswapped optimistic scrap has no server row to retire — plain create
-        const persist = isTempId(scrapId)
-          ? createItemAction(listId, input)
-          : fileScrapAction(scrapId, listId, input);
-        void persist
-          .then((created) => {
-            setLists((prev) =>
-              prev.map((l) =>
-                l.id === listId
-                  ? { ...l, items: l.items.map((i) => (i.id === tempItemId ? { ...created, fresh: true } : i)) }
-                  : l
-              )
-            );
-          })
-          .catch((err) => {
-            console.error("fileScrap failed", err);
-            restore();
-            signalSaveError();
-          });
-      },
-    };
+    return deferredHandle(restore, () => {
+      // an unswapped optimistic scrap has no server row to retire — plain create
+      const persist = isTempId(scrapId)
+        ? createItemAction(listId, input)
+        : fileScrapAction(scrapId, listId, input);
+      void persist
+        .then((created) => {
+          setLists((prev) =>
+            prev.map((l) =>
+              l.id === listId
+                ? { ...l, items: l.items.map((i) => (i.id === tempItemId ? { ...created, fresh: true } : i)) }
+                : l
+            )
+          );
+        })
+        .catch((err) => {
+          console.error("fileScrap failed", err);
+          restore();
+          signalSaveError();
+        });
+    });
   }, [signalSaveError]);
 
   /* ── people ────────────────────────────────────────────────────── */
@@ -853,24 +856,14 @@ export function ListsProvider({
         if (!snap) return;
         setPeople((prev) => insertDetail(prev, personId, sectionId, snap));
       };
-      let settled = false;
-      return {
-        undo: () => {
-          if (settled) return;
-          settled = true;
+      return deferredHandle(restore, () => {
+        if (isTempId(detailId)) return;
+        void deletePersonDetailAction(detailId).catch((err) => {
+          console.error("deletePersonDetail failed", err);
           restore();
-        },
-        commit: () => {
-          if (settled) return;
-          settled = true;
-          if (isTempId(detailId)) return;
-          void deletePersonDetailAction(detailId).catch((err) => {
-            console.error("deletePersonDetail failed", err);
-            restore();
-            signalSaveError();
-          });
-        },
-      };
+          signalSaveError();
+        });
+      });
     },
     [signalSaveError]
   );
@@ -931,24 +924,14 @@ export function ListsProvider({
         return next;
       });
     };
-    let settled = false;
-    return {
-      undo: () => {
-        if (settled) return;
-        settled = true;
+    return deferredHandle(restore, () => {
+      if (isTempId(personId)) return;
+      void deletePersonAction(personId).catch((err) => {
+        console.error("deletePerson failed", err);
         restore();
-      },
-      commit: () => {
-        if (settled) return;
-        settled = true;
-        if (isTempId(personId)) return;
-        void deletePersonAction(personId).catch((err) => {
-          console.error("deletePerson failed", err);
-          restore();
-          signalSaveError();
-        });
-      },
-    };
+        signalSaveError();
+      });
+    });
   }, [signalSaveError]);
 
   const updatePersonDetail = useCallback<StoreValue["updatePersonDetail"]>(

@@ -108,7 +108,13 @@ export function UiProvider({ children }: { children: React.ReactNode }) {
       setSheet({ kind: "edit-detail", personId, sectionId, detailId }),
     []
   );
-  const openConfirm = useCallback((opts: ConfirmOptions) => setConfirm(opts), []);
+  const openConfirm = useCallback((opts: ConfirmOptions) => {
+    // toasts float at z-[60], above the confirm sheet — retire any live one so
+    // it can't sit on the confirm buttons for its remaining seconds. The Toast
+    // component's settle effect still commits its pending work exactly once.
+    setToast(null);
+    setConfirm(opts);
+  }, []);
   const closeConfirm = useCallback(() => setConfirm(null), []);
 
   const showToast = useCallback((message: string, opts?: ToastOptions) => {
