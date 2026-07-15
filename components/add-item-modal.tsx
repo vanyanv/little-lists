@@ -327,6 +327,7 @@ function AddItemFlow({
   // same abort across saveItem's awaited first-list create.
   const alive = useRef(true);
   useEffect(() => {
+    alive.current = true; // StrictMode re-runs effects: the dev double-cleanup must not strand this false
     return () => {
       alive.current = false;
       if (quickPickTimer.current) clearTimeout(quickPickTimer.current);
