@@ -86,12 +86,26 @@ function ItemEditor({
       const linkChanged = (next.personId ?? null) !== (item.personId ?? null);
       if (linkChanged) {
         flush(); // don't let a queued note-text write clobber the link
+        const prevPersonId = item.personId;
+        const prevSubtitle = item.subtitle ?? "";
         updateItem(listId, item.id, { personId: next.personId ?? null, subtitle: next.subtitle });
+        // unlinking can vanish a "Little ideas" card off their person page —
+        // that deserves a word and a way back, like every other removal
+        if (!next.personId && prevPersonId) {
+          const wasName = people.find((p) => p.id === prevPersonId)?.name;
+          showToast(wasName ? `Unlinked from ${wasName}` : "Unlinked", {
+            action: {
+              label: "Undo",
+              onAction: () =>
+                updateItem(listId, item.id, { personId: prevPersonId, subtitle: prevSubtitle }),
+            },
+          });
+        }
       } else {
         queueEdit({ subtitle: next.subtitle });
       }
     },
-    [item.personId, item.id, listId, updateItem, queueEdit, flush]
+    [item.personId, item.subtitle, item.id, listId, people, showToast, updateItem, queueEdit, flush]
   );
 
   // preserve the internal "example" marker (never shown, never typed) on save

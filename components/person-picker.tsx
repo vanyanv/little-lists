@@ -119,7 +119,8 @@ export function PersonPicker({
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
+              // isComposing: an IME commit's Enter belongs to the composition, not to us
+              if (e.key === "Enter" && !e.nativeEvent.isComposing) {
                 e.preventDefault();
                 void saveNew();
               }

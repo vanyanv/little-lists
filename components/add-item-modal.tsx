@@ -17,6 +17,7 @@ import {
 } from "@/lib/types";
 import type { SearchHit } from "@/lib/search/types";
 import { isDuplicateTitle } from "@/lib/sort";
+import { useComboboxNav } from "@/lib/use-combobox-nav";
 import { themeClass } from "@/lib/visual";
 import { staggerContainer, riseItem, softSpring, tap } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
@@ -345,6 +346,20 @@ function AddItemFlow({
     });
   };
 
+  // Arrow keys walk the results while DOM focus stays in the input (WAI-ARIA
+  // combobox). Only the quick flow participates: the gift flow's Enter keeps
+  // its spec'd continue-with-typed-text behavior.
+  const navEnabled = searchable && !personField && !searching && !picked && results.length > 0;
+  const optionIds = results.map((r) => `add-item-opt-${searchKind}-${r.sourceId}`.replace(/\s+/g, "-"));
+  const nav = useComboboxNav({
+    ids: navEnabled ? optionIds : [],
+    onSelect: (_id, i) => {
+      const r = results[i];
+      if (r) quickPick(r);
+    },
+    onEscape: () => {}, // BottomSheet already owns Escape-to-close
+  });
+
   const save = () => {
     void saveItem({
       type,
@@ -387,21 +402,31 @@ function AddItemFlow({
             <input
               autoFocus
               aria-label={searchable ? "Search a title" : "Give it a name"}
+              role={searchable && !personField ? "combobox" : undefined}
+              aria-expanded={searchable && !personField ? results.length > 0 : undefined}
+              aria-controls={searchable && !personField ? "add-item-results" : undefined}
+              aria-autocomplete={searchable && !personField ? "list" : undefined}
+              aria-activedescendant={navEnabled ? nav.activeId : undefined}
               value={query || title}
               onChange={(e) => {
                 setQuery(e.target.value);
                 if (!searchable) setTitle(e.target.value);
               }}
               onKeyDown={(e) => {
-                if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
+                if (e.nativeEvent.isComposing) return;
+                if (navEnabled) {
+                  nav.onKeyDown(e); // arrows move the active option, Enter saves it
+                  if (e.defaultPrevented) return;
+                }
+                if (e.key !== "Enter") return;
                 e.preventDefault();
                 if (personField) {
                   if ((query || title).trim()) continueManual();
                   return;
                 }
                 if (searchable) {
-                  if (results.length > 0 && !searching) quickPick(results[0]);
-                  else if (query.trim() && !searching) quickManual(query);
+                  // results>0 is handled by nav above; this is the no-match fallback
+                  if (query.trim() && !searching && results.length === 0) quickManual(query);
                   return;
                 }
                 quickManual(query || title);
@@ -441,6 +466,7 @@ function AddItemFlow({
                     <ResultListSkeleton rows={4} aspect={meta.aspect === "square" ? "square" : "poster"} />
                   ) : (
                     <motion.div
+                      id="add-item-results"
                       role="listbox"
                       aria-label="Search results"
                       variants={staggerContainer}
@@ -448,24 +474,32 @@ function AddItemFlow({
                       animate="show"
                       className={`flex flex-col gap-2 transition-opacity ${searching || picked ? "pointer-events-none opacity-60" : ""}`}
                     >
-                      {results.map((r) => {
+                      {results.map((r, i) => {
                         const chosen = picked === `${searchKind}:${r.sourceId}`;
+                        const active = navEnabled && i === nav.activeIndex;
                         return (
                           <motion.button
                             key={r.sourceId}
+                            id={optionIds[i]}
                             variants={riseItem}
                             type="button"
                             role="option"
-                            aria-selected={chosen}
+                            aria-selected={chosen || active}
                             tabIndex={searching || picked ? -1 : undefined}
                             onClick={() => (personField ? pickResult(r) : quickPick(r))}
+                            onPointerMove={() => {
+                              // hover follows the virtual cursor so mouse and arrows never fight
+                              if (navEnabled && nav.activeIndex !== i) nav.setActiveIndex(i);
+                            }}
                             whileTap={tap}
                             animate={{ scale: chosen ? 1.015 : 1 }}
                             transition={{ ...softSpring }}
                             className={`flex items-center gap-3 rounded-xl p-2 text-left transition ${focusRing} ${
                               chosen
                                 ? "bg-cream-deep ring-2 ring-ink/15"
-                                : "bg-cream-deep/40 hover:bg-cream-deep/70"
+                                : active
+                                  ? "bg-cream-deep/70 ring-1 ring-ink/10"
+                                  : "bg-cream-deep/40 hover:bg-cream-deep/70"
                             }`}
                           >
                             <div className="w-11 shrink-0">

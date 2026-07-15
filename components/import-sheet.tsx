@@ -182,6 +182,15 @@ export function ImportSheet({ list, open, onClose }: { list: List; open: boolean
         <div>
           <h2 className={sheetTitle}>Finding your things…</h2>
           <p className="mt-1 text-[0.92rem] text-brown">Covers appear as we find them.</p>
+          {/* the match stream is visual (covers fading in) — narrate it for screen readers */}
+          <p role="status" aria-live="polite" className="sr-only">
+            {(() => {
+              const settled = rows.filter((r) => r.state !== "waiting").length;
+              return settled < rows.length
+                ? `Found ${settled} of ${rows.length} so far`
+                : `All ${rows.length} found, tucking them in`;
+            })()}
+          </p>
           <div className="mt-4 flex max-h-[50dvh] flex-col gap-2 overflow-y-auto">
             {rows.map((row, i) => (
               <div key={row.line} className="flex items-center gap-3 rounded-xl bg-cream-deep/40 p-2">

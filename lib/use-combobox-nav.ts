@@ -49,6 +49,9 @@ export function useComboboxNav({
   const index = ids.length === 0 ? -1 : Math.min(activeIndex, ids.length - 1);
 
   const onKeyDown = (e: KeyboardEvent) => {
+    // an IME commit (Japanese/Chinese/Korean composition) arrives as Enter with
+    // isComposing set — that keystroke belongs to the composition, never to us
+    if (e.nativeEvent.isComposing) return;
     if (e.key === "ArrowDown") {
       if (ids.length === 0) return;
       e.preventDefault();
