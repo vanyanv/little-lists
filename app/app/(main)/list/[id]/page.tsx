@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { Search, X } from "lucide-react";
 import { useList, useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { listCountLabel, themeClass } from "@/lib/visual";
@@ -245,10 +246,7 @@ export default function ListDetailScreen() {
                 {showSearch && (
                   <div className="relative flex-1">
                     <span aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-brown-soft/70">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-                        <path d="M20 20l-3.2-3.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                      </svg>
+                      <Search size={16} strokeWidth={2} />
                     </span>
                     <input
                       type="text"
@@ -265,9 +263,7 @@ export default function ListDetailScreen() {
                         aria-label="Clear search"
                         className={`absolute right-1 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-brown-soft transition-colors hover:bg-cream-deep hover:text-ink ${focusRing}`}
                       >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-                        </svg>
+                        <X size={15} strokeWidth={2.5} />
                       </button>
                     )}
                   </div>

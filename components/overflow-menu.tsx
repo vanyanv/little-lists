@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
+import { Ellipsis } from "lucide-react";
 import { tap } from "@/lib/motion";
 import { focusRing, focusRingInset } from "@/lib/a11y";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -163,11 +164,7 @@ export function OverflowMenu({ items, ariaLabel = "More options", stopPropagatio
         }}
         className={`relative grid h-9 w-9 place-items-center rounded-full bg-paper/80 text-ink shadow-soft backdrop-blur-sm before:absolute before:-inset-1 before:content-[''] ${focusRing}`}
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-          <circle cx="5" cy="12" r="2" />
-          <circle cx="12" cy="12" r="2" />
-          <circle cx="19" cy="12" r="2" />
-        </svg>
+        <Ellipsis size={18} strokeWidth={2} fill="currentColor" />
       </motion.button>
 
       {mounted && createPortal(portal, document.body)}

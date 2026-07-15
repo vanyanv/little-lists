@@ -20,6 +20,7 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
+import { GripVertical } from "lucide-react";
 import type { Item, List, StatusId } from "@/lib/types";
 import { statusesForList } from "@/lib/types";
 import { ItemCard } from "@/components/item-card";
@@ -106,11 +107,7 @@ function SortableItemRow({
           {...listeners}
           className={`mt-1 grid h-9 w-6 shrink-0 touch-none cursor-grab place-items-center rounded-md text-brown-soft/70 transition-colors hover:bg-cream-deep hover:text-ink active:cursor-grabbing ${focusRing}`}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-            <circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" />
-            <circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" />
-            <circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" />
-          </svg>
+          <GripVertical size={14} strokeWidth={1.2} fill="currentColor" />
         </button>
       )}
       <div className="min-w-0 flex-1">

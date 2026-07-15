@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import type { PersonSection } from "@/lib/types";
 import { gentleSpring, softSpring } from "@/lib/motion";
@@ -42,9 +43,7 @@ export function PersonDetailSection({
         <span className="flex-1 font-display text-[1.06rem] font-semibold text-ink">{section.label}</span>
         <span className="text-[0.78rem] font-bold text-brown-soft">{section.entries.length}</span>
         <motion.span animate={{ rotate: open ? 0 : -90 }} transition={bodySpring} className="text-brown-soft">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <ChevronDown size={18} strokeWidth={2} />
         </motion.span>
       </button>
 

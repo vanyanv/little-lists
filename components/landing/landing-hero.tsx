@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { CircleCheck } from "lucide-react";
 import { softSpring, gentleSpring, tap } from "@/lib/motion";
 import { focusRing, focusRingOnDark } from "@/lib/a11y";
 import { LittleIcon } from "@/components/icons/little-icon";
@@ -16,10 +17,13 @@ const MotionLink = motion.create(Link);
 /* A soft rounded check in the sage accent, for the reassurance line. */
 function CheckMark() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0 text-sage">
-      <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.35" />
-      <path d="M8 12.4l2.6 2.6L16 9.4" stroke="var(--color-ink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.75" />
-    </svg>
+    <CircleCheck
+      size={16}
+      className="shrink-0 text-sage"
+      fill="currentColor"
+      stroke="var(--color-paper)"
+      strokeWidth={2.25}
+    />
   );
 }
 

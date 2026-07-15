@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
+import { ArrowDownWideNarrow } from "lucide-react";
 import { tap } from "@/lib/motion";
 import { focusRing, focusRingInset } from "@/lib/a11y";
 import { SORT_MODES, type SortMode } from "@/lib/sort";
@@ -115,12 +116,7 @@ export function SortControl({
         }}
         className={`inline-flex h-10 items-center gap-1.5 rounded-pill bg-paper px-3 text-[0.82rem] font-bold text-brown shadow-soft ring-1 ring-line/60 ${focusRing}`}
       >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" aria-hidden>
-          <path d="M7 5v14M7 19l-3-3M7 5l3 3" />
-          <line x1="13" y1="7" x2="20" y2="7" />
-          <line x1="13" y1="12" x2="18" y2="12" />
-          <line x1="13" y1="17" x2="16" y2="17" />
-        </svg>
+        <ArrowDownWideNarrow size={15} strokeWidth={2.1} />
         <span className="max-w-[6.5rem] truncate">{currentLabel}</span>
       </motion.button>
       {mounted && createPortal(portal, document.body)}

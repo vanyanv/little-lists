@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
+import { ChevronLeft, CircleUser, LayoutList, Users } from "lucide-react";
 import { PREVIEW_MOVIES, PREVIEW_BOOKS, PREVIEW_FOODS, PREVIEW_GIFTS, PREVIEW_PERSON } from "@/lib/landing-data";
 import type { List } from "@/lib/types";
 import { themeClass, listCountLabel } from "@/lib/visual";
@@ -20,23 +21,13 @@ import { PreviewListCard, PreviewPersonCard, PreviewPosterCard } from "./preview
 const SCREEN_MS = 6200;
 const push = { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const };
 
-function NavGlyph({ d, fill = false }: { d: string; fill?: boolean }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d={d} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill={fill ? "currentColor" : "none"} fillOpacity={fill ? 0.16 : 0} />
-    </svg>
-  );
-}
-
 function MoviesDetailScreen({ movies }: { movies: List }) {
   return (
     <div className={themeClass(movies.theme)} style={{ height: "100%" }}>
       <div className="h-full px-3.5 pb-[4.75rem] pt-7" style={{ background: "var(--t-bg)" }}>
         <header className="flex items-center gap-2.5 px-1">
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-paper shadow-soft">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M14.5 5.5L8 12l6.5 6.5" stroke="var(--color-ink)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <ChevronLeft size={13} strokeWidth={2.4} color="var(--color-ink)" />
           </span>
           <div className="min-w-0">
             <h3 className="font-display text-[1.12rem] font-semibold leading-tight text-ink">
@@ -76,15 +67,17 @@ export function AppPreview({
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: 0.35 });
   const [inMovies, setInMovies] = useState(false);
+  // mirrors inMovies so the interval can flip + notify without calling the
+  // parent's setState inside an updater (React runs updaters during render)
+  const inMoviesRef = useRef(false);
 
   useEffect(() => {
     if (reduce || !inView) return;
     const id = setInterval(() => {
-      setInMovies((current) => {
-        const next = !current;
-        onScreenChange?.(next ? "movies" : "home");
-        return next;
-      });
+      const next = !inMoviesRef.current;
+      inMoviesRef.current = next;
+      setInMovies(next);
+      onScreenChange?.(next ? "movies" : "home");
     }, SCREEN_MS);
     return () => clearInterval(id);
   }, [reduce, inView, onScreenChange]);
@@ -148,15 +141,15 @@ export function AppPreview({
             <div className="flex items-stretch justify-around rounded-2xl border border-line/70 bg-paper/85 px-2 py-1.5 shadow-lift backdrop-blur-md">
               <span className="relative flex flex-1 flex-col items-center gap-0.5 rounded-xl py-1 text-ink">
                 <span className="absolute inset-0 rounded-xl bg-cream-deep" />
-                <span className="relative"><NavGlyph d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" fill /></span>
+                <span className="relative"><LayoutList size={20} strokeWidth={1.8} fill="currentColor" fillOpacity={0.16} /></span>
                 <span className="relative text-[0.6rem] font-bold tracking-wide">Lists</span>
               </span>
               <span className="flex flex-1 flex-col items-center gap-0.5 py-1 text-brown-soft">
-                <NavGlyph d="M9 8.5a3.2 3.2 0 1 0 0 .01M3.5 19c0-3 2.6-5 5.5-5s5.5 2 5.5 5M16.6 7.6a2.4 2.4 0 1 0 0 .01M15 13.4c2.6-.4 5 1.3 5.4 3.8" />
+                <Users size={20} strokeWidth={1.8} />
                 <span className="text-[0.6rem] font-bold tracking-wide">People</span>
               </span>
               <span className="flex flex-1 flex-col items-center gap-0.5 py-1 text-brown-soft">
-                <NavGlyph d="M12 8.4a3.6 3.6 0 1 0 0 .01M5 19.2c.4-3.6 3.3-6 7-6s6.6 2.4 7 6" />
+                <CircleUser size={20} strokeWidth={1.8} />
                 <span className="text-[0.6rem] font-bold tracking-wide">Profile</span>
               </span>
             </div>

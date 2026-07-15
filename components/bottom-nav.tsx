@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
+import { CircleUser, LayoutList, Paperclip, Users } from "lucide-react";
 import { softSpring } from "@/lib/motion";
 import { focusRingInset } from "@/lib/a11y";
 import { useUi } from "@/lib/ui";
@@ -11,44 +12,16 @@ import { useStore } from "@/lib/store";
 type IconProps = { active: boolean };
 
 function ListsIcon({ active }: IconProps) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-      <rect x="3.5" y="4.5" width="17" height="6" rx="2.4" stroke="currentColor" strokeWidth="1.8" fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.16 : 0} />
-      <rect x="3.5" y="13.5" width="17" height="6" rx="2.4" stroke="currentColor" strokeWidth="1.8" fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.16 : 0} />
-      <circle cx="7" cy="7.5" r="1.1" fill="currentColor" />
-      <circle cx="7" cy="16.5" r="1.1" fill="currentColor" />
-    </svg>
-  );
+  return <LayoutList size={24} strokeWidth={1.8} fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.16 : 0} />;
 }
 function PeopleIcon({ active }: IconProps) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-      <circle cx="9" cy="8.5" r="3.2" stroke="currentColor" strokeWidth="1.8" fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.16 : 0} />
-      <path d="M3.5 19c0-3 2.6-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <circle cx="16.6" cy="7.6" r="2.4" stroke="currentColor" strokeWidth="1.6" opacity="0.85" />
-      <path d="M15 13.4c2.6-.4 5 1.3 5.4 3.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity="0.85" />
-    </svg>
-  );
+  return <Users size={24} strokeWidth={1.8} fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.16 : 0} />;
 }
 function ProfileIcon({ active }: IconProps) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="8.4" r="3.6" stroke="currentColor" strokeWidth="1.8" fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.16 : 0} />
-      <path d="M5 19.2c.4-3.6 3.3-6 7-6s6.6 2.4 7 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
+  return <CircleUser size={24} strokeWidth={1.8} fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.16 : 0} />;
 }
 function PocketIcon({ active }: IconProps) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M4.5 6.5c2.4-1.3 12.6-1.3 15 0v8.9a3.6 3.6 0 0 1-3.6 3.6H8.1a3.6 3.6 0 0 1-3.6-3.6V6.5Z"
-        stroke="currentColor" strokeWidth="1.8"
-        fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.16 : 0}
-      />
-      <path d="M4.5 6.8C6.1 9.5 9 11 12 11s5.9-1.5 7.5-4.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
+  return <Paperclip size={24} strokeWidth={1.8} fill={active ? "currentColor" : "none"} fillOpacity={active ? 0.16 : 0} />;
 }
 
 const TABS = [

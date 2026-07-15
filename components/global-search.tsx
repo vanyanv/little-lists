@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { Search, X } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useUi } from "@/lib/ui";
 import { focusRing } from "@/lib/a11y";
@@ -184,10 +185,7 @@ export function GlobalSearch({ query, onQueryChange }: { query: string; onQueryC
   return (
     <div className="mt-4">
       <div className="flex items-center gap-2 rounded-pill bg-paper px-4 py-3 shadow-soft ring-1 ring-line/60">
-        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 text-brown-soft">
-          <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2" />
-          <path d="M16 16l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
+        <Search size={18} strokeWidth={2} className="shrink-0 text-brown-soft" />
         <label htmlFor="global-search-input" className="sr-only">
           Search your little world
         </label>
@@ -216,9 +214,7 @@ export function GlobalSearch({ query, onQueryChange }: { query: string; onQueryC
             }}
             className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-brown-soft transition-colors hover:bg-cream-deep hover:text-ink ${focusRing}`}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-            </svg>
+            <X size={14} strokeWidth={2.5} />
           </button>
         )}
       </div>

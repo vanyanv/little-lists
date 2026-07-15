@@ -52,13 +52,15 @@ export function GettingStartedCard() {
                   transition={softSpring}
                   width="10"
                   height="10"
-                  viewBox="0 0 10 10"
+                  viewBox="0 0 24 24"
                   fill="none"
                 >
+                  {/* lucide Check geometry; strokeWidth 1.8 in the old 10-unit
+                      viewBox scales to 4.3 in 24 units at the same 10px render */}
                   <path
-                    d="M1.5 5.5l2.3 2.3L8.5 2.5"
+                    d="M20 6 9 17l-5-5"
                     stroke="var(--color-cream)"
-                    strokeWidth="1.8"
+                    strokeWidth="4.3"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />

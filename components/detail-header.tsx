@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
+import { ChevronLeft } from "lucide-react";
 import { tap } from "@/lib/motion";
 import { focusRing } from "@/lib/a11y";
 import { Sticker, type StickerName } from "./sticker";
@@ -42,9 +43,7 @@ export function DetailHeader({ emoji, title, subtitle, sticker = "sparkle", menu
           aria-label="Back"
           className={`grid h-11 w-11 shrink-0 place-items-center rounded-full bg-paper/80 text-ink shadow-soft ${focusRing}`}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <ChevronLeft size={20} strokeWidth={2.2} />
         </motion.button>
         {/* pure echo of the h1 below, so it stays hidden from the tree */}
         <span

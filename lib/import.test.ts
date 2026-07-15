@@ -8,6 +8,7 @@ const hit = (title: string, sourceId = title): SearchHit => ({
   type: "movie",
   title,
   subtitle: "2020",
+  meta: {},
 });
 
 describe("parsePastedList", () => {
