@@ -61,6 +61,11 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
   },
+  appleWebApp: {
+    capable: true,
+    title: "Little Lists",
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
@@ -69,6 +74,9 @@ export const viewport: Viewport = {
   initialScale: 1,
   // pinch-zoom stays enabled for accessibility (WCAG 1.4.4)
   maximumScale: 5,
+  // without this, env(safe-area-inset-*) resolves to 0 on notched iPhones and
+  // every safe-area-aware fixture (nav, FAB, toast, sheets) silently loses it
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

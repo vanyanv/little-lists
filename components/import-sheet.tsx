@@ -191,7 +191,7 @@ export function ImportSheet({ list, open, onClose }: { list: List; open: boolean
                 : `All ${rows.length} found, tucking them in`;
             })()}
           </p>
-          <div className="mt-4 flex max-h-[50dvh] flex-col gap-2 overflow-y-auto">
+          <div className="mt-4 flex max-h-[50dvh] flex-col gap-2 overflow-y-auto overscroll-contain">
             {rows.map((row, i) => (
               <div key={row.line} className="flex items-center gap-3 rounded-xl bg-cream-deep/40 p-2">
                 <div className="w-11 shrink-0">

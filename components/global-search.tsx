@@ -120,9 +120,6 @@ export function GlobalSearch({ query, onQueryChange }: { query: string; onQueryC
   const router = useRouter();
   const reduce = useReducedMotion();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [now] = useState(() => new Date());
-
-  const open = query.trim() !== "";
 
   // Debounce the query feeding the (pure) search so we don't rescan the whole
   // store on every keystroke.
@@ -132,8 +129,15 @@ export function GlobalSearch({ query, onQueryChange }: { query: string; onQueryC
     return () => clearTimeout(t);
   }, [query]);
 
-  const groups = useMemo(
-    () => searchLittleWorld(debounced, { lists, people, scraps }),
+  const hasQuery = query.trim() !== "";
+  // the listbox waits for the debounce to settle, so the first keystroke never
+  // flashes an empty frame while results are still 150ms away
+  const open = hasQuery && debounced.trim() !== "";
+
+  // `now` rides the search memo so scrap ages stay fresh per search instead of
+  // freezing at mount on a long-lived Home
+  const { groups, now } = useMemo(
+    () => ({ groups: searchLittleWorld(debounced, { lists, people, scraps }), now: new Date() }),
     [debounced, lists, people, scraps]
   );
   const flat = useMemo(() => groups.flatMap((g) => g.hits), [groups]);
@@ -204,7 +208,7 @@ export function GlobalSearch({ query, onQueryChange }: { query: string; onQueryC
           placeholder="Search your little world…"
           className={`w-full bg-transparent text-[1rem] text-ink placeholder:text-brown-soft/80 focus:outline-none ${focusRing}`}
         />
-        {open && (
+        {hasQuery && (
           <button
             type="button"
             aria-label="Clear search"
@@ -235,7 +239,11 @@ export function GlobalSearch({ query, onQueryChange }: { query: string; onQueryC
             // page, e.g. with the first-steps checklist card showing). Reserve room for both
             // fixed bottom fixtures (FAB, then nav) so the last option's bottom edge always
             // lands above the FAB, not just the nav.
-            className="mt-3 max-h-[60vh] overflow-y-auto rounded-2xl bg-paper p-2 pb-[calc(env(safe-area-inset-bottom)+16rem)] shadow-soft ring-1 ring-line/60"
+            // the empty state has nothing to scroll clear of the FAB, so it keeps a
+            // snug padding instead of inheriting the 16rem results clearance
+            className={`mt-3 max-h-[60vh] overflow-y-auto overscroll-contain rounded-2xl bg-paper p-2 shadow-soft ring-1 ring-line/60 ${
+              showEmpty ? "pb-2" : "pb-[calc(env(safe-area-inset-bottom)+16rem)]"
+            }`}
           >
             {showEmpty ? (
               <p className="px-3 py-6 text-center text-[0.95rem] leading-relaxed text-brown">

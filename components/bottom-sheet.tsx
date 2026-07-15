@@ -143,7 +143,7 @@ export function BottomSheet({ open, onClose, children, ariaLabel }: BottomSheetP
               <div className="flex justify-center pt-3 pb-1">
                 <span className="h-1.5 w-11 rounded-pill bg-line" />
               </div>
-              <div className="overflow-y-auto px-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]" style={{ maxHeight: "calc(92dvh - 1.5rem)" }}>
+              <div className="overflow-y-auto overscroll-contain px-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]" style={{ maxHeight: "calc(92dvh - 1.5rem)" }}>
                 {children}
               </div>
             </motion.div>

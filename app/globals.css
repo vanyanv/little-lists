@@ -117,6 +117,9 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* the app paints its own tap feedback (whileTap scale) — the grey flash
+     mobile browsers add on top reads as a glitch against the cream */
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
